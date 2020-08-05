@@ -957,11 +957,21 @@ validate_marks <- function(marks) {
   }
 }
 
-validate_style_in <- function(style_vals, style_names, arg_name, in_vector) {
+validate_style_in <- function(style_vals,
+                              style_names,
+                              arg_name,
+                              in_vector,
+                              with_pattern = NULL) {
 
   if (arg_name %in% style_names) {
 
     arg_value <- style_vals[[arg_name]]
+
+    # There is positive validation if a regex pattern is specified
+    # in `with_pattern` and the pattern matches
+    if (!is.null(with_pattern) && grepl(with_pattern, arg_value)) {
+        return()
+    }
 
     if (!(arg_value %in% in_vector)) {
       stop("The provided `", arg_name, "` value cannot be `",
@@ -1017,6 +1027,42 @@ validate_table_id <- function(id) {
   if (!is.character(id)) {
     stop("Any input for `id` must be of the `character` class", call. = FALSE)
   }
+}
+
+validate_n_sigfig <- function(n_sigfig) {
+
+  if (length(n_sigfig) != 1) {
+    stop("The length of `n_sigfig` must be 1.", call. = FALSE)
+  }
+  if (is.na(n_sigfig)) {
+    stop("The value for `n_sigfig` must not be `NA`.", call. = FALSE)
+  }
+  if (!is.numeric(n_sigfig)) {
+    stop("Any input for `n_sigfig` must be numeric.", call. = FALSE)
+  }
+  if (n_sigfig < 1) {
+    stop("The value for `n_sigfig` must be greater than or equal to 1.", call. = FALSE)
+  }
+}
+
+validate_css_lengths <- function(x) {
+
+  # Don't include empty strings in the validation; these lengths
+  # should be handled downstream (i.e., using `htmltools::css()`,
+  # where empty strings and NULL values don't create rules at all)
+  x_units_non_empty <- x[!(x == "")]
+
+  # While this returns a vector of corrected CSS units, we
+  # primarily want to verify that the vector of provided values
+  # don't contain any invalid suffixes; this throws if that's the
+  # case and returns `TRUE` otherwise
+  vapply(
+    x_units_non_empty,
+    FUN = htmltools::validateCssUnit,
+    FUN.VALUE = character(1),
+    USE.NAMES = FALSE
+  ) %>%
+    is.character()
 }
 
 column_classes_are_valid <- function(data, columns, valid_classes) {
