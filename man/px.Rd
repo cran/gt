@@ -40,7 +40,7 @@ tab_1 <-
   gt() \%>\%
   tab_style(
     style = cell_text(size = px(20)),
-    locations = cells_column_labels(columns = TRUE)
+    locations = cells_column_labels()
   )
 
 }
@@ -53,8 +53,12 @@ Other Helper Functions:
 \code{\link{cells_body}()},
 \code{\link{cells_column_labels}()},
 \code{\link{cells_column_spanners}()},
+\code{\link{cells_footnotes}()},
 \code{\link{cells_grand_summary}()},
 \code{\link{cells_row_groups}()},
+\code{\link{cells_source_notes}()},
+\code{\link{cells_stub_grand_summary}()},
+\code{\link{cells_stub_summary}()},
 \code{\link{cells_stubhead}()},
 \code{\link{cells_stub}()},
 \code{\link{cells_summary}()},
