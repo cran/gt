@@ -42,6 +42,7 @@ tab_options(
   heading.subtitle.font.size = NULL,
   heading.subtitle.font.weight = NULL,
   heading.padding = NULL,
+  heading.padding.horizontal = NULL,
   heading.border.bottom.style = NULL,
   heading.border.bottom.width = NULL,
   heading.border.bottom.color = NULL,
@@ -53,6 +54,7 @@ tab_options(
   column_labels.font.weight = NULL,
   column_labels.text_transform = NULL,
   column_labels.padding = NULL,
+  column_labels.padding.horizontal = NULL,
   column_labels.vlines.style = NULL,
   column_labels.vlines.width = NULL,
   column_labels.vlines.color = NULL,
@@ -71,6 +73,7 @@ tab_options(
   row_group.font.weight = NULL,
   row_group.text_transform = NULL,
   row_group.padding = NULL,
+  row_group.padding.horizontal = NULL,
   row_group.border.top.style = NULL,
   row_group.border.top.width = NULL,
   row_group.border.top.color = NULL,
@@ -84,6 +87,7 @@ tab_options(
   row_group.border.right.width = NULL,
   row_group.border.right.color = NULL,
   row_group.default_label = NULL,
+  row_group.as_column = NULL,
   table_body.hlines.style = NULL,
   table_body.hlines.width = NULL,
   table_body.hlines.color = NULL,
@@ -103,39 +107,53 @@ tab_options(
   stub.border.style = NULL,
   stub.border.width = NULL,
   stub.border.color = NULL,
+  stub_row_group.font.size = NULL,
+  stub_row_group.font.weight = NULL,
+  stub_row_group.text_transform = NULL,
+  stub_row_group.border.style = NULL,
+  stub_row_group.border.width = NULL,
+  stub_row_group.border.color = NULL,
   data_row.padding = NULL,
+  data_row.padding.horizontal = NULL,
   summary_row.background.color = NULL,
   summary_row.text_transform = NULL,
   summary_row.padding = NULL,
+  summary_row.padding.horizontal = NULL,
   summary_row.border.style = NULL,
   summary_row.border.width = NULL,
   summary_row.border.color = NULL,
   grand_summary_row.background.color = NULL,
   grand_summary_row.text_transform = NULL,
   grand_summary_row.padding = NULL,
+  grand_summary_row.padding.horizontal = NULL,
   grand_summary_row.border.style = NULL,
   grand_summary_row.border.width = NULL,
   grand_summary_row.border.color = NULL,
   footnotes.background.color = NULL,
   footnotes.font.size = NULL,
   footnotes.padding = NULL,
+  footnotes.padding.horizontal = NULL,
   footnotes.border.bottom.style = NULL,
   footnotes.border.bottom.width = NULL,
   footnotes.border.bottom.color = NULL,
   footnotes.border.lr.style = NULL,
   footnotes.border.lr.width = NULL,
   footnotes.border.lr.color = NULL,
-  footnotes.sep = NULL,
   footnotes.marks = NULL,
+  footnotes.multiline = NULL,
+  footnotes.sep = NULL,
   source_notes.background.color = NULL,
   source_notes.font.size = NULL,
   source_notes.padding = NULL,
+  source_notes.padding.horizontal = NULL,
   source_notes.border.bottom.style = NULL,
   source_notes.border.bottom.width = NULL,
   source_notes.border.bottom.color = NULL,
   source_notes.border.lr.style = NULL,
   source_notes.border.lr.width = NULL,
   source_notes.border.lr.color = NULL,
+  source_notes.multiline = NULL,
+  source_notes.sep = NULL,
   row.striping.background_color = NULL,
   row.striping.include_stub = NULL,
   row.striping.include_table_body = NULL
@@ -233,6 +251,14 @@ group labels (\code{row_group.padding}), in the body/stub rows
 \code{grand_summary_row.padding}), or in the footnotes and source notes
 (\code{footnotes.padding} and \code{source_notes.padding}).}
 
+\item{heading.padding.horizontal, column_labels.padding.horizontal, data_row.padding.horizontal, row_group.padding.horizontal, summary_row.padding.horizontal, grand_summary_row.padding.horizontal, footnotes.padding.horizontal, source_notes.padding.horizontal}{The amount of horizontal padding to incorporate in the \code{heading} (title and
+subtitle), the \code{column_labels} (this includes the column spanners), the row
+group labels (\code{row_group.padding.horizontal}), in the body/stub rows
+(\code{data_row.padding}), in summary rows (\code{summary_row.padding.horizontal} or
+\code{grand_summary_row.padding.horizontal}), or in the footnotes and source
+notes (\code{footnotes.padding.horizontal} and
+\code{source_notes.padding.horizontal}).}
+
 \item{heading.border.bottom.style, heading.border.bottom.width, heading.border.bottom.color}{The style, width, and color properties of the header's bottom border. This
 border shares space with that of the \code{column_labels} location. If the
 \code{width} of this border is larger, then it will be the visible border.}
@@ -272,6 +298,11 @@ haven't been placed into a row group (where one or more row groups already
 exist), those rows will be automatically placed into a row group without a
 label.}
 
+\item{row_group.as_column}{How should row groups be structured? By default,
+they are separate rows that lie above the each of the groups. Setting this
+to \code{TRUE} will structure row group labels are columns to the far left of
+the table.}
+
 \item{table_body.hlines.style, table_body.hlines.width, table_body.hlines.color, table_body.vlines.style, table_body.vlines.width, table_body.vlines.color}{The style, width, and color properties for all horizontal lines ('hlines')
 and vertical lines ('vlines') in the \code{table_body}.}
 
@@ -280,6 +311,11 @@ the \code{table_body} location.}
 
 \item{stub.border.style, stub.border.width, stub.border.color}{The style, width, and color properties for the vertical border of the table
 stub.}
+
+\item{stub_row_group.font.size, stub_row_group.font.weight, stub_row_group.text_transform, stub_row_group.border.style, stub_row_group.border.width, stub_row_group.border.color}{Options for the row group column in the stub (made possible when using
+\code{row_group.as_column = TRUE}). The defaults for these options mirror that
+of the \verb{stub.*} variants (except for \code{stub_row_group.border.width}, which
+is \code{"1px"} instead of \code{"2px"}).}
 
 \item{summary_row.border.style, summary_row.border.width, summary_row.border.color}{The style, width, and color properties for all horizontal borders of the
 \code{summary_row} location.}
@@ -293,9 +329,6 @@ stub.}
 \item{footnotes.border.lr.style, footnotes.border.lr.width, footnotes.border.lr.color}{The style, width, and color properties for the left and right borders of
 the \code{footnotes} location.}
 
-\item{footnotes.sep}{The separating characters between adjacent footnotes in
-the footnotes section. The default value produces a linebreak.}
-
 \item{footnotes.marks}{The set of sequential marks used to reference and
 identify each of the footnotes (same input as the \code{\link[=opt_footnote_marks]{opt_footnote_marks()}}
 function. We can supply a vector that represents the series of footnote
@@ -307,6 +340,17 @@ want to use numeric marks). We can use lowercase \code{"letters"} or uppercase
 \code{"LETTERS"}. There is the option for using a traditional symbol set where
 \code{"standard"} provides four symbols, and, \code{"extended"} adds two more
 symbols, making six.}
+
+\item{footnotes.multiline, source_notes.multiline}{An option to either put
+footnotes and source notes in separate lines (the default, or \code{TRUE}) or
+render them as a continuous line of text with \code{footnotes.sep} providing the
+separator (by default \code{" "}) between notes.}
+
+\item{footnotes.sep, source_notes.sep}{The separating characters between
+adjacent footnotes and source notes in their respective footer sections
+when rendered as a continuous line of text (when
+\code{footnotes.multiline == FALSE}). The default value is a single space
+character (\code{" "}).}
 
 \item{source_notes.border.bottom.style, source_notes.border.bottom.width, source_notes.border.bottom.color}{The style, width, and color properties for the bottom border of the
 \code{source_notes} location.}
