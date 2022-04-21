@@ -1,6 +1,6 @@
 Type: Package
 Package: gt
-Version: 0.4.0
+Version: 0.5.0
 Title: Easily Create Presentation-Ready Display Tables
 Description: Build display tables from tabular data with an easy-to-use set of
     functions. With its progressive approach, we can construct display tables
@@ -50,11 +50,11 @@ Collate: 'as_data_frame.R' 'build_data.R' 'compile_scss.R'
         'utils_render_html.R' 'utils_render_latex.R'
         'utils_render_rtf.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2022-02-14 21:29:10 UTC; rich
+Packaged: 2022-04-21 21:17:58 UTC; rich
 Author: Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>),
   Joe Cheng [aut],
   Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),
   RStudio [cph, fnd]
 Maintainer: Richard Iannone <rich@rstudio.com>
 Repository: CRAN
-Date/Publication: 2022-02-15 10:10:02 UTC
+Date/Publication: 2022-04-21 22:10:02 UTC
