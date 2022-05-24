@@ -59,7 +59,7 @@ merged column (e.g., \code{NA} + \code{NA} = \code{NA})
 }
 
 Any resulting \code{NA} values in the \code{col_val} column following the merge
-operation can be easily formatted using the \code{\link[=fmt_missing]{fmt_missing()}} function.
+operation can be easily formatted using the \code{\link[=sub_missing]{sub_missing()}} function.
 
 This function is part of a set of four column-merging functions. The other
 two are the general \code{\link[=cols_merge]{cols_merge()}} function and the specialized
@@ -67,24 +67,14 @@ two are the general \code{\link[=cols_merge]{cols_merge()}} function and the spe
 operate similarly, where the non-target columns can be optionally hidden from
 the output table through the \code{hide_columns} or \code{autohide} options.
 }
-\section{Figures}{
+\section{Examples}{
 
-\if{html}{\figure{man_cols_merge_uncert_1.png}{options: width=100\%}}
-}
 
-\section{Function ID}{
+Use \code{\link{exibble}} to create a \strong{gt} table, keeping only the \code{currency} and
+\code{num} columns. Merge columns into one with a base value and uncertainty
+(after formatting the \code{num} column) using the \code{cols_merge_uncert()} function.
 
-4-9
-}
-
-\examples{
-# Use `exibble` to create a gt table,
-# keeping only the `currency` and `num`
-# columns; merge columns into one with
-# a base value and uncertainty (after
-# formatting the `num` column)
-tab_1 <-
-  exibble \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
   dplyr::select(currency, num) \%>\%
   dplyr::slice(1:7) \%>\%
   gt() \%>\%
@@ -97,11 +87,19 @@ tab_1 <-
     col_val = currency,
     col_uncert = num
   ) \%>\%
-  cols_label(
-    currency = "value + uncert."
-  )
+  cols_label(currency = "value + uncert.")
+}\if{html}{\out{</div>}}
 
+\if{html}{\out{
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_cols_merge_uncert_1.png" style="width:100\%;">
+}}
 }
+
+\section{Function ID}{
+
+4-9
+}
+
 \seealso{
 Other Modify Columns: 
 \code{\link{cols_align}()},

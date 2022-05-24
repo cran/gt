@@ -1,6 +1,6 @@
 Type: Package
 Package: gt
-Version: 0.5.0
+Version: 0.6.0
 Title: Easily Create Presentation-Ready Display Tables
 Description: Build display tables from tabular data with an easy-to-use set of
     functions. With its progressive approach, we can construct display tables
@@ -23,7 +23,7 @@ BugReports: https://github.com/rstudio/gt/issues
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Depends: R (>= 3.2.0)
 Imports: base64enc (>= 0.1-3), bitops (>= 1.0.6), checkmate (>= 2.0.0),
         commonmark (>= 1.7), dplyr (>= 1.0.8), fs (>= 1.5.2), ggplot2
@@ -43,18 +43,18 @@ Collate: 'as_data_frame.R' 'build_data.R' 'compile_scss.R'
         'helpers.R' 'image.R' 'info_tables.R' 'knitr-utils.R'
         'location_methods.R' 'modify_columns.R' 'modify_rows.R'
         'tab_create_modify.R' 'opts.R' 'print.R' 'reexports.R'
-        'render_as_html.R' 'resolver.R' 'shiny.R' 'summary_rows.R'
-        'text_transform.R' 'utils.R' 'utils_formatters.R'
-        'utils_general_str_formatting.R' 'utils_pipe.R'
-        'utils_render_common.R' 'utils_render_footnotes.R'
-        'utils_render_html.R' 'utils_render_latex.R'
-        'utils_render_rtf.R' 'zzz.R'
+        'render_as_html.R' 'resolver.R' 'shiny.R' 'substitution.R'
+        'summary_rows.R' 'text_transform.R' 'utils.R'
+        'utils_formatters.R' 'utils_general_str_formatting.R'
+        'utils_pipe.R' 'utils_render_common.R'
+        'utils_render_footnotes.R' 'utils_render_html.R'
+        'utils_render_latex.R' 'utils_render_rtf.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2022-04-21 21:17:58 UTC; rich
+Packaged: 2022-05-24 04:11:22 UTC; rich
 Author: Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>),
   Joe Cheng [aut],
   Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),
   RStudio [cph, fnd]
 Maintainer: Richard Iannone <rich@rstudio.com>
 Repository: CRAN
-Date/Publication: 2022-04-21 22:10:02 UTC
+Date/Publication: 2022-05-24 04:40:06 UTC

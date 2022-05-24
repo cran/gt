@@ -386,13 +386,31 @@ format_num_to_str_c <- function(x,
 #' @param context The output context.
 #'
 #' @noRd
-to_latex_math_mode <- function(x,
-                               context) {
+to_latex_math_mode <- function(
+    x,
+    context
+) {
 
   if (context != "latex") {
+
     return(x)
+
   } else {
-    return(x %>% paste_between(x_2 = c("$", "$")))
+
+    # Ensure that `$` signs only surround the correct number parts
+    # - certain LaTeX marks operate only in text mode and we need to
+    #   conditionally surround only the number portion in these cases
+    # - right now, the only marks that need to be situated outside of
+    #   the math context are the per mille and per myriad (10,000)
+    #   marks (provided by the `fmt_per()` function)
+    if (all(grepl("\\\\textper(ten)?thousand$", x))) {
+      out <- paste0("$", x)
+      out <- gsub("(\\s*?\\\\textper(ten)?thousand)", "$\\1", out)
+    } else {
+      out <- paste_between(x, x_2 = c("$", "$"))
+    }
+
+    return(out)
   }
 }
 
@@ -478,15 +496,79 @@ context_plusminus_mark <- function(plusminus_mark,
   )
 }
 
+#' Obtain the contextually correct small values text for `sub_small_vals()`
+#'
+#' @param context The output context.
+#' @noRd
+resolve_small_vals_text <- function(
+    threshold,
+    small_pattern
+) {
+
+  gsub("{x}", abs(threshold), small_pattern, fixed = TRUE)
+}
+
+#' Obtain the contextually correct large values text for `sub_large_vals()`
+#'
+#' @param context The output context.
+#' @noRd
+context_large_vals_text <- function(
+    threshold,
+    large_pattern,
+    sign,
+    context
+) {
+
+  if (large_pattern == ">={x}") {
+    if (sign == "-") {
+      return(I(paste0(context_lte_mark(context = context), "-", threshold)))
+    } else {
+      return(I(paste0(context_gte_mark(context = context), threshold)))
+    }
+  }
+
+  gsub("{x}", threshold, large_pattern, fixed = TRUE)
+}
+
+#' Obtain the contextually correct less than or equal to
+#'
+#' @param context The output context.
+#' @noRd
+context_lte_mark <- function(context) {
+
+  switch(
+    context,
+    html = "\U02264",
+    latex = "$\\leq$",
+    "<="
+  )
+}
+
+#' Obtain the contextually correct greater than or equal to
+#'
+#' @param context The output context.
+#' @noRd
+context_gte_mark <- function(context) {
+
+  switch(
+    context,
+    html = "\U02265",
+    latex = "$\\geq$",
+    ">="
+  )
+}
+
 #' Obtain the contextually correct minus mark
 #'
 #' @param context The output context.
 #' @noRd
 context_minus_mark <- function(context) {
 
-  switch(context,
-         html = "&minus;",
-         "-")
+  switch(
+    context,
+    html = "&minus;",
+    "-"
+  )
 }
 
 #' Obtain the contextually correct percent mark
@@ -495,10 +577,42 @@ context_minus_mark <- function(context) {
 #' @noRd
 context_percent_mark <- function(context) {
 
-  switch(context,
-         html = "%",
-         latex = "\\%",
-         "%")
+  switch(
+    context,
+    html = "%",
+    latex = "\\%",
+    "%"
+  )
+}
+
+#' Obtain the contextually correct per mille mark
+#'
+#' @param context The output context.
+#' @noRd
+context_permille_mark <- function(context) {
+
+  switch(
+    context,
+    html = "\U02030",
+    latex = "\\textperthousand",
+    rtf = "\\'89",
+    "per mille"
+  )
+}
+
+#' Obtain the contextually correct per myriad mark
+#'
+#' @param context The output context.
+#' @noRd
+context_permyriad_mark <- function(context) {
+
+  switch(
+    context,
+    html = "\U02031",
+    latex = "\\textpertenthousand",
+    rtf = "\\uc0\\u8241",
+    "per myriad"
+  )
 }
 
 #' Obtain the contextually correct pair of parentheses
@@ -507,9 +621,11 @@ context_percent_mark <- function(context) {
 #' @noRd
 context_parens_marks <- function(context) {
 
-  switch(context,
-         latex = c("(", ")"),
-         c("(", ")"))
+  switch(
+    context,
+    latex = c("(", ")"),
+    c("(", ")")
+  )
 }
 
 #' Obtain the contextually correct pair of opening/closing exponential strings
@@ -518,11 +634,13 @@ context_parens_marks <- function(context) {
 #' @noRd
 context_exp_marks <- function(context) {
 
-  switch(context,
-         html = c(" &times; 10<sup class='gt_super'>", "</sup>"),
-         latex = c(" \\times 10^{", "}"),
-         rtf = c(" \\'d7 10{\\super ", "}"),
-         c(" x 10(", ")"))
+  switch(
+    context,
+    html = c(" &times; 10<sup class='gt_super'>", "</sup>"),
+    latex = c(" \\times 10^{", "}"),
+    rtf = c(" \\'d7 10{\\super ", "}"),
+    c(" x 10(", ")")
+  )
 }
 
 
@@ -557,22 +675,23 @@ context_symbol_str <- function(context,
     return(context_percent_mark(context))
   }
 
-  # Get the contextually correct currency string
-  switch(context,
-         html = {
-           symbol %>%
-             get_currency_str()
-         },
-         latex = {
-           symbol %>%
-             get_currency_str(fallback_to_code = TRUE) %>%
-             markdown_to_latex() %>%
-             paste_between(x_2 = c("\\text{", "}"))
-         },
-         {
-           symbol %>%
-             get_currency_str(fallback_to_code = TRUE)
-         })
+  # Get the contextually correct symbol string
+  symbol <-
+    switch(
+      context,
+      html = get_currency_str(currency = symbol),
+      latex = {
+        if (!inherits(symbol, "AsIs")) {
+          symbol %>%
+            get_currency_str(fallback_to_code = TRUE) %>%
+            markdown_to_latex() %>%
+            paste_between(x_2 = c("\\text{", "}"))
+        } else {
+          symbol
+        }
+      },
+      get_currency_str(currency = symbol, fallback_to_code = TRUE)
+    )
 }
 
 #' Paste a symbol string to a formatted number
@@ -615,7 +734,7 @@ format_symbol_str <- function(x_abs_str,
         direction = placement
       ) %>%
       paste_on_side(
-        x_side = symbol_str,
+        x_side = as.character(symbol_str),
         direction = placement
       )
 

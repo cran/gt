@@ -42,55 +42,60 @@ resolve_footnotes_styles <- function(data,
     return(data)
   }
 
-  # Pare down to the relevant records
-  if (nrow(tbl) > 0) {
+  #
+  # Pare down the rows in `tbl` to only those with active locations
+  #
 
-    # Filter `tbl` by elements preceeding the data rows
-    # (i.e., if element is not present but a reference is,
-    # remove the footnote reference since it is not relevant)
+  # Filter `tbl` by elements preceding the data rows
+  # (i.e., if element is not present but a reference is,
+  # remove the footnote reference since it is not relevant)
 
-    # Filter by `title`
-    if (!dt_heading_has_title(data = data)) {
+  # Filter by `title`
+  if (!dt_heading_has_title(data = data)) {
 
-      tbl <- dplyr::filter(tbl, locname != "title")
-    }
+    tbl <- dplyr::filter(tbl, locname != "title")
+  }
 
-    # Filter by `subtitle`
-    if (!dt_heading_has_subtitle(data = data)) {
+  # Filter by `subtitle`
+  if (!dt_heading_has_subtitle(data = data)) {
 
-      tbl <- dplyr::filter(tbl, locname != "subtitle")
-    }
+    tbl <- dplyr::filter(tbl, locname != "subtitle")
+  }
 
-    # Filter by `grpname` in columns groups
-    if ("columns_groups" %in% tbl[["locname"]]) { # remove conditional
+  # Filter by `grpname` in columns groups
+  if ("columns_groups" %in% tbl[["locname"]]) { # remove conditional
 
-      spanner_ids <- unique(unlist(spanners$spanner_id))
+    spanner_ids <- unique(unlist(spanners$spanner_id))
 
-      tbl <-
-        dplyr::filter(
-          tbl,
-          locname != "columns_groups" | grpname %in% spanner_ids
-        )
-    }
-
-    # Filter by `grpname` in row groups
-    if ("row_groups" %in% tbl[["locname"]]) {
-
-      tbl <-
-        dplyr::bind_rows(
-          dplyr::filter(tbl, locname != "row_groups"),
-          tbl %>%
-            dplyr::filter(locname == "row_groups") %>%
-            dplyr::filter(grpname %in% groups_rows_df$group_id)
-        )
-    }
-
-    # Filter `tbl` by the remaining columns in `body`
     tbl <-
       dplyr::filter(
         tbl,
-        colname %in% c(NA_character_, dt_boxhead_get_vars_default(data = data))
+        locname != "columns_groups" | grpname %in% spanner_ids
       )
+  }
+
+  # Filter by `grpname` in row groups
+  if ("row_groups" %in% tbl[["locname"]]) {
+
+    tbl <-
+      dplyr::bind_rows(
+        dplyr::filter(tbl, locname != "row_groups"),
+        tbl %>%
+          dplyr::filter(locname == "row_groups") %>%
+          dplyr::filter(grpname %in% groups_rows_df$group_id)
+      )
+  }
+
+  # Filter `tbl` by the remaining columns in `body`
+  tbl <-
+    dplyr::filter(
+      tbl,
+      colname %in% c(NA_character_, dt_boxhead_get_vars_default(data = data))
+    )
+
+  # Return `data` unchanged if there are no rows in `tbl`
+  if (nrow(tbl) == 0) {
+    return(data)
   }
 
   # Reorganize records that target the data rows
@@ -322,25 +327,37 @@ resolve_footnotes_styles <- function(data,
     # text elements (that are distinct)
     lookup_tbl <-
       tbl %>%
+      dplyr::filter(locname != "none") %>%
       dplyr::select(footnotes) %>%
       dplyr::distinct() %>%
-      tibble::rownames_to_column(var = "fs_id") %>%
-      dplyr::mutate(fs_id = as.integer(fs_id))
+      tibble::rownames_to_column(var = "fs_id")
 
     # Join the lookup table to `tbl`
-    tbl <- dplyr::inner_join(tbl, lookup_tbl, by = "footnotes")
+    tbl <-
+      dplyr::left_join(tbl, lookup_tbl, by = "footnotes") %>%
+      dplyr::mutate(fs_id = ifelse(locname == "none", NA_character_, fs_id))
 
     if (nrow(tbl) > 0) {
 
+      # Retain the row that only contain `locname == "none"`
+      tbl_no_loc <- dplyr::filter(tbl, locname == "none")
+
       # Modify `fs_id` to contain the footnote marks we need
-      tbl <-
-        dplyr::mutate(
-          tbl,
-          fs_id = process_footnote_marks(
-            x = fs_id,
-            marks = footnote_marks
+      tbl <- dplyr::filter(tbl, locname != "none")
+
+      if (nrow(tbl) > 0) {
+
+        tbl <-
+          dplyr::mutate(
+            tbl,
+            fs_id = process_footnote_marks(
+              x = as.integer(fs_id),
+              marks = footnote_marks
+            )
           )
-        )
+      }
+
+      tbl <- dplyr::bind_rows(tbl_no_loc, tbl)
     }
   }
 
@@ -546,38 +563,44 @@ apply_footnotes_to_output <- function(data,
       dplyr::group_by(rownum, colnum) %>%
       dplyr::mutate(fs_id_coalesced = paste(fs_id, collapse = ",")) %>%
       dplyr::ungroup() %>%
-      dplyr::select(colname, rownum, fs_id_coalesced) %>%
+      dplyr::select(colname, rownum, locname, placement, fs_id_coalesced) %>%
       dplyr::distinct()
 
     for (i in seq(nrow(footnotes_data_marks))) {
 
       text <-
-        body[footnotes_data_marks$rownum[i], footnotes_data_marks$colname[i]]
+        body[[footnotes_data_marks$rownum[i], footnotes_data_marks$colname[i]]]
+
+      colname <- dplyr::pull(footnotes_data_marks[i, ], "colname")
+      rownum <- dplyr::pull(footnotes_data_marks[i, ], "rownum")
+      location <- dplyr::pull(footnotes_data_marks[i, ], "locname")
+      placement <- dplyr::pull(footnotes_data_marks[i, ], "placement")
+
+      footnote_placement <-
+        resolve_footnote_placement(
+          data = data,
+          colname = colname,
+          rownum = rownum,
+          input_placement = placement,
+          cell_content = text,
+          context = context
+        )
 
       if (context == "html") {
-
-        text <-
-          paste0(text, footnote_mark_to_html(
-            footnotes_data_marks$fs_id_coalesced[i])
-          )
-
+        mark <- footnote_mark_to_html(footnotes_data_marks$fs_id_coalesced[i])
       } else if (context == "rtf") {
-
-        text <-
-          paste0(text, footnote_mark_to_rtf(
-            footnotes_data_marks$fs_id_coalesced[i])
-          )
-
+        mark <- footnote_mark_to_rtf(footnotes_data_marks$fs_id_coalesced[i])
       } else if (context == "latex") {
-
-        text <-
-          paste0(text, footnote_mark_to_latex(
-            footnotes_data_marks$fs_id_coalesced[i])
-          )
+        mark <- footnote_mark_to_latex(footnotes_data_marks$fs_id_coalesced[i])
       }
 
-      body[
-        footnotes_data_marks$rownum[i], footnotes_data_marks$colname[i]] <- text
+      if (footnote_placement == "right") {
+        text <- paste0(text, mark)
+      } else {
+        text <- paste0(mark, " ", text)
+      }
+
+      body[footnotes_data_marks$rownum[i], footnotes_data_marks$colname[i]] <- text
     }
   }
 
