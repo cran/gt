@@ -41,7 +41,7 @@
 #' `r man_get_image_tag(file = "man_text_transform_1.png")`
 #' }}
 #'
-#' @family Format Data
+#' @family data formatting functions
 #' @section Function ID:
 #' 3-20
 #'
@@ -98,9 +98,7 @@ text_transform_at_location.cells_body <- function(
     }
   }
 
-  data <- dt_body_set(data = data, body = body)
-
-  data
+  dt_body_set(data = data, body = body)
 }
 
 text_transform_at_location.cells_stub <- function(
@@ -116,13 +114,12 @@ text_transform_at_location.cells_stub <- function(
   stub_df <- dt_stub_df_get(data = data)
 
   stub_var <- dt_boxhead_get_var_stub(data = data)
+
   # FIXME: Check for zero-length stub_var before continuing.
   body[[stub_var]][stub_df$rownum_i %in% loc$rows] <-
     fn(body[[stub_var]][stub_df$rownum_i %in% loc$rows])
 
-  data <- dt_body_set(data = data, body = body)
-
-  data
+  dt_body_set(data = data, body = body)
 }
 
 text_transform_at_location.cells_column_labels <- function(

@@ -47,7 +47,7 @@
 #' `r man_get_image_tag(file = "man_cols_align_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-1
 #'
@@ -61,9 +61,6 @@ cols_align <- function(
   # Perform input object validation
   stop_if_not_gt(data = data)
 
-  # Get the internal data table
-  data_tbl <- dt_data_get(data = data)
-
   # Get the `align` value, this stops the function if there is no match
   align <- match.arg(align)
 
@@ -76,13 +73,19 @@ cols_align <- function(
 
   if (align == "auto") {
 
+    # Get the internal data table
+    data_tbl <- dt_data_get(data = data)
+
     # Obtain a vector of column classes for each of the column
     # names
+    col_classes <- unlist(lapply(lapply(data_tbl[column_names], class), `[[`, 1))
+
+    # Check whether all values in 'character' columns are
+    # predominantly 'number-like' and modify `col_classes` accordingly
     col_classes <-
-      unlist(
-        lapply(
-          data_tbl[column_names], class) %>%
-          lapply(`[[`, 1)
+      determine_which_character_number(
+        data_tbl = data_tbl,
+        col_classes = col_classes
       )
 
     # Get a vector of `align` values based on the column classes
@@ -90,9 +93,10 @@ cols_align <- function(
       unname(
         sapply(
           col_classes, switch,
+          "character-numeric" = "right",
           "character" = "left",
-          "Date" = "left",
-          "POSIXct" = "left",
+          "Date" = "right",
+          "POSIXct" = "right",
           "logical" = "center",
           "factor" = "center",
           "list" = "center",
@@ -117,6 +121,27 @@ cols_align <- function(
   }
 
   data
+}
+
+determine_which_character_number <- function(
+  data_tbl = data_tbl,
+  col_classes = col_classes
+) {
+
+  cols_character <- names(col_classes[col_classes == "character"])
+
+  for (col in cols_character) {
+
+    col_vals <- data_tbl[[col]]
+
+    res <- grepl("^[0-9 -/:\\.]*$", col_vals[!is.na(col_vals)])
+
+    if (length(res) > 0 && all(res)) {
+      col_classes[names(col_classes) == col] <- "character-numeric"
+    }
+  }
+
+  col_classes
 }
 
 #' Set the widths of columns
@@ -183,7 +208,7 @@ cols_align <- function(
 #' `r man_get_image_tag(file = "man_cols_width_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-2
 #'
@@ -202,11 +227,10 @@ cols_width <- function(
 
   # If nothing is provided, return `.data` unchanged
   if (length(widths_list) == 0) {
-    stop(
-      "Nothing was provided to `...`:\n",
-      " * Use formula expressions to define custom column widths",
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "Nothing was provided to `...`.",
+      "*" = "Use formula expressions to define custom column widths."
+    ))
   }
 
   all_formulas <-
@@ -219,9 +243,8 @@ cols_width <- function(
     )
 
   if (!all_formulas) {
-    stop(
-      "Only two-sided formulas should be provided to `...`",
-      call. = FALSE
+    cli::cli_abort(
+      "Only two-sided formulas should be provided to `...`."
     )
   }
 
@@ -240,15 +263,13 @@ cols_width <- function(
         expr = !!cols,
         data = .data,
         excl_stub = FALSE
-      ) %>%
-      base::setdiff(columns_used)
+      )
+
+    columns <- base::setdiff(columns, columns_used)
 
     columns_used <- c(columns_used, columns)
 
-    width <-
-      width_item %>%
-      rlang::f_rhs() %>%
-      rlang::eval_tidy()
+    width <- rlang::eval_tidy(rlang::f_rhs(width_item))
 
     # If a bare numeric value is provided, give that the `px` dimension
     if (is.numeric(width)) width <- paste_right(as.character(width), "px")
@@ -264,11 +285,9 @@ cols_width <- function(
     }
   }
 
-  unset_widths <-
-    dt_boxhead_get(data = .data) %>%
-    .$column_width %>%
-    lapply(is.null) %>%
-    unlist()
+  boxh <- dt_boxhead_get(data = .data)
+
+  unset_widths <- unlist(lapply(boxh$column_width, FUN = is.null))
 
   if (any(unset_widths)) {
 
@@ -363,7 +382,7 @@ cols_width <- function(
 #' `r man_get_image_tag(file = "man_cols_label_2.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-3
 #'
@@ -388,25 +407,22 @@ cols_label <- function(
 
   # Test for names being NULL
   if (is.null(names(labels_list))) {
-    stop(
-      "Named arguments are required for `cols_label()`.",
-      call. = FALSE
+    cli::cli_abort(
+      "Named arguments are required for `cols_label()`."
     )
   }
 
   # Test for any missing names
   if (any(names(labels_list) == "")) {
-    stop(
-      "All arguments to `cols_label()` must be named.",
-      call. = FALSE
+    cli::cli_abort(
+      "All arguments to `cols_label()` must be named."
     )
   }
 
   # Stop function if any of the column names specified are not in `cols_labels`
   if (!all(names(labels_list) %in% dt_boxhead_get_vars(data = .data))) {
-    stop(
-      "All column names provided must exist in the input `.data` table.",
-      call. = FALSE
+    cli::cli_abort(
+      "All column names provided must exist in the input `.data` table."
     )
   }
 
@@ -494,7 +510,7 @@ cols_label <- function(
 #' `r man_get_image_tag(file = "man_cols_move_to_start_2.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-4
 #'
@@ -519,17 +535,13 @@ cols_move_to_start <- function(
 
   # Stop function if no `columns` are provided
   if (length(columns) == 0) {
-    stop(
-      "Columns must be provided.",
-      call. = FALSE
-    )
+    cli::cli_abort("Columns must be provided.")
   }
 
   # Stop function if any of the `columns` don't exist in `vars`
   if (!all(columns %in% vars)) {
-    stop(
-      "All `columns` must exist and be visible in the input `data` table.",
-      call. = FALSE
+    cli::cli_abort(
+      "All `columns` must exist and be visible in the input `data` table."
     )
   }
 
@@ -602,7 +614,7 @@ cols_move_to_start <- function(
 #' `r man_get_image_tag(file = "man_cols_move_to_end_2.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-5
 #'
@@ -627,17 +639,13 @@ cols_move_to_end <- function(
 
   # Stop function if no `columns` are provided
   if (length(columns) == 0) {
-    stop(
-      "Columns must be provided.",
-      call. = FALSE
-    )
+    cli::cli_abort("Columns must be provided.")
   }
 
   # Stop function if any of the `columns` don't exist in `vars`
   if (!all(columns %in% vars)) {
-    stop(
-      "All `columns` must exist and be visible in the input `data` table.",
-      call. = FALSE
+    cli::cli_abort(
+      "All `columns` must exist and be visible in the input `data` table."
     )
   }
 
@@ -701,7 +709,7 @@ cols_move_to_end <- function(
 #' `r man_get_image_tag(file = "man_cols_move_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-6
 #'
@@ -734,33 +742,25 @@ cols_move <- function(
 
   # Stop function if `after` contains multiple columns
   if (length(after) > 1) {
-    stop(
-      "Only one column name should be supplied to `after`.",
-      call. = FALSE
-    )
+    cli::cli_abort("Only one column name should be supplied to `after`.")
   }
 
   # Stop function if `after` doesn't exist in `vars`
   if (!(after %in% vars)) {
-    stop(
-      "The column supplied to `after` doesn't exist in the input `data` table.",
-      call. = FALSE
+    cli::cli_abort(
+      "The column supplied to `after` doesn't exist in the input `data` table."
     )
   }
 
   # Stop function if no `columns` are provided
   if (length(columns) == 0) {
-    stop(
-      "Columns must be provided.",
-      call. = FALSE
-    )
+    cli::cli_abort("Columns must be provided.")
   }
 
   # Stop function if any of the `columns` don't exist in `vars`
   if (!all(columns %in% vars)) {
-    stop(
-      "All `columns` must exist and be visible in the input `data` table.",
-      call. = FALSE
+    cli::cli_abort(
+      "All `columns` must exist and be visible in the input `data` table."
     )
   }
 
@@ -848,7 +848,7 @@ cols_move <- function(
 #' `r man_get_image_tag(file = "man_cols_hide_2.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-7
 #'
@@ -875,18 +875,12 @@ cols_hide <- function(
 
   # Stop function if no `columns` are provided
   if (length(columns) == 0) {
-    stop(
-      "Columns must be provided.",
-      call. = FALSE
-    )
+    cli::cli_abort("Columns must be provided.")
   }
 
   # Stop function if any of the `columns` don't exist in `vars`
   if (!all(columns %in% vars)) {
-    stop(
-      "All `columns` must exist in the input `data` table.",
-      call. = FALSE
-    )
+    cli::cli_abort("All `columns` must exist in the input `data` table.")
   }
 
   # Set the `"hidden"` type for the `columns` in `_dt_boxhead`
@@ -951,7 +945,7 @@ cols_hide <- function(
 #' `r man_get_image_tag(file = "man_cols_unhide_2.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-8
 #'
@@ -978,18 +972,12 @@ cols_unhide <- function(
 
   # Stop function if no `columns` are provided
   if (length(columns) == 0) {
-    stop(
-      "Columns must be provided.",
-      call. = FALSE
-    )
+    cli::cli_abort("Columns must be provided.")
   }
 
   # Stop function if any of the `columns` don't exist in `vars`
   if (!all(columns %in% vars)) {
-    stop(
-      "All `columns` must exist in the input `data` table.",
-      call. = FALSE
-    )
+    cli::cli_abort("All `columns` must exist in the input `data` table.")
   }
 
   # Set the `"visible"` type for the `columns` in `_dt_boxhead`
@@ -1082,7 +1070,7 @@ cols_unhide <- function(
 #' `r man_get_image_tag(file = "man_cols_merge_uncert_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-9
 #'
@@ -1208,7 +1196,7 @@ cols_merge_uncert <- function(
 #' `r man_get_image_tag(file = "man_cols_merge_range_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-10
 #'
@@ -1382,7 +1370,7 @@ cols_merge_resolver <- function(data, col_begin, col_end, sep) {
 #' `r man_get_image_tag(file = "man_cols_merge_n_pct_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-11
 #'
@@ -1501,7 +1489,7 @@ cols_merge_n_pct <- function(
 #' `r man_get_image_tag(file = "man_cols_merge_1.png")`
 #' }}
 #'
-#' @family Modify Columns
+#' @family column modification functions
 #' @section Function ID:
 #' 4-12
 #'
@@ -1544,11 +1532,10 @@ cols_merge <- function(
     hide_columns_from_supplied <- base::intersect(hide_columns, columns)
 
     if (length(base::setdiff(hide_columns, columns) > 0)) {
-      warning(
-        "Only the columns supplied in `columns` will be hidden.\n",
-        " * use `cols_hide()` to hide any out of scope columns",
-        call. = FALSE
-      )
+      cli::cli_warn(c(
+        "Only the columns supplied in `columns` will be hidden.",
+        "*" = "Use `cols_hide()` to hide any out of scope columns."
+      ))
     }
 
     if (length(hide_columns_from_supplied) > 0) {

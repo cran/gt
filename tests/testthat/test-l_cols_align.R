@@ -1,5 +1,3 @@
-context("LaTeX -- Ensuring that the `cols_align*()` functions work as expected")
-
 # Create a shorter version of `mtcars`
 mtcars_short <- mtcars[1:5, ]
 
@@ -63,6 +61,6 @@ test_that("the `cols_align()` function works correctly", {
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern
-  grepl(".*begin\\{longtable\\}\\{lrrrrr\\}.*", tbl_latex) %>%
+  grepl(".*begin\\{longtable\\}\\{rrrrrr\\}.*", tbl_latex) %>%
     expect_true()
 })

@@ -56,12 +56,12 @@ get_date_format <- function(date_style) {
   if (is.numeric(date_style)) {
 
     if (!(date_style %in% date_format_num_range)) {
-      stop(
+
+      cli::cli_abort(c(
         "If using a numeric value for a `date_style`, it must be ",
-        "between `1` and `", nrow((date_format_tbl)), "`:\n",
-        "* Use `info_date_style()` for a useful visual reference",
-        call. = FALSE
-      )
+        "between `1` and `{nrow(date_format_tbl)}`.",
+        "*" = "Use `info_date_style()` for a useful visual reference."
+      ))
     }
   }
 
@@ -69,11 +69,10 @@ get_date_format <- function(date_style) {
   if (is.character(date_style)) {
 
     if (!(date_style %in% date_format_tbl$format_name)) {
-      stop(
-        "If using a `date_style` name, it must be in the valid set:\n",
-        "* Use `info_date_style()` for a useful visual reference",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "If using a `date_style` name, it must be in the valid set.",
+        "*" = "Use `info_date_style()` for a useful visual reference."
+      ))
     }
 
     # Normalize `date_style` to be a numeric index value
@@ -105,12 +104,11 @@ get_time_format <- function(time_style) {
   if (is.numeric(time_style)) {
 
     if (!(time_style %in% time_format_num_range)) {
-      stop(
-        "If using a numeric value for a `time_style`, it must be ",
-        "between `1` and `", nrow((time_format_tbl)), "`:\n",
-        "* Use `info_time_style()` for a useful visual reference",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "If using a numeric value for a `time_style`, it must be
+        between `1` and `{nrow((time_format_tbl))}`.",
+        "*" = "Use `info_time_style()` for a useful visual reference."
+      ))
     }
   }
 
@@ -118,11 +116,10 @@ get_time_format <- function(time_style) {
   if (is.character(time_style)) {
 
     if (!(time_style %in% time_format_tbl$format_name)) {
-      stop(
-        "If using a `time_style` name, it must be in the valid set:\n",
-        "* Use `info_time_style()` for a useful visual reference",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "If using a `time_style` name, it must be in the valid set.",
+        "*" = "Use `info_time_style()` for a useful visual reference."
+      ))
     }
 
     # Normalize `time_style` to be a numeric index value
@@ -148,9 +145,8 @@ is_string_time <- function(x) {
 check_format_string <- function(format) {
 
   if (!is.character(format) || length(format) != 1) {
-    stop(
-      "The `format` code must be a character string of length 1.",
-      call. = FALSE
+    cli::cli_abort(
+      "The `format` code must be a character string of length 1."
     )
   }
 }
@@ -158,49 +154,34 @@ check_format_string <- function(format) {
 #' Transform a `currency` code to a currency string
 #'
 #' @noRd
-get_currency_str <- function(currency,
-                             fallback_to_code = FALSE) {
+get_currency_str <- function(
+    currency,
+    fallback_to_code = FALSE
+) {
 
   # Create bindings for specific variables
   curr_symbol <- symbol <- curr_code <- curr_number <- NULL
 
   if (currency[1] %in% currency_symbols$curr_symbol) {
 
-    return(
-      currency_symbols %>%
-        dplyr::filter(curr_symbol == currency) %>%
-        dplyr::pull(symbol))
+    return(dplyr::filter(currency_symbols, curr_symbol == currency)$symbol)
 
   } else if (currency[1] %in% currencies$curr_code) {
 
-    currency_symbol <-
-      currencies %>%
-      dplyr::filter(curr_code == currency) %>%
-      dplyr::pull(symbol)
+    currency_symbol <- dplyr::filter(currencies, curr_code == currency)$symbol
 
     if (fallback_to_code && grepl("&#", currency_symbol)) {
-
-      currency_symbol <-
-        currencies %>%
-        dplyr::filter(curr_code == currency) %>%
-        dplyr::pull(curr_code)
+      currency_symbol <- dplyr::filter(currencies, curr_code == currency)$curr_code
     }
 
     return(currency_symbol)
 
   } else if (currency[1] %in% currencies$curr_number) {
 
-    currency_symbol <-
-      currencies %>%
-      dplyr::filter(curr_number == currency) %>%
-      dplyr::pull(symbol)
+    currency_symbol <- dplyr::filter(currencies, curr_number == currency)$symbol
 
     if (fallback_to_code && grepl("&#", currency_symbol)) {
-
-      currency_symbol <-
-        currencies %>%
-        dplyr::filter(curr_number == currency) %>%
-        dplyr::pull(curr_code)
+      currency_symbol <- dplyr::filter(currencies, curr_number == currency)$curr_code
     }
 
     return(currency_symbol)
@@ -274,8 +255,10 @@ get_alignment_at_body_cell <- function(
   #
 
   styles_filtered_tbl <-
-    styles_tbl %>%
-    dplyr::filter(locname == "data" && colname == .env$colname && rownum == .env$rownum)
+    dplyr::filter(
+      styles_tbl,
+      locname == "data" & colname == .env$colname & rownum == .env$rownum
+    )
 
   if (nrow(styles_tbl) < 1) {
     return(column_alignment)
@@ -332,17 +315,11 @@ get_currency_exponent <- function(currency) {
 
   if (currency[1] %in% currencies$curr_code) {
 
-    exponent <-
-      currencies %>%
-      dplyr::filter(curr_code == currency) %>%
-      dplyr::pull(exponent)
+    exponent <- dplyr::filter(currencies, curr_code == currency)$exponent
 
   } else if (currency[1] %in% currencies$curr_number) {
 
-    exponent <-
-      currencies %>%
-      dplyr::filter(curr_number == currency) %>%
-      dplyr::pull(exponent)
+    exponent <- dplyr::filter(currencies, curr_number == currency)$exponent
   }
 
   if (is.na(exponent)) {
@@ -360,8 +337,7 @@ get_currency_exponent <- function(currency) {
 #' helper function), then the text will be seen as HTML and it won't undergo
 #' sanitization.
 #' @noRd
-process_text <- function(text,
-                         context = "html") {
+process_text <- function(text, context = "html") {
 
   # If text is marked `AsIs` (by using `I()`) then just
   # return the text unchanged
@@ -382,13 +358,22 @@ process_text <- function(text,
     if (inherits(text, "from_markdown")) {
 
       text <-
-        as.character(text) %>%
-        vapply(commonmark::markdown_html, character(1)) %>%
-        stringr::str_replace_all(c("^<p>" = "", "</p>\n$" = ""))
+        vapply(
+          as.character(text),
+          FUN.VALUE = character(1),
+          USE.NAMES = FALSE,
+          FUN = commonmark::markdown_html
+        )
+
+      text <- gsub("^<p>|</p>\n$", "", text)
 
       return(text)
 
-    } else if (is_html(text) || inherits(text, "shiny.tag") || inherits(text, "shiny.tag.list")) {
+    } else if (
+      is_html(text) ||
+      inherits(text, "shiny.tag") ||
+      inherits(text, "shiny.tag.list")
+    ) {
 
       text <- as.character(text)
 
@@ -442,6 +427,19 @@ process_text <- function(text,
 
       return(text)
     }
+
+  } else if (context == "word") {
+
+    # Text processing for Word output
+
+    if (inherits(text, "from_markdown")) {
+      text <- markdown_to_xml(text)
+    }else{
+      text <- as.character(text)
+    }
+
+    return(htmltools::htmlEscape(text))
+
   } else {
 
     # Text processing in the default case
@@ -474,10 +472,10 @@ process_text <- function(text,
 #' @noRd
 unescape_html <- function(text) {
 
-  text %>%
-    tidy_gsub("&lt;", "<") %>%
-    tidy_gsub("&gt;", ">") %>%
-    tidy_gsub("&amp;", "&")
+  text <- tidy_gsub(text, "&lt;", "<")
+  text <- tidy_gsub(text, "&gt;", ">")
+  text <- tidy_gsub(text, "&amp;", "&")
+  text
 }
 
 #' Transform Markdown text to HTML and also perform HTML escaping
@@ -486,11 +484,15 @@ unescape_html <- function(text) {
 md_to_html <- function(x) {
 
   non_na_x <-
-    x[!is.na(x)] %>%
-    as.character() %>%
-    vapply(commonmark::markdown_html, character(1), USE.NAMES = FALSE) %>%
-    tidy_gsub("^", "<div class='gt_from_md'>") %>%
-    tidy_gsub("$", "</div>")
+    vapply(
+      as.character(x[!is.na(x)]),
+      FUN.VALUE = character(1),
+      USE.NAMES = FALSE,
+      FUN = commonmark::markdown_html
+    )
+
+  non_na_x <- tidy_gsub(non_na_x, "^", "<div class='gt_from_md'>")
+  non_na_x <- tidy_gsub(non_na_x, "$", "</div>")
 
   x[!is.na(x)] <- non_na_x
   x
@@ -505,30 +507,265 @@ md_to_html <- function(x) {
 markdown_to_latex <- function(text) {
 
   # Vectorize `commonmark::markdown_latex` and modify output
-  # behavior to passthrough NAs
-  lapply(text, function(x) {
+  # behavior to pass through NAs
+  unname(
+    unlist(
+      lapply(
+        text,
+        FUN = function(x) {
 
-    if (is.na(x)) {
-      return(NA_character_)
-    }
+          if (is.na(x)) {
+            return(NA_character_)
+          }
 
-    if (isTRUE(getOption("gt.html_tag_check", TRUE))) {
+          if (isTRUE(getOption("gt.html_tag_check", TRUE))) {
 
-      if (grepl("<[a-zA-Z\\/][^>]*>", x)) {
-        warning("HTML tags found, and they will be removed.\n",
-                " * set `options(gt.html_tag_check = FALSE)` to disable this check",
-                call. = FALSE)
+            if (grepl("<[a-zA-Z\\/][^>]*>", x)) {
+              cli::cli_warn(c(
+                "HTML tags found, and they will be removed.",
+                "*" = "Set `options(gt.html_tag_check = FALSE)` to disable this check."
+              ))
+            }
+          }
+
+          tidy_gsub(commonmark::markdown_latex(x), "\\n$", "")
+        }
+      )
+    )
+  )
+}
+
+markdown_to_xml <- function(text) {
+
+  text <-
+    text %>%
+    as.character() %>%
+    vapply(
+      FUN.VALUE = character(1),
+      USE.NAMES = FALSE,
+      FUN = commonmark::markdown_xml
+    ) %>%
+    vapply(
+      FUN.VALUE = character(1),
+      USE.NAMES = FALSE,
+      FUN = function(cmark) {
+        # cat(cmark)
+        x <- xml2::read_xml(cmark)
+        if (!identical(xml2::xml_name(x), "document")) {
+          stop("Unexpected result from markdown parsing: `document` element not found")
+        }
+
+        children <- xml2::xml_children(x)
+
+        if (length(children) == 1 &&
+            xml2::xml_type(children[[1]]) == "element" &&
+            xml2::xml_name(children[[1]]) == "paragraph") {
+          children <- xml2::xml_children(children[[1]])
+        }
+
+        apply_rules <- function(x) {
+
+          if (inherits(x, "xml_nodeset")) {
+
+            len <- length(x)
+            results <- character(len) # preallocate vector
+
+            for (i in seq_len(len)) {
+              results[[i]] <- apply_rules(x[[i]])
+            }
+
+            # TODO: is collapse = "" correct?
+            xml_raw(paste0("", results, collapse = ""))
+
+          } else {
+
+            output <- if (xml2::xml_type(x) == "element") {
+
+              rule <- cmark_rules_xml[[xml2::xml_name(x)]]
+
+              if (is.null(rule)) {
+
+                rlang::warn(
+                  paste0("Unknown commonmark element encountered: ", xml2::xml_name(x)),
+                  .frequency = "once",
+                  .frequency_id = "gt_commonmark_unknown_element"
+                )
+
+                apply_rules(xml2::xml_contents(x))
+
+              } else if (is.function(rule)) {
+
+                rule(x, apply_rules)
+              }
+            }
+
+            xml_raw(paste0("", output, collapse = ""))
+          }
+        }
+
+        apply_rules(children)
+      }
+    )
+
+  text
+}
+
+# TODO: Make XML versions of these
+cmark_rules_xml <- list(
+
+  heading = function(x, process) {
+
+    heading_sizes <- c(36, 32, 28, 24, 20, 16)
+    fs <- heading_sizes[as.numeric(xml2::xml_attr(x, attr = "level"))]
+
+    htmltools::tagList(
+      xml_sz(process(xml2::xml_children(x)), val = fs)
+    )
+  },
+  thematic_break = function(x, process) {
+    "<w:pict>
+      <v:rect style=\"width:500pt;height:1pt;\" o:hralign=\"center\" fillcolor=\"#bbbbbb\" stroked=\"f\"/>
+    </w:pict>"
+  },
+  link = function(x, process) {
+    # NOTE: Links are difficult to insert in OOXML documents because
+    # a relationship must be provided in the 'document.xml.rels' file
+    xml2::xml_text(x)
+  },
+  list = function(x, process) {
+
+    type <- xml2::xml_attr(x, attr = "type")
+    n_items <- length(xml2::xml_children(x))
+
+    # NOTE: `start`, `delim`, and `tight` attrs are ignored; we also
+    # assume there is only `type` values of "ordered" and "bullet" (unordered)
+    htmltools::HTML(
+      paste(
+        vapply(
+          seq_len(n_items),
+          FUN.VALUE = character(1),
+          USE.NAMES = FALSE,
+          FUN = function(n) {
+
+            paste(
+              ifelse(type == "bullet", "\u2022", ""),
+              process(xml2::xml_children(x)[n]),
+              collapse = ""
+            )
+          }
+        ),
+        collapse = "<w:br/>"
+      )
+    )
+  },
+  item = function(x, process) {
+    # TODO: probably needs something like process_children()
+    xml2::xml_text(x)
+  },
+  code_block = function(x, process) {
+    htmltools::tagList(
+      xml_rPr(xml_r_font(ascii_font = "Courier", ansi_font = "Courier")),
+      xml_t(xml2::xml_text(x), xml_space = "preserve"),
+      xml_rPr(xml_r_font(ascii_font = "Calibri", ansi_font = "Calibri"))
+    )
+  },
+  html_inline = function(x, process) {
+
+    # TODO: make this work for XML
+
+    tag <- xml2::xml_text(x)
+
+    match <- stringr::str_match(tag, pattern = "^<(/?)([a-zA-Z0-9\\-]+)")
+
+    if (!is.na(match[1, 1])) {
+
+      span_map <-
+        c(
+          sup = "super",
+          sub = "sub",
+          strong = "b",
+          b = "b",
+          em = "i",
+          i = "i",
+          code = "f1"
+        )
+
+      key_map <- c(br = "line")
+
+      is_closing <- match[1, 2] == "/"
+      tag_name <- match[1, 3]
+
+      if (!is_closing) {
+
+        if (tag_name %in% names(key_map)) {
+
+          return(rtf_key(key_map[tag_name], space = TRUE))
+
+        } else if (tag_name %in% names(span_map)) {
+
+          return(
+            rtf_paste0(
+              rtf_raw("{"),
+              rtf_key(span_map[tag_name], space = TRUE)
+            )
+          )
+        }
+
+      } else {
+
+        if (tag_name %in% names(span_map)) {
+          return(rtf_raw("}"))
+        }
       }
     }
 
-    commonmark::markdown_latex(x) %>% tidy_gsub("\\n$", "")
-  }) %>%
-    unlist() %>%
-    unname()
-}
+    # Any unrecognized HTML tags are stripped, returning nothing
+    return(rtf_raw(""))
+  },
+  softbreak = function(x, process) {
+    "\n "
+  },
+  linebreak = function(x, process) {
+    "<w:br/>"
+  },
+  block_quote = function(x, process) {
+    # TODO: Implement
+    process(xml2::xml_children(x))
+  },
+  code = function(x, process) {
+    htmltools::tagList(
+      xml_rPr(xml_r_font(ascii_font = "Courier", ansi_font = "Courier")),
+      xml_t(xml2::xml_text(x), xml_space = "preserve"),
+      xml_rPr(xml_r_font(ascii_font = "Calibri", ansi_font = "Calibri"))
+    )
+  },
+  strong = function(x, process) {
+    htmltools::HTML(
+      paste0(
+        xml_rPr(xml_b(active = TRUE)),
+        as.character(process(xml2::xml_children(x))),
+        xml_rPr(xml_b(active = FALSE))
+      )
+    )
+  },
+  emph = function(x, process) {
+    htmltools::HTML(
+      paste0(
+        xml_rPr(xml_i(active = TRUE)),
+        as.character(process(xml2::xml_children(x))),
+        xml_rPr(xml_i(active = FALSE))
+      )
+    )
+  },
+  text = function(x, process) {
+    xml2::xml_text(x)
+  },
+  paragraph = function(x, process) {
+    xml2::xml_text(x)
+  }
+)
 
-cmark_rules <- list(
-
+cmark_rules_rtf <- list(
   heading = function(x, process) {
     heading_sizes <- c(36, 32, 28, 24, 20, 16)
     fs <- heading_sizes[as.numeric(xml2::xml_attr(x, attr = "level"))]
@@ -676,7 +913,7 @@ cmark_rules <- list(
 )
 
 is_last <- function(x) {
-  children <- xml2::xml_parent(x) %>% xml2::xml_children()
+  children <- xml2::xml_children(xml2::xml_parent(x))
   last <- children[[xml2::xml_length(xml2::xml_parent(x))]]
   identical(last, x)
 }
@@ -684,27 +921,36 @@ is_last <- function(x) {
 markdown_to_rtf <- function(text) {
 
   text <-
-    text %>%
-    as.character() %>%
     vapply(
+      as.character(text),
       FUN.VALUE = character(1),
       USE.NAMES = FALSE,
       FUN = commonmark::markdown_xml
-    ) %>%
+    )
+
+  text <-
     vapply(
+      text,
       FUN.VALUE = character(1),
       USE.NAMES = FALSE,
       FUN = function(cmark) {
-        # cat(cmark)
+
         x <- xml2::read_xml(cmark)
+
         if (!identical(xml2::xml_name(x), "document")) {
-          stop("Unexpected result from markdown parsing: `document` element not found")
+          cli::cli_abort(c(
+            "Unexpected result from markdown parsing.",
+            "*" = "`document` element not found."
+          ))
         }
 
         children <- xml2::xml_children(x)
-        if (length(children) == 1 &&
-            xml2::xml_type(children[[1]]) == "element" &&
-            xml2::xml_name(children[[1]]) == "paragraph") {
+
+        if (
+          length(children) == 1 &&
+          xml2::xml_type(children[[1]]) == "element" &&
+          xml2::xml_name(children[[1]]) == "paragraph"
+        ) {
           children <- xml2::xml_children(children[[1]])
         }
 
@@ -721,7 +967,7 @@ markdown_to_rtf <- function(text) {
           } else {
             output <- if (xml2::xml_type(x) == "element") {
 
-              rule <- cmark_rules[[xml2::xml_name(x)]]
+              rule <- cmark_rules_rtf[[xml2::xml_name(x)]]
               if (is.null(rule)) {
                 rlang::warn(
                   paste0("Unknown commonmark element encountered: ", xml2::xml_name(x)),
@@ -736,7 +982,7 @@ markdown_to_rtf <- function(text) {
               }
             }
             if (!is_rtf(output)) {
-              warning("Rule for ", xml2::xml_name(x), " did not return RTF")
+              cli::cli_warn("Rule for {xml2::xml_name(x)} did not return RTF.")
             }
             # TODO: is collapse = "" correct?
             rtf_raw(paste0("", output, collapse = ""))
@@ -761,26 +1007,32 @@ rtf_wrap <- function(control, x, process) {
 markdown_to_text <- function(text) {
 
   # Vectorize `commonmark::markdown_text` and modify output
-  # behavior to passthrough NAs
-  lapply(text, function(x) {
+  # behavior to pass through NAs
+  unname(
+    unlist(
+      lapply(
+        text,
+        FUN = function(x) {
 
-    if (is.na(x)) {
-      return(NA_character_)
-    }
+          if (is.na(x)) {
+            return(NA_character_)
+          }
 
-    if (isTRUE(getOption("gt.html_tag_check", TRUE))) {
+          if (isTRUE(getOption("gt.html_tag_check", TRUE))) {
 
-      if (grepl("<[a-zA-Z\\/][^>]*>", x)) {
-        warning("HTML tags found, and they will be removed.\n",
-                " * set `options(gt.html_tag_check = FALSE)` to disable this check",
-                call. = FALSE)
-      }
-    }
+            if (grepl("<[a-zA-Z\\/][^>]*>", x)) {
+              cli::cli_warn(c(
+                "HTML tags found, and they will be removed.",
+                "*" = "Set `options(gt.html_tag_check = FALSE)` to disable this check."
+              ))
+            }
+          }
 
-    commonmark::markdown_text(x) %>% tidy_gsub("\\n$", "")
-  }) %>%
-    unlist() %>%
-    unname()
+          tidy_gsub(commonmark::markdown_text(x), "\\n$", "")
+        }
+      )
+    )
+  )
 }
 
 #' Handle formatting of a pattern in a `fmt_*()` function
@@ -794,23 +1046,24 @@ markdown_to_text <- function(text) {
 #' @param pattern A formatting pattern that allows for decoration of the
 #'   formatted value (defined here as `x`).
 #' @noRd
-apply_pattern_fmt_x <- function(values,
-                                pattern) {
+apply_pattern_fmt_x <- function(values, pattern) {
 
   vapply(
     values,
-    function(x) tidy_gsub(x = pattern, "{x}", x, fixed = TRUE),
     FUN.VALUE = character(1),
-    USE.NAMES = FALSE
+    USE.NAMES = FALSE,
+    FUN = function(x) tidy_gsub(x = pattern, "{x}", x, fixed = TRUE)
   )
 }
 
 #' Get a vector of indices for large-number suffixing
 #'
 #' @noRd
-non_na_index <- function(values,
-                         index,
-                         default_value = NA) {
+non_na_index <- function(
+    values,
+    index,
+    default_value = NA
+) {
 
   stopifnot(is.integer(index) || is.numeric(index))
   stopifnot(all(index >= 1 | is.na(index)))
@@ -864,10 +1117,12 @@ non_na_index <- function(values,
 #' returns a tibble where each row represents a scaled value for `x` and the
 #' correct suffix to use during `x`'s character-based formatting.
 #' @noRd
-num_suffix <- function(x,
-                       suffixes = c("K", "M", "B", "T"),
-                       base = 1000,
-                       scale_by) {
+num_suffix <- function(
+    x,
+    suffixes = c("K", "M", "B", "T"),
+    base = 1000,
+    scale_by
+) {
 
   # If `suffixes` is a zero-length vector, we
   # provide a tibble that will ultimately not
@@ -940,9 +1195,11 @@ num_suffix <- function(x,
 #' returns a tibble where each row represents a scaled value for `x` and the
 #' correct suffix to use during `x`'s character-based formatting.
 #' @noRd
-num_suffix_ind <- function(x,
-                           suffixes = c(NA, "L", "Cr"),
-                           scale_by) {
+num_suffix_ind <- function(
+    x,
+    suffixes = c(NA, "L", "Cr"),
+    scale_by
+) {
 
   # If `suffixes` is a zero-length vector, we
   # provide a tibble that will ultimately not
@@ -1020,7 +1277,6 @@ num_suffix_ind <- function(x,
 #' @param x The single value to test for whether it is `FALSE`.
 #' @noRd
 is_false = function(x) {
-
   is.logical(x) && length(x) == 1L && !is.na(x) && !x
 }
 
@@ -1032,9 +1288,11 @@ is_false = function(x) {
 #' @param suffixing,scale_by The `suffixing` and `scale_by` options in some
 #'   `fmt_*()` functions.
 #' @noRd
-normalize_suffixing_inputs <- function(suffixing,
-                                       scale_by,
-                                       system) {
+normalize_suffixing_inputs <- function(
+    suffixing,
+    scale_by,
+    system
+) {
 
   if (is_false(suffixing)) {
 
@@ -1065,9 +1323,8 @@ normalize_suffixing_inputs <- function(suffixing,
     # to `suffixing`, we first want to check if there
     # are any names provided
     if (!is.null(names(suffixing))) {
-      stop(
-        "The character vector supplied to `suffixed` cannot contain names.",
-        call. = FALSE
+      cli::cli_abort(
+        "The character vector supplied to `suffixed` cannot contain names."
       )
     }
 
@@ -1080,12 +1337,11 @@ normalize_suffixing_inputs <- function(suffixing,
     # Stop function if the input to `suffixing` isn't
     # valid (i.e., isn't logical and isn't a valid
     # character vector)
-    stop(
-      "The value provided to `suffixing` must either be:\n",
-      "* `TRUE` or `FALSE` (the default)\n",
-      "* a character vector with suffixing labels",
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "The value provided to `suffixing` must either be:",
+      "*" = "`TRUE` or `FALSE` (the default), or",
+      "*" = "A character vector with suffixing labels."
+    ))
   }
 }
 
@@ -1096,10 +1352,11 @@ normalize_suffixing_inputs <- function(suffixing,
 warn_on_scale_by_input <- function(scale_by) {
 
   if (scale_by != 1) {
-    warning("The value for `scale_by` cannot be changed if `suffixing` is ",
-            "anything other than `FALSE`. The value provided to `scale_by` ",
-            "will be ignored.",
-            call. = FALSE)
+    cli::cli_warn(c(
+      "The value for `scale_by` cannot be changed if `suffixing` is
+      anything other than `FALSE`.",
+      "*" = "The value provided to `scale_by` will be ignored."
+    ))
   }
 }
 
@@ -1113,13 +1370,12 @@ derive_summary_label <- function(fn) {
     # Stop the function if any functions provided
     # as bare names (e.g., `mean`) don't have
     # names provided
-    stop("All functions provided as bare names in `fns` need a label.",
-         call. = FALSE)
+    cli::cli_abort(
+      "All functions provided as bare names in `fns` need a label."
+    )
 
   } else if (inherits(fn, "formula")) {
-
     as.character(rlang::f_rhs(fn)[[1]])
-
   } else {
     as.character(fn)
   }
@@ -1148,11 +1404,7 @@ remove_html <- function(text) {
 #' @noRd
 get_css_tbl <- function(data) {
 
-  raw_css_vec <-
-    compile_scss(data) %>%
-    as.character() %>%
-    strsplit("\n") %>%
-    unlist()
+  raw_css_vec <- unlist(strsplit(as.character(compile_scss(data)), "\n"))
 
   ruleset_start <- which(grepl("\\{\\s*", raw_css_vec))
   ruleset_end <- which(grepl("\\s*\\}\\s*", raw_css_vec))
@@ -1185,17 +1437,19 @@ get_css_tbl <- function(data) {
   # For anything other than a class selector, the class type
   # will entered as NA
   css_tbl <-
-    css_tbl %>%
-    dplyr::mutate(type = dplyr::case_when(
-      stringr::str_detect(selector, "^\\.") ~ "class",
-      !stringr::str_detect(selector, "^\\.") ~ NA_character_)
-    ) %>%
-    dplyr::select(selector, type, property, value)
+    dplyr::mutate(
+      css_tbl,
+      type = dplyr::case_when(
+        stringr::str_detect(selector, "^\\.") ~ "class",
+        !stringr::str_detect(selector, "^\\.") ~ NA_character_
+      )
+    )
+  css_tbl <- dplyr::select(css_tbl, selector, type, property, value)
 
   # Stop function if any NA values found while inspecting the
   # selector names (e.g., not determined to be class selectors)
-  if (any(is.na(css_tbl %>% dplyr::pull(type)))) {
-    stop("All selectors must be class selectors", call. = FALSE)
+  if (any(is.na(css_tbl$type))) {
+    cli::cli_abort("All selectors must be class selectors.")
   }
 
   css_tbl
@@ -1204,14 +1458,13 @@ get_css_tbl <- function(data) {
 #' Create an inlined style block from a CSS tibble
 #'
 #' @noRd
-create_inline_styles <- function(class_names,
-                                 css_tbl,
-                                 extra_style = "") {
+create_inline_styles <- function(
+    class_names,
+    css_tbl,
+    extra_style = ""
+) {
 
-  class_names <-
-    class_names %>%
-    stringr::str_split("\\s+") %>%
-    unlist()
+  class_names <- unlist(stringr::str_split(class_names, "\\s+"))
 
   paste0(
     "style=\"",
@@ -1227,29 +1480,29 @@ create_inline_styles <- function(class_names,
     tidy_gsub(" \\\"$", "\\\"")
 }
 
+extract_strings <- function(text, pattern, perl = TRUE) {
+  sapply(regmatches(text, regexec(pattern, text, perl = perl)), "[", 1)
+}
+
 #' Transform HTML to inlined HTML using a CSS tibble
 #'
 #' @noRd
 inline_html_styles <- function(html, css_tbl) {
 
   cls_sty_pattern <- "class=\\\"(.*?)\\\"\\s+style=\\\"(.*?)\\\""
+  cls_names_pattern <- "(?<=\\\").*?(?=\\\")"
+  sty_exist_pattern <- "style=\\\"(.*?)\\\""
+  cls_pattern <- "class=\\\"(.*?)\\\""
 
   repeat {
 
-    matching_css_style <- html %>% stringr::str_extract(cls_sty_pattern)
+    matching_css_style <- extract_strings(html, cls_sty_pattern)
 
-    if (is.na(matching_css_style)) {
-      break
-    }
+    if (is.na(matching_css_style)) break
 
-    class_names <-
-      matching_css_style %>%
-      stringr::str_extract("(?<=\\\").*?(?=\\\")")
+    class_names <- extract_strings(matching_css_style, cls_names_pattern)
 
-    existing_style <-
-      matching_css_style %>%
-      stringr::str_match("style=\\\"(.*?)\\\"") %>%
-      magrittr::extract(1, 2)
+    existing_style <- stringr::str_match(matching_css_style, sty_exist_pattern)[, 2]
 
     inline_styles <-
       create_inline_styles(
@@ -1259,31 +1512,29 @@ inline_html_styles <- function(html, css_tbl) {
       )
 
     html <-
-      html %>%
       stringr::str_replace(
+        html,
         pattern = cls_sty_pattern,
         replacement = inline_styles
       )
   }
 
-  cls_pattern <- "class=\\\"(.*?)\\\""
-
   repeat {
 
-    class_names <-
-      html %>%
-      stringr::str_extract(pattern = cls_pattern) %>%
-      stringr::str_extract("(?<=\\\").*?(?=\\\")")
+    class_names <- stringr::str_extract(html, pattern = cls_pattern)
+    class_names <- stringr::str_extract(class_names, pattern = cls_names_pattern)
 
-    if (is.na(class_names)) {
-      break
-    }
+    if (is.na(class_names)) break
 
-    inline_styles <- create_inline_styles(class_names = class_names, css_tbl)
+    inline_styles <-
+      create_inline_styles(
+        class_names = class_names,
+        css_tbl = css_tbl
+      )
 
     html <-
-      html %>%
       stringr::str_replace(
+        html,
         pattern = cls_pattern,
         replacement = inline_styles
       )
@@ -1300,8 +1551,8 @@ inline_html_styles <- function(html, css_tbl) {
 split_scientific_notn <- function(x_str) {
 
   exp_parts <- strsplit(x_str, "e|E")
-  num_part <- exp_parts %>% vapply(`[[`, character(1), 1)
-  exp_part <- exp_parts %>% vapply(`[[`, character(1), 2) %>% as.numeric()
+  num_part <- vapply(exp_parts, FUN.VALUE = character(1), `[[`, 1)
+  exp_part <- as.numeric(vapply(exp_parts, FUN.VALUE = character(1), `[[`, 2))
 
   list(num = num_part, exp = exp_part)
 }
@@ -1385,12 +1636,13 @@ process_footnote_marks <- function(x,
 
   marks_val <- marks[(x - 1) %% length(marks) + 1]
 
-  mapply(
-    marks_val, marks_rep,
-    FUN = function(val_i, rep_i) {
-      paste(rep(val_i, rep_i), collapse = "")}
-  ) %>%
-    unname()
+  unname(
+    mapply(
+      marks_val, marks_rep,
+      FUN = function(val_i, rep_i) {
+        paste(rep(val_i, rep_i), collapse = "")}
+    )
+  )
 }
 
 #' Determine whether an object is a `gt_tbl`
@@ -1398,8 +1650,7 @@ process_footnote_marks <- function(x,
 #' @param data A table object that is created using the [gt()] function.
 #' @noRd
 is_gt <- function(data) {
-
-  checkmate::test_class(data, "gt_tbl")
+  inherits(data, "gt_tbl")
 }
 
 #' Determines whether a character vector is non-empty
@@ -1407,7 +1658,6 @@ is_gt <- function(data) {
 #' @param x A character vector.
 #' @noRd
 is_nonempty_string <- function(x) {
-
   length(x) > 0 && any(grepl("\\S", x))
 }
 
@@ -1417,9 +1667,8 @@ is_nonempty_string <- function(x) {
 #'
 #' @noRd
 stop_if_not_gt <- function(data) {
-
   if (!is_gt(data)) {
-    stop("The object to `data` is not a `gt_tbl` object.", call. = FALSE)
+    cli::cli_abort("The object to `data` is not a `gt_tbl` object.")
   }
 }
 
@@ -1428,25 +1677,26 @@ stop_if_not_gt <- function(data) {
 #' @noRd
 resolve_border_side <- function(side) {
 
-  switch(side,
-         l = "left",
-         left = "left",
-         r = "right",
-         right = "right",
-         t = "top",
-         top = "top",
-         b = "bottom",
-         bottom = "bottom",
-         a = "all",
-         everything = "all",
-         all = "all")
+  switch(
+    side,
+    l = "left",
+    left = "left",
+    r = "right",
+    right = "right",
+    t = "top",
+    top = "top",
+    b = "bottom",
+    bottom = "bottom",
+    a = "all",
+    everything = "all",
+    all = "all"
+  )
 }
 
 #' Expand a path using fs::path_expand
 #'
 #' @noRd
 path_expand <- function(file) {
-
   fs::path_expand(file)
 }
 
@@ -1457,7 +1707,6 @@ path_expand <- function(file) {
 #'
 #' @noRd
 get_file_ext <- function(file) {
-
   pos <- regexpr("\\.([[:alnum:]]+)$", file)
   ifelse(pos > -1L, substring(file, pos + 1L), "")
 }
@@ -1465,29 +1714,34 @@ get_file_ext <- function(file) {
 validate_marks <- function(marks) {
 
   if (is.null(marks)) {
-    stop("The value for `marks` must not be `NULL`.", call. = FALSE)
+    cli::cli_abort("The value for `marks` must not be `NULL`.")
   }
   if (!is.character(marks)) {
-    stop("The value for `marks` must be a character vector.", call. = FALSE)
+    cli::cli_abort("The value for `marks` must be a character vector.")
   }
   if (length(marks) == 0) {
-    stop("The length of `marks` must not be zero.", call. = FALSE)
+    cli::cli_abort("The length of `marks` must not be zero.")
   }
 
   marks_keywords <- c("numbers", "letters", "LETTERS", "standard", "extended")
 
   if (length(marks) == 1 && !any(marks_keywords %in% marks)) {
-    stop("The `marks` keyword provided (\"", marks, "\") is not valid\n",
-         " * \"numbers\", \"letters\", \"LETTERS\", \"standard\", or \"extended\" can be used",
-         call. = FALSE)
+
+    cli::cli_abort(c(
+      "The `marks` keyword provided (\"{marks}\") is not valid.",
+      "*" = "Either of \"numbers\", \"letters\", \"LETTERS\", \"standard\",
+      or \"extended\" can be used."
+    ))
   }
 }
 
-validate_style_in <- function(style_vals,
-                              style_names,
-                              arg_name,
-                              in_vector,
-                              with_pattern = NULL) {
+validate_style_in <- function(
+    style_vals,
+    style_names,
+    arg_name,
+    in_vector,
+    with_pattern = NULL
+) {
 
   if (arg_name %in% style_names) {
 
@@ -1500,32 +1754,34 @@ validate_style_in <- function(style_vals,
     }
 
     if (!(arg_value %in% in_vector)) {
-      stop("The provided `", arg_name, "` value cannot be `",
-           arg_value, "`; it can only be either of the following:\n",
-           " * ", str_catalog(in_vector, conj = "or"),
-           call. = FALSE)
+
+      cli::cli_abort(c(
+        "The provided `{arg_name}` value cannot be `{arg_value}`.",
+        "*" = "It can only be either of the following:
+        {str_catalog(in_vector, conj = 'or')}."
+      ))
     }
   }
 }
 
-check_spanner_id_unique <- function(data,
-                                    spanner_id) {
+check_spanner_id_unique <- function(data, spanner_id) {
 
-  existing_ids <- dt_spanners_get_ids(data = data)
+  existing_column_ids <- dt_boxhead_get_vars(data = data)
+  existing_spanner_ids <- dt_spanners_get_ids(data = data)
 
-  if (spanner_id %in% existing_ids) {
+  all_existing_ids <- c(existing_column_ids, existing_spanner_ids)
 
-    stop(
-      "The spanner `id` provided (`\"", spanner_id, "\"`) is not unique:\n",
-      "* The `id` must be unique across existing spanners\n",
-      "* Provide a unique ID value for this spanner",
-      call. = FALSE
-    )
+  if (spanner_id %in% all_existing_ids) {
+
+    cli::cli_abort(c(
+      "The spanner `id` provided (\"{spanner_id}\") is not unique.",
+      "*" = "The `id` must be unique across existing spanner and column IDs.",
+      "*" = "Provide a unique ID value for this spanner."
+    ))
   }
 }
 
-check_row_group_id_unique <- function(data,
-                                      row_group_id) {
+check_row_group_id_unique <- function(data, row_group_id) {
 
   stub_df <- dt_stub_df_get(data = data)
 
@@ -1533,11 +1789,10 @@ check_row_group_id_unique <- function(data,
 
   if (row_group_id %in% existing_ids) {
 
-    stop(
-      "The row group `id` provided (`\"", row_group_id, "\"`) is not unique:\n",
-      "* Provide a unique ID value for this row group",
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "The row group `id` provided (\"{row_group_id}\") is not unique.",
+      "*" = "Provide a unique ID value for this row group"
+    ))
   }
 }
 
@@ -1549,10 +1804,7 @@ flatten_list <- function(x) {
 #'
 #' @inheritParams append
 #' @noRd
-prepend_vec <- function(x,
-                        values,
-                        after = 0) {
-
+prepend_vec <- function(x, values, after = 0) {
   append(x, values, after = after)
 }
 
@@ -1560,14 +1812,12 @@ prepend_vec <- function(x,
 #'
 #' @noRd
 rep_vec_as_list <- function(x, length_out) {
-
   rep_len(list(x), length_out)
 }
 
 validate_length_one <- function(x, name) {
   if (length(x) != 1) {
-    stop("The value for `", name, "` should have a length of one",
-         call. = FALSE)
+    cli::cli_abort("The value for `{name}` should have a length of one.")
   }
 }
 
@@ -1578,29 +1828,29 @@ validate_table_id <- function(id) {
   }
 
   if (length(id) != 1) {
-    stop("The length of `id` must be 1", call. = FALSE)
+    cli::cli_abort("The length of `id` must be `1`.")
   }
   if (is.na(id)) {
-    stop("The value for `id` must not be `NA`", call. = FALSE)
+    cli::cli_abort("The value for `id` must not be `NA`.")
   }
   if (!is.character(id)) {
-    stop("Any input for `id` must be of the `character` class", call. = FALSE)
+    cli::cli_abort("Any input for `id` must be of the `character` class.")
   }
 }
 
 validate_n_sigfig <- function(n_sigfig) {
 
   if (length(n_sigfig) != 1) {
-    stop("The length of `n_sigfig` must be 1.", call. = FALSE)
+    cli::cli_abort("The length of `n_sigfig` must be 1.")
   }
   if (is.na(n_sigfig)) {
-    stop("The value for `n_sigfig` must not be `NA`.", call. = FALSE)
+    cli::cli_abort("The value for `n_sigfig` must not be `NA`.")
   }
   if (!is.numeric(n_sigfig)) {
-    stop("Any input for `n_sigfig` must be numeric.", call. = FALSE)
+    cli::cli_abort("Any input for `n_sigfig` must be numeric.")
   }
   if (n_sigfig < 1) {
-    stop("The value for `n_sigfig` must be greater than or equal to 1.", call. = FALSE)
+    cli::cli_abort("The value for `n_sigfig` must be greater than or equal to `1`.")
   }
 }
 
@@ -1615,13 +1865,14 @@ validate_css_lengths <- function(x) {
   # primarily want to verify that the vector of provided values
   # don't contain any invalid suffixes; this throws if that's the
   # case and returns `TRUE` otherwise
-  vapply(
-    x_units_non_empty,
-    FUN = htmltools::validateCssUnit,
-    FUN.VALUE = character(1),
-    USE.NAMES = FALSE
-  ) %>%
-    is.character()
+  is.character(
+    vapply(
+      x_units_non_empty,
+      FUN = htmltools::validateCssUnit,
+      FUN.VALUE = character(1),
+      USE.NAMES = FALSE
+    )
+  )
 }
 
 column_classes_are_valid <- function(data, columns, valid_classes) {
@@ -1632,13 +1883,17 @@ column_classes_are_valid <- function(data, columns, valid_classes) {
       data = data
     )
 
-  dt_data_get(data = data) %>%
-    dplyr::select(dplyr::all_of(resolved)) %>%
+  table_data <- dt_data_get(data = data)
+  table_data <- dplyr::select(table_data, dplyr::all_of(resolved))
+
+  all(
     vapply(
-      FUN.VALUE = logical(1), USE.NAMES = FALSE,
+      table_data,
+      FUN.VALUE = logical(1),
+      USE.NAMES = FALSE,
       FUN = function(x) any(class(x) %in% valid_classes)
-    ) %>%
-    all()
+    )
+  )
 }
 
 # print8 <- function(x) {
@@ -1655,7 +1910,36 @@ man_get_image_tag <- function(file, dir = "images") {
 
   repo_url <- "https://raw.githubusercontent.com/rstudio/gt/master"
 
+  function_name <- paste0(gsub("man_(.*)_[1-9].png", "\\1", file), "()")
+  example_code_idx <- gsub("man_.*?([1-9]).png", "\\1", file)
+
+  ordinal_idx <-
+    switch(
+      example_code_idx,
+      `1` = "first",
+      `2` = "second",
+      `3` = "third",
+      `4` = "fourth",
+      `5` = "fifth",
+      `6` = "sixth",
+      `7` = "seventh",
+      `8` = "eighth",
+      `9` = "ninth",
+      "above"
+    )
+
+  alt_text <-
+    paste0(
+      "This image of a table was generated from the ", ordinal_idx,
+      " code example in the `", function_name, "` help file."
+    )
+
   image_url <- file.path(repo_url, dir, file)
 
-  paste0("<img src=\"", image_url, "\" style=\"width:100\\%;\">")
+  paste0(
+    "<img ",
+    "src=\"", image_url, "\" ",
+    "alt=\"", alt_text, "\" ",
+    "style=\"width:100\\%;\">"
+  )
 }

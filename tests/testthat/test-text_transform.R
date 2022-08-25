@@ -9,20 +9,13 @@ check_suggests <- function() {
 
 # Gets the HTML attr value from a single key
 selection_value <- function(html, key) {
-
   selection <- paste0("[", key, "]")
-
-  html %>%
-    rvest::html_nodes(selection) %>%
-    rvest::html_attr(key)
+  rvest::html_attr(rvest::html_nodes(html, selection), key)
 }
 
 # Gets the inner HTML text from a single value
 selection_text <- function(html, selection) {
-
-  html %>%
-    rvest::html_nodes(selection) %>%
-    rvest::html_text()
+  rvest::html_text(rvest::html_nodes(html, selection))
 }
 
 test_that("the `text_transform()` function works correctly", {
@@ -174,17 +167,14 @@ test_that("the `text_transform()` function works correctly", {
   # Expect that `resolved` subcomponent of `transforms` has the class
   # names and `resolved`, `cells_body`, `location_cells`
   transforms[[1]]$resolved %>%
-    expect_is(c("resolved", "cells_body", "location_cells"))
+    expect_s3_class(c("resolved", "cells_body", "location_cells"))
 
   transforms[[2]]$resolved %>%
-    expect_is(c("resolved", "cells_body", "location_cells"))
+    expect_s3_class(c("resolved", "cells_body", "location_cells"))
 
   # Expect that `fn` subcomponent of `transforms` is a function
-  transforms[[1]]$fn %>%
-    expect_is("function")
-
-  transforms[[2]]$fn %>%
-    expect_is("function")
+  expect_equal(class(transforms[[1]]$fn), "function")
+  expect_equal(class(transforms[[2]]$fn), "function")
 
   # Define a function that converts vector of `x` to numeric
   # and rounds values to a specific multiple
@@ -255,11 +245,12 @@ test_that("`text_transform()` works in the body even when rows/columns are reord
   tbl_html %>%
     render_as_html() %>%
     xml2::read_html() %>%
-    selection_text("tr td:nth-child(1)") %>%
+    selection_text("tr th:nth-child(1)") %>%
     expect_equal(
       c(
-        "Mazda", "Mazda RX4", "Mazda RX4 Wag", "2 Hornets + a Datsun",
-        "Datsun 710", "Hornet 4 Drive", "Hornet Sportabout"
+        "",
+        "Mazda RX4", "Mazda RX4 Wag", "Datsun 710",
+        "Hornet 4 Drive", "Hornet Sportabout"
       )
     )
 
@@ -310,7 +301,7 @@ test_that("`text_transform()` works in column labels", {
   tbl_html %>%
     render_as_html() %>%
     xml2::read_html() %>%
-    selection_text("th") %>%
+    selection_text("tr:first-child th") %>%
     expect_equal(
       c(
         "", "MPG", "disp", "hp", "drat", "wt",
@@ -346,7 +337,7 @@ test_that("`text_transform()` works on row labels in the stub", {
   tbl_html %>%
     render_as_html() %>%
     xml2::read_html() %>%
-    selection_text("[class='gt_row gt_right gt_stub']") %>%
+    selection_text("[class='gt_row gt_left gt_stub']") %>%
     expect_equal(
       c(
         "Datsun 710", "Hornet 4 Drive", "HORNET SPORTABOUT",

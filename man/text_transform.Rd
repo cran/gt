@@ -51,7 +51,7 @@ vector of column values from the \code{num} column.
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
-<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_text_transform_1.png" style="width:100\%;">
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_text_transform_1.png" alt="This image of a table was generated from the first code example in the `text_transform()` help file." style="width:100\%;">
 }}
 }
 
@@ -61,12 +61,13 @@ vector of column values from the \code{num} column.
 }
 
 \seealso{
-Other Format Data: 
+Other data formatting functions: 
 \code{\link{data_color}()},
 \code{\link{fmt_bytes}()},
 \code{\link{fmt_currency}()},
 \code{\link{fmt_datetime}()},
 \code{\link{fmt_date}()},
+\code{\link{fmt_duration}()},
 \code{\link{fmt_engineering}()},
 \code{\link{fmt_fraction}()},
 \code{\link{fmt_integer}()},
@@ -83,4 +84,4 @@ Other Format Data:
 \code{\link{sub_small_vals}()},
 \code{\link{sub_zero}()}
 }
-\concept{Format Data}
+\concept{data formatting functions}

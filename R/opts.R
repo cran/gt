@@ -85,7 +85,7 @@
 #' `r man_get_image_tag(file = "man_opt_footnote_marks_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-1
 #'
@@ -155,7 +155,7 @@ opt_footnote_marks <- function(
 #' `r man_get_image_tag(file = "man_opt_row_striping_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-2
 #'
@@ -226,7 +226,7 @@ opt_row_striping <- function(
 #' `r man_get_image_tag(file = "man_opt_align_table_header_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-3
 #'
@@ -308,7 +308,7 @@ opt_align_table_header <- function(
 #' `r man_get_image_tag(file = "man_opt_vertical_padding_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-4
 #'
@@ -390,7 +390,7 @@ opt_vertical_padding <- function(
 #' `r man_get_image_tag(file = "man_opt_horizontal_padding_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-5
 #'
@@ -416,9 +416,8 @@ get_padding_option_value_list <- function(scale, type) {
 
   # Stop if `scale` is beyond an acceptable range
   if (scale < 0 | scale > 3) {
-    stop(
-      "The value provided for `scale` (", scale, ") must be between `0` and `3`.",
-      call. = FALSE
+    cli::cli_abort(
+      "The value provided for `scale` ({scale}) must be between `0` and `3`."
     )
   }
 
@@ -426,6 +425,7 @@ get_padding_option_value_list <- function(scale, type) {
 
   # Get the padding parameters from `dt_options_tbl` that relate
   # to the `type` (either vertical or horizontal padding)
+  # TODO: refactor these stmts to remove dplyr fns
   padding_params <-
     dt_options_tbl %>%
     dplyr::filter(grepl(paste0(pattern, "$"), parameter)) %>%
@@ -507,7 +507,7 @@ get_padding_option_value_list <- function(scale, type) {
 #' `r man_get_image_tag(file = "man_opt_all_caps_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-6
 #'
@@ -523,10 +523,8 @@ opt_all_caps <- function(
 
   # Ensure that all named locations are valid
   if (!all(locations %in% c("column_labels", "stub", "row_group"))) {
-
-    stop(
-      "The available locations are `column_labels`, `stub`, and `row_group`.",
-      call. = FALSE
+    cli::cli_abort(
+      "The available locations are `column_labels`, `stub`, and `row_group`."
     )
   }
 
@@ -613,7 +611,7 @@ opt_all_caps <- function(
 #' `r man_get_image_tag(file = "man_opt_table_lines_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-7
 #'
@@ -712,7 +710,7 @@ opt_table_lines <- function(
 #' `r man_get_image_tag(file = "man_opt_table_outline_2.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-8
 #'
@@ -849,7 +847,7 @@ opt_table_outline <- function(
 #' `r man_get_image_tag(file = "man_opt_table_font_2.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
 #' 9-9
 #'
@@ -919,6 +917,160 @@ opt_table_font <- function(
   data
 }
 
+#' Stylize your table with a colorful look
+#'
+#' @description
+#' With `opt_stylize()` you can quickly style your **gt** table with a carefully
+#' curated set of background colors, line colors, and line styles. There are six
+#' styles to choose from and they largely vary in the extent of coloring applied
+#' to different table locations. Some have table borders applied, some apply
+#' darker colors to the table stub and summary sections, and, some even have
+#' vertical lines. In addition to choosing a `style` preset, there are six
+#' `color` variations that each use a range of five color tints. Each of the
+#' color tints have been fine-tuned to maximize the contrast between text and
+#' its background. There are 36 combinations of `style` and `color` to choose
+#' from.
+#'
+#' @inheritParams fmt_number
+#' @param style Six numbered styles are available. Simply provide a number from
+#'   `1` (the default) to `6` to choose a distinct look.
+#' @param color There are six color variations: `"blue"` (the default),
+#'   `"cyan"`, `"pink"`, `"green"`, `"red"`, and `"gray"`.
+#' @param add_row_striping An option to enable row striping in the table body
+#'   for the style chosen. By default, this is `TRUE`.
+#'
+#' @return an object of class `gt_tbl`.
+#'
+#' @section Examples:
+#'
+#' Use `exibble` to create a **gt** table with a number of table parts added.
+#' Then, use the `opt_stylize()` function to give the table some additional
+#' style (using the `"cyan"` color variation and style number `6`).
+#'
+#' ```r
+#' exibble %>%
+#'   gt(rowname_col = "row", groupname_col = "group") %>%
+#'   summary_rows(
+#'     groups = "grp_a",
+#'     columns = c(num, currency),
+#'     fns = list(
+#'       min = ~min(., na.rm = TRUE),
+#'       max = ~max(., na.rm = TRUE)
+#'     )) %>%
+#'   grand_summary_rows(
+#'     columns = currency,
+#'     fns = list(
+#'       total = ~sum(., na.rm = TRUE)
+#'     )) %>%
+#'   tab_source_note(source_note = "This is a source note.") %>%
+#'   tab_footnote(
+#'     footnote = "This is a footnote.",
+#'     locations = cells_body(columns = 1, rows = 1)
+#'   ) %>%
+#'   tab_header(
+#'     title = "The title of the table",
+#'     subtitle = "The table's subtitle"
+#'   ) %>%
+#'   opt_stylize(style = 6, color = "cyan")
+#' ```
+#'
+#' \if{html}{\out{
+#' `r man_get_image_tag(file = "man_opt_stylize_1.png")`
+#' }}
+#'
+#' @family table option functions
+#' @section Function ID:
+#' 9-10
+#'
+#' @export
+opt_stylize <- function(
+    data,
+    style = 1,
+    color = "blue",
+    add_row_striping = TRUE
+) {
+
+  if (!(length(style) == 1 && style %in% 1:6)) {
+    cli::cli_abort("The `style` value must be a number in the range of 1 to 6.")
+  }
+
+  if (!(length(color) == 1 && color %in% unique(styles_colors_params$color))) {
+    cli::cli_abort(c(
+      "The `color` value must be one of seven specific colors:",
+      "*" = "\"blue\", \"cyan\", \"pink\", \"green\", \"red\", or \"gray\""
+    ))
+  }
+
+  # Get the set of parameters based on the `style` and `color` values
+  params <-
+    get_colorized_params(
+      styles_colors_params = styles_colors_params,
+      style = style,
+      color = color
+    )
+
+  tbl_colorized <-
+    tab_options(
+      data,
+      table.border.top.color = params$table_hlines_color,
+      table.border.bottom.color = params$table_hlines_color,
+      heading.border.bottom.color = params$location_hlines_color,
+      column_labels.border.top.color = params$location_hlines_color,
+      column_labels.border.bottom.color = params$location_hlines_color,
+      row_group.border.top.color = params$location_hlines_color,
+      row_group.border.bottom.color = params$location_hlines_color,
+      summary_row.border.color = params$location_hlines_color,
+      grand_summary_row.border.color = params$location_hlines_color,
+      column_labels.background.color = params$column_labels_background_color,
+      stub.background.color = params$stub_background_color,
+      stub.border.style = params$stub_border_style,
+      stub.border.color = params$stub_border_color,
+      table_body.border.top.color = params$location_hlines_color,
+      table_body.border.bottom.color = params$location_hlines_color,
+      table_body.hlines.style = params$data_hlines_style,
+      table_body.hlines.color = params$data_hlines_color,
+      table_body.vlines.style = params$data_vlines_style,
+      table_body.vlines.color = params$data_vlines_color,
+      summary_row.background.color = params$summary_row_background_color,
+      grand_summary_row.background.color = params$grand_summary_row_background_color,
+      row.striping.background_color = params$row_striping_background_color
+    )
+
+  if (!is.na(params$table_outline_color)) {
+
+    tbl_colorized <-
+      opt_table_outline(
+        tbl_colorized,
+        width = px(3),
+        color = params$table_outline_color
+      )
+  }
+
+  if (add_row_striping) {
+    tbl_colorized <- opt_row_striping(tbl_colorized)
+  }
+
+  tbl_colorized
+}
+
+get_colorized_params <- function(
+    styles_colors_params,
+    style,
+    color
+) {
+
+  style_filter <- style
+  color_filter <- color
+
+  as.list(
+    dplyr::filter(
+      styles_colors_params,
+      style == style_filter,
+      color == color_filter
+    )
+  )
+}
+
 #' Option to add custom CSS for the table
 #'
 #' @description
@@ -977,9 +1129,9 @@ opt_table_font <- function(
 #' `r man_get_image_tag(file = "man_opt_css_1.png")`
 #' }}
 #'
-#' @family Table Option Functions
+#' @family table option functions
 #' @section Function ID:
-#' 9-10
+#' 9-11
 #'
 #' @export
 opt_css <- function(
@@ -1011,11 +1163,14 @@ opt_css <- function(
 
 normalize_font_input <- function(font_input) {
 
-  if (!inherits(font_input, "character") &&
-      !inherits(font_input, "list") &&
-      !inherits(font_input, "font_css")) {
-    stop("Values provided to `font` must either be a list or a character vector.",
-         call. = FALSE)
+  if (
+    !inherits(font_input, "character") &&
+    !inherits(font_input, "list") &&
+    !inherits(font_input, "font_css")
+  ) {
+    cli::cli_abort(
+      "Values provided to `font` must either be a list or a character vector."
+    )
   }
 
   if (inherits(font_input, "character")) {
@@ -1053,9 +1208,15 @@ create_option_value_list <- function(tab_options_args, values) {
 
   # Validate the length of the `values` vector
   if (length(values) == 1) {
+
     values <- rep_len(values, length(tab_options_args))
+
   } else if (length(values) != length(tab_options_args)) {
-    stop("The length of the `values` vector must be 1 or the length of `tab_options_args`")
+
+    cli::cli_abort(
+      "The length of the `values` vector must be `1` or the length of
+      `tab_options_args`."
+    )
   }
 
   stats::setNames(object = values, tab_options_args) %>% as.list()
@@ -1063,19 +1224,22 @@ create_option_value_list <- function(tab_options_args, values) {
 
 create_default_option_value_list <- function(tab_options_args) {
 
-  lapply(stats::setNames(, tab_options_args), function(x) {
-    dt_options_get_default_value(tidy_gsub(x, ".", "_", fixed = TRUE))
-  })
+  lapply(
+    stats::setNames(, tab_options_args),
+    FUN = function(x) {
+      dt_options_get_default_value(tidy_gsub(x, ".", "_", fixed = TRUE))
+    }
+  )
 }
 
 dt_options_get_default_value <- function(option) {
 
   # Validate the provided `option` value
   if (length(option) != 1) {
-    stop("A character vector of length one must be provided")
+    cli::cli_abort("A character vector of length one must be provided.")
   }
   if (!(option %in% dt_options_tbl$parameter)) {
-    stop("The `option` provided is invalid")
+    cli::cli_abort("The `option` provided is invalid.")
   }
 
   dt_options_tbl$value[[which(dt_options_tbl$parameter == option)]]
@@ -1083,7 +1247,7 @@ dt_options_get_default_value <- function(option) {
 
 # Get vector of argument names (excluding `data`) from `tab_options`
 #' @include tab_create_modify.R
-tab_options_arg_names <- formals(tab_options) %>% names() %>% base::setdiff("data")
+tab_options_arg_names <- base::setdiff(names(formals(tab_options)), "data")
 
 # Create vector of all args from `tab_options()` by
 # use of a regex pattern
@@ -1095,7 +1259,7 @@ get_tab_options_arg_vec <- function(pattern) {
 validate_tab_options_args <- function(tab_options_args) {
 
   if (!all(tab_options_args %in% tab_options_arg_names)) {
-    stop("All `tab_options_args` must be valid names.")
+    cli::cli_abort("All `tab_options_args` must be valid names.")
   }
 }
 

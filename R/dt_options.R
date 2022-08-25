@@ -1,36 +1,27 @@
 .dt_options_key <- "_options"
 
 dt_options_get <- function(data) {
-
   dt__get(data, .dt_options_key)
 }
 
 dt_options_set <- function(data, options) {
-
   dt__set(data, .dt_options_key, options)
 }
 
 dt_options_init <- function(data) {
-
-  dt_options_tbl %>% dt_options_set(options = ., data = data)
+  dt_options_set(data = data, options = dt_options_tbl)
 }
 
 dt_options_set_value <- function(data, option, value) {
 
-  dt_options <-
-    data %>%
-    dt_options_get()
-
+  dt_options <- dt_options_get(data = data)
   dt_options$value[[which(dt_options$parameter == option)]] <- value
 
-  dt_options %>%
-    dt_options_set(options = ., data = data)
+  dt_options_set(data = data, options = dt_options)
 }
 
 dt_options_get_value <- function(data, option) {
-
   dt_options <- dt_options_get(data = data)
-
   dt_options$value[[which(dt_options$parameter == option)]]
 }
 
@@ -151,6 +142,7 @@ dt_options_tbl <-
     "stub_border_style",                  TRUE,  "stub",             "value",   "solid",
     "stub_border_width",                  TRUE,  "stub",             "px",      "2px",
     "stub_border_color",                  TRUE,  "stub",             "value",   "#D3D3D3",
+    "stub_indent_length",                 TRUE,  "stub",             "px",      "5px",
     "stub_row_group_background_color",    TRUE,  "stub",             "value",   NA_character_,
     "stub_row_group_font_size",           TRUE,  "stub",             "px",      "100%",
     "stub_row_group_font_weight",         TRUE,  "stub",             "value",   "initial",

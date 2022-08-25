@@ -28,7 +28,7 @@
 #' `r man_get_image_tag(file = "man_md_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-1
 #'
@@ -75,7 +75,7 @@ md <- function(text) {
 #' `r man_get_image_tag(file = "man_html_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-2
 #'
@@ -132,7 +132,7 @@ is_rtf <- function(x) {
 #' `r man_get_image_tag(file = "man_px_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-3
 #'
@@ -140,7 +140,7 @@ is_rtf <- function(x) {
 px <- function(x) {
 
   if (mode(x) != "numeric") {
-    stop("The supplied value must be numeric", call. = FALSE)
+    cli::cli_abort("The supplied value must be numeric.")
   }
 
   paste0(x, "px")
@@ -182,7 +182,7 @@ px <- function(x) {
 #' `r man_get_image_tag(file = "man_pct_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-4
 #'
@@ -190,7 +190,7 @@ px <- function(x) {
 pct <- function(x) {
 
   if (mode(x) != "numeric") {
-    stop("The supplied value must be numeric", call. = FALSE)
+    cli::cli_abort("The supplied value must be numeric.")
   }
 
   paste0(x, "%")
@@ -272,7 +272,7 @@ pct <- function(x) {
 #' `r man_get_image_tag(file = "man_cells_title_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-5
 #'
@@ -288,9 +288,8 @@ cells_title <- function(groups = c("title", "subtitle")) {
     !all(groups %in% c("title", "subtitle")) ||
     any(duplicated(groups))
   ) {
-    stop(
-      "The input to `groups` must be either `\"title\"`, `\"subtitle\"`, or both.",
-      call. = FALSE
+    cli::cli_abort(
+      "The input to `groups` must be either \"title\", \"subtitle\", or both."
     )
   }
 
@@ -379,7 +378,7 @@ cells_title <- function(groups = c("title", "subtitle")) {
 #' `r man_get_image_tag(file = "man_cells_stubhead_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-6
 #'
@@ -474,7 +473,7 @@ cells_stubhead <- function() {
 #' `r man_get_image_tag(file = "man_cells_column_spanners_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-7
 #'
@@ -578,7 +577,7 @@ cells_column_spanners <- function(spanners = everything()) {
 #' `r man_get_image_tag(file = "man_cells_column_labels_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-8
 #'
@@ -684,7 +683,7 @@ cells_column_labels <- function(columns = everything()) {
 #' `r man_get_image_tag(file = "man_cells_row_groups_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-9
 #'
@@ -712,9 +711,10 @@ cells_row_groups <- function(groups = everything()) {
 #' @export
 cells_group <- function(groups = TRUE) {
 
-  warning("The `cells_group()` function is deprecated and will soon be removed\n",
-          " * Use the `cells_row_groups()` function instead",
-          call. = FALSE)
+  cli::cli_warn(c(
+    "The `cells_group()` function is deprecated and will soon be removed.",
+    "*" = "Use the `cells_row_groups()` function instead."
+  ))
 
   cells_row_groups(groups = {{groups}})
 }
@@ -801,7 +801,7 @@ cells_group <- function(groups = TRUE) {
 #' `r man_get_image_tag(file = "man_cells_stub_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-10
 #'
@@ -900,7 +900,7 @@ cells_stub <- function(rows = everything()) {
 #' `r man_get_image_tag(file = "man_cells_body_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-11
 #'
@@ -1035,7 +1035,7 @@ cells_body <- function(
 #' `r man_get_image_tag(file = "man_cells_summary_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-12
 #'
@@ -1158,7 +1158,7 @@ cells_summary <- function(
 #' `r man_get_image_tag(file = "man_cells_grand_summary_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-13
 #'
@@ -1286,7 +1286,7 @@ cells_grand_summary <- function(
 #' `r man_get_image_tag(file = "man_cells_stub_summary_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-14
 #'
@@ -1399,7 +1399,7 @@ cells_stub_summary <- function(
 #' `r man_get_image_tag(file = "man_cells_stub_grand_summary_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-15
 #'
@@ -1511,7 +1511,7 @@ cells_stub_grand_summary <- function(rows = everything()) {
 #' `r man_get_image_tag(file = "man_cells_footnotes_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-16
 #'
@@ -1605,7 +1605,7 @@ cells_footnotes <- function() {
 #' `r man_get_image_tag(file = "man_cells_source_notes_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-17
 #'
@@ -1673,7 +1673,7 @@ cells_source_notes <- function() {
 #' `r man_get_image_tag(file = "man_currency_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-18
 #'
@@ -1688,8 +1688,7 @@ currency <- function(
 
   # Stop function if the currency list contains no values
   if (length(currency_list) == 0) {
-    stop("The `currency()` function must be provided with currency symbols.",
-         call. = FALSE)
+    cli::cli_abort("The `currency()` function must be provided with currency symbols.")
   }
 
   # If only a single string is provided, upgrade the `currency_list`
@@ -1700,8 +1699,7 @@ currency <- function(
 
   # Stop function if `currency_list` isn't entirely named
   if (!rlang::is_named(currency_list)) {
-    stop("Names must be provided for all output contexts.",
-         call. = FALSE)
+    cli::cli_abort("Names must be provided for all output contexts.")
   }
 
   # Stop function if all names are not part of the supported contexts
@@ -1709,8 +1707,7 @@ currency <- function(
 
   # Stop function if there are duplicated names
   if (!rlang::is_dictionaryish(currency_list)) {
-    stop("There cannot be any duplicate names for output contexts.",
-         call. = FALSE)
+    cli::cli_abort("There cannot be any duplicate names for output contexts.")
   }
 
   # Set the `gt_currency` class
@@ -1801,7 +1798,7 @@ currency <- function(
 #' `r man_get_image_tag(file = "man_cell_text_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-19
 #'
@@ -1976,7 +1973,7 @@ cell_style_to_html.cell_text <- function(style) {
 #' `r man_get_image_tag(file = "man_cell_fill_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-20
 #'
@@ -1987,11 +1984,11 @@ cell_fill <- function(
 ) {
 
   if (length(color) != 1) {
-    stop("The length of the `color` vector must be `1`", call. = FALSE)
+    cli::cli_abort("The length of the `color` vector must be `1`.")
   }
 
   if (!is.null(alpha) && length(alpha) != 1) {
-    stop("If provided, `alpha` must be a single value", call. = FALSE)
+    cli::cli_abort("If provided, `alpha` must be a single value.")
   }
 
   # Transform the `color` value, if present, so that X11 color names
@@ -2028,11 +2025,11 @@ cell_style_to_html.cell_fill <- function(style) {
 #' @param color,style,weight The border color, style, and weight. The `color`
 #'   can be defined with a color name or with a hexadecimal color code. The
 #'   default `color` value is `"#000000"` (black). The `style` can be one of
-#'   either `"solid"` (the default), `"dashed"`, or `"dotted"`. The `weight` of
-#'   the border lines is to be given in pixel values (the [px()] helper function
-#'   is useful for this. The default value for `weight` is `"1px"`. Borders for
-#'   any defined `sides` can be removed by supplying `NULL` to any of `color`,
-#'   `style`, or `weight`.
+#'   either `"solid"` (the default), `"dashed"`, `"dotted"`, or `"hidden"`.
+#'   The `weight` of the border lines is to be given in pixel values (the
+#'   [px()] helper function is useful for this. The default value for `weight`
+#'   is `"1px"`. Borders for any defined `sides` can be removed by supplying
+#'   `NULL` to any of `color`, `style`, or `weight`.
 #'
 #' @return A list object of class `cell_styles`.
 #'
@@ -2100,7 +2097,7 @@ cell_style_to_html.cell_fill <- function(style) {
 #' `r man_get_image_tag(file = "man_cell_borders_2.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-21
 #'
@@ -2135,25 +2132,28 @@ cell_borders <- function(
     "bottom", "b",
     "all", "everything", "a"
   ))) {
-    stop(
+    cli::cli_abort(c(
       "The `sides` vector for `cell_borders()` has to include one ",
-      "or more of the following keywords (or short forms):\n",
-      " * \"left\" (or: \"l\")\n",
-      " * \"right\" (or: \"r\")\n",
-      " * \"top\" (or: \"t\")\n",
-      " * \"bottom\" (or: \"b\")\n",
-      " * \"all\" (or: \"a\", \"everything\"",
-      call. = FALSE
-    )
+      "or more of the following keywords (or short forms):",
+      "*" = "\"left\" (or: \"l\")",
+      "*" = "\"right\" (or: \"r\")",
+      "*" = "\"top\" (or: \"t\")",
+      "*" = "\"bottom\" (or: \"b\")",
+      "*" = "\"all\" (or: \"a\", \"everything\")"
+    ))
   }
 
   # Resolve the selection of borders into a vector of
   # standardized sides
   sides <-
-    vapply(
-      sides, resolve_border_side,
-      FUN.VALUE = character(1), USE.NAMES = FALSE) %>%
-    unique()
+    unique(
+      vapply(
+        sides,
+        FUN.VALUE = character(1),
+        USE.NAMES = FALSE,
+        FUN = resolve_border_side
+      )
+    )
 
   # Should the `all` selection appear in the
   # `sides` vector, use all possible sides
@@ -2161,29 +2161,38 @@ cell_borders <- function(
     sides <- c("left", "right", "top", "bottom")
   }
 
-  lapply(sides, function(side) {
+  style_list <-
+    lapply(
+      sides,
+      FUN = function(side) {
 
-    style_vals <-
-      list(
-        side = side,
-        width = weight,
-        style = style,
-        color = color
-      )
+        style_vals <-
+          list(
+            side = side,
+            width = weight,
+            style = style,
+            color = color
+          )
 
-    validate_style_in(
-      style_vals, names(style_vals), "style",
-      c("solid", "dashed", "dotted")
+        validate_style_in(
+          style_vals, names(style_vals), "style",
+          c("solid", "dashed", "dotted", "hidden")
+        )
+
+        cell_style_structure(
+          name = paste0("cell_border_", side),
+          obj = style_vals,
+          subclass =  "cell_border"
+        )
+      }
     )
 
-    cell_style_structure(paste0("cell_border_", side), style_vals, "cell_border")
-  }) %>%
-    as_style()
+  as_style(style = style_list)
 }
 
 cell_style_to_html.cell_border <- function(style) {
 
-  css <- style %>% unclass()
+  css <- unclass(style)
 
   side <- css$side
 
@@ -2277,7 +2286,7 @@ cell_style_structure <- function(name, obj, subclass = name) {
 #' `r man_get_image_tag(file = "man_google_font_2.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-27
 #'
@@ -2285,8 +2294,8 @@ cell_style_structure <- function(name, obj, subclass = name) {
 google_font <- function(name) {
 
   import_stmt <-
-    name %>% tidy_gsub(" ", "+") %>%
     paste_between(
+      gsub(" ", "+", name),
       c(
         "@import url('https://fonts.googleapis.com/css2?family=",
         ":ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');"
@@ -2343,7 +2352,7 @@ google_font <- function(name) {
 #' `r man_get_image_tag(file = "man_default_fonts_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #'
 #' @section Function ID:
 #' 7-26
@@ -2430,7 +2439,7 @@ default_fonts <- function() {
 #' `r man_get_image_tag(file = "man_adjust_luminance_1.png")`
 #' }}
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-22
 #'
@@ -2442,8 +2451,9 @@ adjust_luminance <- function(
 
   # Stop if steps is beyond an acceptable range
   if (steps > 2.0 | steps < -2.0) {
-    stop("The value provided for `steps` (", steps, ") must be between `-2.0` and `+2.0`.",
-         call. = FALSE)
+    cli::cli_abort(
+      "The value provided for `steps` (`{steps}`) must be between `-2.0` and `+2.0`."
+    )
   }
 
   # Get a matrix of values in the RGB color space
@@ -2486,7 +2496,7 @@ adjust_luminance <- function(
 #'
 #' @return A character vector containing a single, random ID.
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-23
 #'
@@ -2521,7 +2531,7 @@ latex_special_chars <- c(
 #'
 #' @return A character vector.
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-24
 #'
@@ -2578,7 +2588,7 @@ escape_latex <- function(text) {
 #'
 #' @return An object of class `knit_asis`.
 #'
-#' @family Helper Functions
+#' @family helper functions
 #' @section Function ID:
 #' 7-25
 #'
@@ -2587,17 +2597,19 @@ gt_latex_dependencies <- function() {
 
   if (requireNamespace("knitr", quietly = TRUE)) {
 
-    paste(
-      "",
-      "% gt packages",
-      paste0("\\usepackage{", latex_packages(), "}", collapse = "\n"),
-      "",
-      sep = "\n"
-    ) %>%
-      knitr::asis_output()
+    knitr::asis_output(
+      paste(
+        "",
+        "% gt packages",
+        paste0("\\usepackage{", latex_packages(), "}", collapse = "\n"),
+        "",
+        sep = "\n"
+      )
+    )
 
   } else {
-    stop("The `knitr` package is required for getting the LaTeX dependency headers.",
-         call. = FALSE)
+    cli::cli_abort(
+      "The `knitr` package is required for getting the LaTeX dependency headers."
+    )
   }
 }

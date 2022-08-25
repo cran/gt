@@ -69,7 +69,7 @@ end will capture all remaining columns).
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
-<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_cols_width_1.png" style="width:100\%;">
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_cols_width_1.png" alt="This image of a table was generated from the first code example in the `cols_width()` help file." style="width:100\%;">
 }}
 }
 
@@ -79,7 +79,7 @@ end will capture all remaining columns).
 }
 
 \seealso{
-Other Modify Columns: 
+Other column modification functions: 
 \code{\link{cols_align}()},
 \code{\link{cols_hide}()},
 \code{\link{cols_label}()},
@@ -92,4 +92,4 @@ Other Modify Columns:
 \code{\link{cols_move}()},
 \code{\link{cols_unhide}()}
 }
-\concept{Modify Columns}
+\concept{column modification functions}

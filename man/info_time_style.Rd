@@ -26,7 +26,7 @@ by supplying a number code to the \code{\link[=fmt_time]{fmt_time()}} function).
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
-<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_info_time_style_1.png" style="width:100\%;">
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_info_time_style_1.png" alt="This image of a table was generated from the first code example in the `info_time_style()` help file." style="width:100\%;">
 }}
 }
 
@@ -36,11 +36,11 @@ by supplying a number code to the \code{\link[=fmt_time]{fmt_time()}} function).
 }
 
 \seealso{
-Other Information Functions: 
+Other information functions: 
 \code{\link{info_currencies}()},
 \code{\link{info_date_style}()},
 \code{\link{info_google_fonts}()},
 \code{\link{info_locales}()},
 \code{\link{info_paletteer}()}
 }
-\concept{Information Functions}
+\concept{information functions}

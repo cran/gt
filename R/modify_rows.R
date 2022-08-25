@@ -37,7 +37,7 @@
 #' `r man_get_image_tag(file = "man_row_group_order_1.png")`
 #' }}
 #'
-#' @family Modify Rows
+#' @family row modification functions
 #' @section Function ID:
 #' 5-1
 #'
@@ -52,10 +52,8 @@ row_group_order <- function(
 
   # Stop function if `groups` is not a `character` vector
   if (!inherits(groups, "character")) {
-
-    stop(
-      "The values provided for `groups` must be a character vector.",
-      call. = FALSE
+    cli::cli_abort(
+      "The values provided for `groups` must be a character vector."
     )
   }
 
@@ -65,12 +63,11 @@ row_group_order <- function(
   # Stop function if any value in `groups` doesn't match a group name
   if (any(!groups %in% arrange_groups)) {
 
-    stop(
-      "All values given as `groups` must correspond to `group_id` values:\n",
-      "The following `group_id` values can be used:\n",
-      str_catalog(arrange_groups),
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "All values given as `groups` must correspond to `group_id` values.",
+      "*" = "The following `group_id` values can be
+      used {str_catalog(arrange_groups)}."
+    ))
   }
 
   # Arrange groups in the new order

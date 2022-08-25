@@ -42,7 +42,7 @@ the \code{default_fonts()} set).
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
-<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_default_fonts_1.png" style="width:100\%;">
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_default_fonts_1.png" alt="This image of a table was generated from the first code example in the `default_fonts()` help file." style="width:100\%;">
 }}
 }
 
@@ -52,7 +52,7 @@ the \code{default_fonts()} set).
 }
 
 \seealso{
-Other Helper Functions: 
+Other helper functions: 
 \code{\link{adjust_luminance}()},
 \code{\link{cell_borders}()},
 \code{\link{cell_fill}()},
@@ -80,4 +80,4 @@ Other Helper Functions:
 \code{\link{px}()},
 \code{\link{random_id}()}
 }
-\concept{Helper Functions}
+\concept{helper functions}

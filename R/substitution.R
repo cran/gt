@@ -41,7 +41,7 @@
 #' `r man_get_image_tag(file = "man_sub_missing_1.png")`
 #' }}
 #'
-#' @family Format Data
+#' @family data formatting functions
 #' @section Function ID:
 #' 3-16
 #'
@@ -118,11 +118,11 @@ fmt_missing <- function(
     missing_text = "---"
 ) {
 
-  warning(
-    "The `fmt_missing()` function is deprecated and will soon be removed\n",
-    "* Use the `sub_missing()` function instead",
-    call. = FALSE
-  )
+  cli::cli_warn(c(
+    "Since gt v0.6.0 the `fmt_missing()` function is deprecated and will
+    soon be removed.",
+    "*" = "Use the `sub_missing()` function instead."
+  ))
 
   sub_missing(
     data = data,
@@ -176,7 +176,7 @@ fmt_missing <- function(
 #' `r man_get_image_tag(file = "man_sub_zero_1.png")`
 #' }}
 #'
-#' @family Format Data
+#' @family data formatting functions
 #' @section Function ID:
 #' 3-17
 #'
@@ -308,7 +308,7 @@ sub_zero <- function(
 #' `r man_get_image_tag(file = "man_sub_small_vals_3.png")`
 #' }}
 #'
-#' @family Format Data
+#' @family data formatting functions
 #' @section Function ID:
 #' 3-18
 #'
@@ -508,7 +508,7 @@ sub_small_vals <- function(
 #' `r man_get_image_tag(file = "man_sub_large_vals_3.png")`
 #' }}
 #'
-#' @family Format Data
+#' @family data formatting functions
 #' @section Function ID:
 #' 3-19
 #'
@@ -624,11 +624,10 @@ sub_large_vals <- function(
 check_sub_fn_sign <- function(sign) {
 
   if (!(sign %in% c("+", "-"))) {
-    stop(
-      "The `sign` option should either be `\"+\"` or `\"-\"`:\n",
-      "* With `\"+\"`, we consider only positive large values\n",
-      "* Using `\"-\"` means that the focus is on negative values\n",
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "The `sign` option should either be \"+\" or \"-\".",
+      "*" = "With \"+\", we consider only positive large values.",
+      "*" = "Using \"-\" means that the focus is on negative values."
+    ))
   }
 }

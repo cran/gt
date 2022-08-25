@@ -76,7 +76,7 @@ merge the \code{open} & \code{close} columns together, and, the \code{low} & \co
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
-<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_cols_merge_1.png" style="width:100\%;">
+<img src="https://raw.githubusercontent.com/rstudio/gt/master/images/man_cols_merge_1.png" alt="This image of a table was generated from the first code example in the `cols_merge()` help file." style="width:100\%;">
 }}
 }
 
@@ -86,7 +86,7 @@ merge the \code{open} & \code{close} columns together, and, the \code{low} & \co
 }
 
 \seealso{
-Other Modify Columns: 
+Other column modification functions: 
 \code{\link{cols_align}()},
 \code{\link{cols_hide}()},
 \code{\link{cols_label}()},
@@ -99,4 +99,4 @@ Other Modify Columns:
 \code{\link{cols_unhide}()},
 \code{\link{cols_width}()}
 }
-\concept{Modify Columns}
+\concept{column modification functions}

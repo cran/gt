@@ -1,5 +1,3 @@
-context("LaTeX -- Ensuring that the `row_group_order()` function works as expected")
-
 test_that("the `row_group_order()` function works correctly", {
 
   # Create a table with group names, rownames, and four columns of values
@@ -28,9 +26,9 @@ test_that("the `row_group_order()` function works correctly", {
   # Expect a characteristic pattern
   grepl(
     paste0(
-      ".*multicolumn\\{1\\}\\{l\\}\\{2018-02-11\\}",
-      ".*multicolumn\\{1\\}\\{l\\}\\{2018-02-10\\}.*"),
-    tbl_latex %>%
-      as_latex() %>% as.character()) %>%
+      ".*multicolumn\\{5\\}\\{l\\}\\{2018-02-11\\}",
+      ".*multicolumn\\{5\\}\\{l\\}\\{2018-02-10\\}.*"),
+    tbl_latex %>% as_latex() %>% as.character()
+  ) %>%
     expect_true()
 })
