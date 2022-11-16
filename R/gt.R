@@ -30,8 +30,10 @@
 #'   group labels for generation of stub row groups. If the input `data` table
 #'   has the `grouped_df` class (through use of the [dplyr::group_by()] function
 #'   or associated `group_by*()` functions) then any input here is ignored.
-#' @param caption An optional table caption to use for cross-referencing
-#'   in R Markdown documents and **bookdown** book projects.
+#' @param process_md Should the contents of the `rowname_col` and
+#'   `groupname_col` be interpreted as Markdown? By default this is `FALSE`.
+#' @param caption An optional table caption to use for cross-referencing in R
+#'   Markdown, Quarto, or **bookdown**.
 #' @param rownames_to_stub An option to take rownames from the input `data`
 #'   table as row captions in the display table stub.
 #' @param auto_align Optionally have column data be aligned depending on the
@@ -102,6 +104,7 @@ gt <- function(
     data,
     rowname_col = "rowname",
     groupname_col = dplyr::group_vars(data),
+    process_md = FALSE,
     caption = NULL,
     rownames_to_stub = FALSE,
     auto_align = TRUE,
@@ -153,7 +156,8 @@ gt <- function(
       data = data,
       rowname_col = rowname_col,
       groupname_col = groupname_col,
-      row_group.sep = row_group.sep
+      row_group.sep = row_group.sep,
+      process_md = process_md
     )
   data <- dt_row_groups_init(data = data)
   data <- dt_heading_init(data = data)
@@ -162,6 +166,7 @@ gt <- function(
   data <- dt_footnotes_init(data = data)
   data <- dt_source_notes_init(data = data)
   data <- dt_formats_init(data = data)
+  data <- dt_substitutions_init(data = data)
   data <- dt_styles_init(data = data)
   data <- dt_summary_init(data = data)
   data <- dt_options_init(data = data)
@@ -181,11 +186,7 @@ gt <- function(
       )
   }
 
-  # Add any user-defined table caption to the `table_id` parameter
-  # TODO: consider whether this might take a string or a logical (to say that
-  # we'll use the header from `tab_header` as the table caption); this might
-  # require some more thought still because a `caption` arg might also be
-  # sensible in `tab_header`
+  # Add any user-defined table caption to the `table_caption` parameter
   if (!is.null(caption)) {
 
     data <-
@@ -230,6 +231,15 @@ gt <- function(
           )
       }
     }
+  }
+
+  if (
+    process_md &&
+    !is.null(rowname_col) &&
+    rowname_col %in% colnames(dt_data_get(data = data))
+  ) {
+
+    data <- fmt_markdown(data = data, columns = rowname_col)
   }
 
   data

@@ -74,11 +74,11 @@
 #'   display a minus sign. This option is disregarded when using accounting
 #'   notation with `accounting = TRUE`.
 #' @param locale An optional locale ID that can be used for formatting the value
-#'   according the locale's rules. Examples include `"en_US"` for English
-#'   (United States) and `"fr_FR"` for French (France). The use of a valid
-#'   locale ID will override any values provided in `sep_mark` and `dec_mark`.
-#'   We can use the [info_locales()] function as a useful reference for all of
-#'   the locales that are supported.
+#'   according the locale's rules. Examples include `"en"` for English (United
+#'   States) and `"fr"` for French (France). The use of a valid locale ID will
+#'   override any values provided in `sep_mark` and `dec_mark`. We can use the
+#'   [info_locales()] function as a useful reference for all of the locales that
+#'   are supported.
 #' @param output The output style of the resulting character vector. This can
 #'   either be `"auto"` (the default), `"plain"`, `"html"`, `"latex"`, `"rtf"`,
 #'   or `"word"`. In **knitr** rendering (i.e., Quarto or R Markdown), the
@@ -182,7 +182,7 @@ vec_fmt_number <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -449,7 +449,7 @@ vec_fmt_scientific <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -586,7 +586,7 @@ vec_fmt_engineering <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -749,7 +749,7 @@ vec_fmt_percent <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -849,7 +849,7 @@ vec_fmt_percent <- function(
 #' ```
 #'
 #' Using `vec_fmt_partsper()` with the default options will create a character
-#' vector where the resultant per millle values have two decimal places and `NA`
+#' vector where the resultant per mille values have two decimal places and `NA`
 #' values will render as `"NA"`. The rendering context will be autodetected
 #' unless specified in the `output` argument (here, it is of the `"plain"`
 #' output type).
@@ -876,7 +876,12 @@ vec_fmt_percent <- function(
 #' works here):
 #'
 #' ```r
-#' vec_fmt_partsper(num_vals, to_units = "ppm", sep_mark = ".", dec_mark = ",")
+#' vec_fmt_partsper(
+#'   num_vals,
+#'   to_units = "ppm",
+#'   sep_mark = ".",
+#'   dec_mark = ","
+#' )
 #' ```
 #' ```
 #' #> [1] "1.000,00 ppm" "100,00 ppm" "10,00 ppm" "NA"
@@ -926,7 +931,7 @@ vec_fmt_partsper <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -936,7 +941,7 @@ vec_fmt_partsper <- function(
   stop_if_not_vector(x)
 
   # Ensure that `to_units` is matched correctly to one option
-  to_units <- match.arg(to_units)
+  to_units <- rlang::arg_match(to_units)
 
   # Stop function if class of `x` is incompatible with the formatting
   if (!vector_class_is_valid(x, valid_classes = c("numeric", "integer"))) {
@@ -1067,7 +1072,7 @@ vec_fmt_fraction <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1077,7 +1082,7 @@ vec_fmt_fraction <- function(
   stop_if_not_vector(x)
 
   # Ensure that `layout` is matched correctly to one option
-  layout <- match.arg(layout)
+  layout <- rlang::arg_match(layout)
 
   # Stop function if class of `x` is incompatible with the formatting
   if (!vector_class_is_valid(x, valid_classes = c("numeric", "integer"))) {
@@ -1105,13 +1110,12 @@ vec_fmt_fraction <- function(
 #' Format a vector as currency values
 #'
 #' @description
-#' With numeric values in a vector, we can perform currency-based
-#' formatting. This function supports both automatic formatting with a
-#' three-letter or numeric currency code. We can also specify a custom currency
-#' that is formatted according to the output context with the [currency()]
-#' helper function. Numeric formatting facilitated through the use of a locale
-#' ID. We have fine control over the conversion from numeric values to currency
-#' values, where we could take advantage of the following options:
+#' With numeric values in a vector, we can perform currency-based formatting.
+#' This function supports both automatic formatting with a three-letter or
+#' numeric currency code. We can also specify a custom currency that is
+#' formatted according to the output context with the [currency()] helper
+#' function. We have fine control over the conversion from numeric values to
+#' currency values, where we could take advantage of the following options:
 #'
 #' - the currency: providing a currency code or common currency name will
 #' procure the correct currency symbol and number of currency subunits; we could
@@ -1187,7 +1191,7 @@ vec_fmt_fraction <- function(
 #' ```
 #'
 #' We can supply a currency code to the `currency` argument. Let's use British
-#' Pounds by using `currency = "GBP"`:
+#' Pounds through `currency = "GBP"`:
 #'
 #' ```r
 #' vec_fmt_currency(num_vals, currency = "GBP")
@@ -1197,7 +1201,7 @@ vec_fmt_fraction <- function(
 #' ```
 #'
 #' If we are formatting for a different locale, we could supply the locale ID
-#' and let **gt** handle qll locale-specific formatting options:
+#' and let **gt** handle all locale-specific formatting options:
 #'
 #' ```r
 #' vec_fmt_currency(num_vals, currency = "EUR", locale = "fr")
@@ -1252,7 +1256,7 @@ vec_fmt_currency <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1287,6 +1291,107 @@ vec_fmt_currency <- function(
       placement = placement,
       incl_space = incl_space,
       locale = locale
+    ),
+    output = output
+  )
+}
+
+#' Format a vector as Roman numerals
+#'
+#' @description
+#' With numeric values in a vector, we can transform those to Roman numerals,
+#' rounding values as necessary.
+#'
+#' @inheritParams vec_fmt_number
+#' @param case Should Roman numerals should be rendered as uppercase (`"upper"`)
+#'   or lowercase (`"lower"`) letters? By default, this is set to `"upper"`.
+#'
+#' @return A character vector.
+#'
+#' @section Examples:
+#'
+#' Let's create a numeric vector for the next few examples:
+#'
+#' ```r
+#' num_vals <- c(1, 4, 5, 8, 12, 20, 0, -5, 1.3, NA)
+#' ```
+#'
+#' Using `vec_fmt_roman()` with the default options will create a character
+#' vector with values rendered as Roman numerals. Zero values will be rendered
+#' as `"N"`, any `NA` values remain as `NA` values, negative values will be
+#' automatically made positive, and values greater than or equal to 3900 will be
+#' rendered as `"ex terminis"`. The rendering context will be autodetected
+#' unless specified in the `output` argument (here, it is of the `"plain"`
+#' output type).
+#'
+#' ```r
+#' vec_fmt_roman(num_vals)
+#' ```
+#'
+#' ```
+#' #> [1] "I" "IV" "V" "VIII" "XII" "XX" "N" "V" "I" "NA"
+#' ```
+#'
+#' We can also use `vec_fmt_roman()` with the `case = "lower"` option to create
+#' a character vector with values rendered as lowercase Roman numerals.
+#'
+#' ```r
+#' vec_fmt_roman(num_vals, case = "lower")
+#' ```
+#'
+#' ```
+#' #> [1] "i" "iv" "v" "viii" "xii" "xx" "n" "v" "i" "NA"
+#' ```
+#'
+#' As a last example, one can wrap the values in a pattern with the `pattern`
+#' argument. Note here that `NA` values won't have the pattern applied.
+#'
+#' ```r
+#' vec_fmt_roman(num_vals, case = "lower", pattern = "{x}.")
+#' ```
+#' ```
+#' #> [1] "i." "iv." "v." "viii." "xii." "xx." "n." "v." "i." "NA"
+#' ```
+#'
+#' @family vector formatting functions
+#' @section Function ID:
+#' 14-9
+#'
+#' @import rlang
+#' @export
+vec_fmt_roman <- function(
+    x,
+    case = c("upper", "lower"),
+    pattern = "{x}",
+    output = c("auto", "plain", "html", "latex", "rtf", "word")
+) {
+
+  # Ensure that `output` is matched correctly to one option
+  output <- rlang::arg_match(output)
+
+  if (output == "auto") {
+    output <- determine_output_format()
+  }
+
+  # Ensure that `x` is strictly a vector with `rlang::is_vector()`
+  stop_if_not_vector(x)
+
+  # Ensure that `case` is matched correctly to one option
+  case <- rlang::arg_match(case)
+
+  # Stop function if class of `x` is incompatible with the formatting
+  if (!vector_class_is_valid(x, valid_classes = c("numeric", "integer"))) {
+    cli::cli_abort(
+      "The `vec_fmt_roman()` function can only be used with numeric vectors."
+    )
+  }
+
+  render_as_vector(
+    fmt_roman(
+      gt(dplyr::tibble(x = x)),
+      columns = "x", rows = everything(),
+      case = case,
+      pattern = pattern
     ),
     output = output
   )
@@ -1390,7 +1495,7 @@ vec_fmt_currency <- function(
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-9
+#' 14-10
 #'
 #' @export
 vec_fmt_bytes <- function(
@@ -1411,7 +1516,7 @@ vec_fmt_bytes <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1421,7 +1526,7 @@ vec_fmt_bytes <- function(
   stop_if_not_vector(x)
 
   # Ensure that `standard` is matched correctly to one option
-  standard <- match.arg(standard)
+  standard <- rlang::arg_match(standard)
 
   # Stop function if class of `x` is incompatible with the formatting
   if (!vector_class_is_valid(x, valid_classes = c("numeric", "integer"))) {
@@ -1454,38 +1559,74 @@ vec_fmt_bytes <- function(
 #' Format a vector as date values
 #'
 #' @description
-#' Format vector values to date values using one of fourteen presets. Input can
-#' be in the form of `POSIXt` (i.e., date-times), the `Date` type, or
+#' Format vector values to date values using one of 41 preset date styles. Input
+#' can be in the form of `POSIXt` (i.e., datetimes), the `Date` type, or
 #' `character` (must be in the ISO 8601 form of `YYYY-MM-DD HH:MM:SS` or
 #' `YYYY-MM-DD`).
 #'
-#' We can simply apply a preset date style to format the dates. The following
-#' date styles are available for use (all using the input date of `2000-02-29`
-#' in the example output dates):
+#' @section Formatting with the `date_style` argument:
 #'
-#' 1. `"iso"`: `2000-02-29`
-#' 2. `"wday_month_day_year"`: `Tuesday, February 29, 2000`
-#' 3. `"wd_m_day_year"`: `Tue, Feb 29, 2000`
-#' 4. `"wday_day_month_year"`: `Tuesday 29 February 2000`
-#' 5. `"month_day_year"`: `February 29, 2000`
-#' 6. `"m_day_year"`: `Feb 29, 2000`
-#' 7. `"day_m_year"`: `29 Feb 2000`
-#' 8. `"day_month_year"`: `29 February 2000`
-#' 9. `"day_month"`: `29 February`
-#' 10. `"year"`: `2000`
-#' 11. `"month"`: `February`
-#' 12. `"day"`: `29`
-#' 13. `"year.mn.day"`: `2000/02/29`
-#' 14. `"y.mn.day"`: `00/02/29`
+#' We need to supply a preset date style to the `date_style` argument. The date
+#' styles are numerous and can handle localization to any supported locale. A
+#' large segment of date styles are termed flexible date formats and this means
+#' that their output will adapt to any `locale` provided. That feature makes the
+#' flexible date formats a better option for locales other than `"en"` (the
+#' default locale).
 #'
-#' We can use the [info_date_style()] function for a useful reference on all of
-#' the possible inputs to `date_style`.
+#' The following table provides a listing of all date styles and their output
+#' values (corresponding to an input date of `2000-02-29`).
+#'
+#' |    | Date Style            | Output                  | Notes         |
+#' |----|-----------------------|-------------------------|---------------|
+#' | 1  | `"iso"`               | `"2000-02-29"`          | ISO 8601      |
+#' | 2  | `"wday_month_day_year"`| `"Tuesday, February 29, 2000"`  |      |
+#' | 3  | `"wd_m_day_year"`     | `"Tue, Feb 29, 2000"`   |               |
+#' | 4  | `"wday_day_month_year"`| `"Tuesday 29 February 2000"`    |      |
+#' | 5  | `"month_day_year"`    | `"February 29, 2000"`   |               |
+#' | 6  | `"m_day_year"`        | `"Feb 29, 2000"`        |               |
+#' | 7  | `"day_m_year"`        | `"29 Feb 2000"`         |               |
+#' | 8  | `"day_month_year"`    | `"29 February 2000"`    |               |
+#' | 9  | `"day_month"`         | `"29 February"`         |               |
+#' | 10 | `"day_m"`             | `"29 Feb"`              |               |
+#' | 11 | `"year"`              | `"2000"`                |               |
+#' | 12 | `"month"`             | `"February"`            |               |
+#' | 13 | `"day"`               | `"29"`                  |               |
+#' | 14 | `"year.mn.day"`       | `"2000/02/29"`          |               |
+#' | 15 | `"y.mn.day"`          | `"00/02/29"`            |               |
+#' | 16 | `"year_week"`         | `"2000-W09"`            |               |
+#' | 17 | `"year_quarter"`      | `"2000-Q1"`             |               |
+#' | 18 | `"yMd"`               | `"2/29/2000"`           | flexible      |
+#' | 19 | `"yMEd"`              | `"Tue, 2/29/2000"`      | flexible      |
+#' | 20 | `"yMMM"`              | `"Feb 2000"`            | flexible      |
+#' | 21 | `"yMMMM"`             | `"February 2000"`       | flexible      |
+#' | 22 | `"yMMMd"`             | `"Feb 29, 2000"`        | flexible      |
+#' | 23 | `"yMMMEd"`            | `"Tue, Feb 29, 2000"`   | flexible      |
+#' | 24 | `"GyMd"`              | `"2/29/2000 A"`         | flexible      |
+#' | 25 | `"GyMMMd"`            | `"Feb 29, 2000 AD"`     | flexible      |
+#' | 26 | `"GyMMMEd"`           | `"Tue, Feb 29, 2000 AD"`| flexible      |
+#' | 27 | `"yM"`                | `"2/2000"`              | flexible      |
+#' | 28 | `"Md"`                | `"2/29"`                | flexible      |
+#' | 29 | `"MEd"`               | `"Tue, 2/29"`           | flexible      |
+#' | 30 | `"MMMd"`              | `"Feb 29"`              | flexible      |
+#' | 31 | `"MMMEd"`             | `"Tue, Feb 29"`         | flexible      |
+#' | 32 | `"MMMMd"`             | `"February 29"`         | flexible      |
+#' | 33 | `"GyMMM"`             | `"Feb 2000 AD"`         | flexible      |
+#' | 34 | `"yQQQ"`              | `"Q1 2000"`             | flexible      |
+#' | 35 | `"yQQQQ"`             | `"1st quarter 2000"`    | flexible      |
+#' | 36 | `"Gy"`                | `"2000 AD"`             | flexible      |
+#' | 37 | `"y"`                 | `"2000"`                | flexible      |
+#' | 38 | `"M"`                 | `"2"`                   | flexible      |
+#' | 39 | `"MMM"`               | `"Feb"`                 | flexible      |
+#' | 40 | `"d"`                 | `"29"`                  | flexible      |
+#' | 41 | `"Ed"`                | `"29 Tue"`              | flexible      |
+#'
+#' We can use the [info_date_style()] within the console to view a similar table
+#' of date styles with example output.
 #'
 #' @inheritParams vec_fmt_number
-#' @param date_style The date style to use. Supply a number (from `1` to `14`)
-#'   that corresponds to the preferred date style, or, provide a named date
-#'   style (`"wday_month_day_year"`, `"m_day_year"`, `"year.mn.day"`, etc.). Use
-#'   [info_date_style()] to see the different numbered and named date presets.
+#' @param date_style The date style to use. By default this is `"iso"` which
+#'   corresponds to ISO 8601 date formatting. The other date styles can be
+#'   viewed using [info_date_style()].
 #'
 #' @return A character vector.
 #'
@@ -1498,30 +1639,42 @@ vec_fmt_bytes <- function(
 #' str_vals <- c("2022-06-13", "2019-01-25", "2015-03-23", NA)
 #' ```
 #'
-#' Using `vec_fmt_date()` with the default options will create a character
-#' vector of formatted dates. Any `NA` values remain as `NA` values. The
-#' rendering context will be autodetected unless specified in the `output`
-#' argument (here, it is of the `"plain"` output type).
+#' Using `vec_fmt_date()` (here with the `"wday_month_day_year"` date style)
+#' will result in a character vector of formatted dates. Any `NA` values remain
+#' as `NA` values. The rendering context will be autodetected unless specified
+#' in the `output` argument (here, it is of the `"plain"` output type).
 #'
 #' ```r
-#' vec_fmt_date(str_vals)
+#' vec_fmt_date(str_vals, date_style = "wday_month_day_year")
 #' ```
 #' ```
 #' #> [1] "Monday, June 13, 2022" "Friday, January 25, 2019"
 #' #> [3] "Monday, March 23, 2015" NA
 #' ```
 #'
-#' We can change the formatting style by choosing a number from `1` to `14`:
+#' We can choose from any of 41 different date formatting styles. Many of these
+#' styles are flexible, meaning that the structure of the format will adapt
+#' to different locales. Let's use the `"yMMMEd"` date style to demonstrate this
+#' (first in the default locale of `"en"`):
 #'
 #' ```r
-#' vec_fmt_date(str_vals, date_style = 6)
+#' vec_fmt_date(str_vals, date_style = "yMMMEd")
 #' ```
 #' ```
-#' #> [1] "Jun 13, 2022" "Jan 25, 2019" "Mar 23, 2015" NA
+#' #> [1] "Mon, Jun 13, 2022" "Fri, Jan 25, 2019" "Mon, Mar 23, 2015" NA
+#' ```
+#'
+#' Let's perform the same type of formatting in the French (`"fr"`) locale:
+#'
+#' ```r
+#' vec_fmt_date(str_vals, date_style = "yMMMEd", locale = "fr")
+#' ```
+#' ```
+#' #> [1] "lun. 13 juin 2022" "ven. 25 janv. 2019" "lun. 23 mars 2015" NA
 #' ```
 #'
 #' We can always use [info_date_style()] to call up an info table that serves as
-#' a handy reference to all of the date styles.
+#' a handy reference to all of the `date_style` options.
 #'
 #' As a last example, one can wrap the date values in a pattern with the
 #' `pattern` argument. Note here that `NA` values won't have the pattern
@@ -1531,24 +1684,24 @@ vec_fmt_bytes <- function(
 #' vec_fmt_date(str_vals, pattern = "Date: {x}")
 #' ```
 #' ```
-#' #> [1] "Date: Monday, June 13, 2022" "Date: Friday, January 25, 2019"
-#' #> [3] "Date: Monday, March 23, 2015" NA
+#' #> [1] "Date: 2022-06-13" "Date: 2019-01-25" "Date: 2015-03-23" NA
 #' ```
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-10
+#' 14-11
 #'
 #' @export
 vec_fmt_date <- function(
     x,
-    date_style = 2,
+    date_style = "iso",
     pattern = "{x}",
+    locale = NULL,
     output = c("auto", "plain", "html", "latex", "rtf", "word")
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1569,7 +1722,8 @@ vec_fmt_date <- function(
       gt(dplyr::tibble(x = x)),
       columns = "x", rows = everything(),
       date_style = date_style,
-      pattern = pattern
+      pattern = pattern,
+      locale = locale
     ),
     output = output
   )
@@ -1578,29 +1732,59 @@ vec_fmt_date <- function(
 #' Format a vector as time values
 #'
 #' @description
-#' Format vector values to time values using one of five presets. Input can be
-#' in the form of `POSIXt` (i.e., date-times), `character` (must be in the ISO
-#' 8601 forms of `HH:MM:SS` or `YYYY-MM-DD HH:MM:SS`), or `Date` (which always
-#' results in the formatting of `00:00:00`).
+#' Format vector values to time values using one of 25 preset time styles. Input
+#' can be in the form of `POSIXt` (i.e., datetimes), `character` (must be in the
+#' ISO 8601 forms of `HH:MM:SS` or `YYYY-MM-DD HH:MM:SS`), or `Date` (which
+#' always results in the formatting of `00:00:00`).
 #'
-#' We can simply apply a preset time style to format the times. The following
-#' time styles are available for use (all using the input time of `14:35:00` in
-#' the example output times):
+#' @section Formatting with the `time_style` argument:
 #'
-#' 1. `"hms"`: `14:35:00`
-#' 2. `"hm"`: `14:35`
-#' 3. `"hms_p"`: `2:35:00 PM`
-#' 4. `"hm_p"`: `2:35 PM`
-#' 5. `"h_p"`: `2 PM`
+#' We need to supply a preset time style to the `time_style` argument. There are
+#' many time styles and all of them can handle localization to any supported
+#' locale. Many of the time styles are termed flexible time formats and this
+#' means that their output will adapt to any `locale` provided. That feature
+#' makes the flexible time formats a better option for locales other than `"en"`
+#' (the default locale).
 #'
-#' We can use the [info_time_style()] function for a useful reference on all of
-#' the possible inputs to `time_style`.
+#' The following table provides a listing of all time styles and their output
+#' values (corresponding to an input time of `14:35:00`). It is noted which of
+#' these represent 12- or 24-hour time.
+#'
+#' |    | Time Style    | Output                          | Notes         |
+#' |----|---------------|---------------------------------|---------------|
+#' | 1  | `"iso"`       | `"14:35:00"`                    | ISO 8601, 24h |
+#' | 2  | `"iso-short"` | `"14:35"`                       | ISO 8601, 24h |
+#' | 3  | `"h_m_s_p"`   | `"2:35:00 PM"`                  | 12h           |
+#' | 4  | `"h_m_p"`     | `"2:35 PM"`                     | 12h           |
+#' | 5  | `"h_p"`       | `"2 PM"`                        | 12h           |
+#' | 6  | `"Hms"`       | `"14:35:00"`                    | flexible, 24h |
+#' | 7  | `"Hm"`        | `"14:35"`                       | flexible, 24h |
+#' | 8  | `"H"`         | `"14"`                          | flexible, 24h |
+#' | 9  | `"EHm"`       | `"Thu 14:35"`                   | flexible, 24h |
+#' | 10 | `"EHms"`      | `"Thu 14:35:00"`                | flexible, 24h |
+#' | 11 | `"Hmsv"`      | `"14:35:00 GMT+00:00"`          | flexible, 24h |
+#' | 12 | `"Hmv"`       | `"14:35 GMT+00:00"`             | flexible, 24h |
+#' | 13 | `"hms"`       | `"2:35:00 PM"`                  | flexible, 12h |
+#' | 14 | `"hm"`        | `"2:35 PM"`                     | flexible, 12h |
+#' | 15 | `"h"`         | `"2 PM"`                        | flexible, 12h |
+#' | 16 | `"Ehm"`       | `"Thu 2:35 PM"`                 | flexible, 12h |
+#' | 17 | `"Ehms"`      | `"Thu 2:35:00 PM"`              | flexible, 12h |
+#' | 18 | `"EBhms"`   | `"Thu 2:35:00 in the afternoon"`  | flexible, 12h |
+#' | 19 | `"Bhms"`      | `"2:35:00 in the afternoon"`    | flexible, 12h |
+#' | 20 | `"EBhm"`      | `"Thu 2:35 in the afternoon"`   | flexible, 12h |
+#' | 21 | `"Bhm"`       | `"2:35 in the afternoon"`       | flexible, 12h |
+#' | 22 | `"Bh"`        | `"2 in the afternoon"`          | flexible, 12h |
+#' | 23 | `"hmsv"`      | `"2:35:00 PM GMT+00:00"`        | flexible, 12h |
+#' | 24 | `"hmv"`       | `"2:35 PM GMT+00:00"`           | flexible, 12h |
+#' | 25 | `"ms"`        | `"35:00"`                       | flexible      |
+#'
+#' We can use the [info_time_style()] within the console to view a similar table
+#' of time styles with example output.
 #'
 #' @inheritParams vec_fmt_number
-#' @param time_style The time style to use. Supply a number (from `1` to `5`)
-#'   that corresponds to the preferred time style, or, provide a named time
-#'   style (`"hms"`, `"hms_p"`, `"h_p"`, etc.). Use [info_time_style()] to see
-#'   the different numbered and named time presets.
+#' @param time_style The time style to use. By default this is `"iso"` which
+#'   corresponds to how times are formatted within ISO 8601 datetime values. The
+#'   other time styles can be viewed using [info_time_style()].
 #'
 #' @return A character vector.
 #'
@@ -1613,55 +1797,73 @@ vec_fmt_date <- function(
 #' str_vals <- c("2022-06-13 18:36", "2019-01-25 01:08", NA)
 #' ```
 #'
-#' Using `vec_fmt_time()` with the default options will create a character
-#' vector of formatted times. Any `NA` values remain as `NA` values. The
-#' rendering context will be autodetected unless specified in the `output`
-#' argument (here, it is of the `"plain"` output type).
+#' Using `vec_fmt_time()` (here with the `"iso-short"` time style) will result
+#' in a character vector of formatted times. Any `NA` values remain as `NA`
+#' values. The rendering context will be autodetected unless specified in the
+#' `output` argument (here, it is of the `"plain"` output type).
 #'
 #' ```r
-#' vec_fmt_time(str_vals)
+#' vec_fmt_time(str_vals, time_style = "iso-short")
 #' ```
 #' ```
 #' #> [1] "18:36" "01:08" NA
 #' ```
 #'
-#' We can change the formatting style by choosing a number from `1` to `5`:
+#' We can choose from any of 25 different time formatting styles. Many of these
+#' styles are flexible, meaning that the structure of the format will adapt
+#' to different locales. Let's use the `"Bhms"` time style to demonstrate this
+#' (first in the default locale of `"en"`):
 #'
 #' ```r
-#' vec_fmt_time(str_vals, time_style = 4)
+#' vec_fmt_time(str_vals, time_style = "Bhms")
 #' ```
 #' ```
-#' #> [1] "6:36 PM" "1:08 AM" NA
+#' #> [1] "6:36:00 in the evening" "1:08:00 at night" NA
+#' ```
+#'
+#' Let's perform the same type of formatting in the German (`"de"`) locale:
+#'
+#' ```r
+#' vec_fmt_time(str_vals, time_style = "Bhms", locale = "de")
+#' ```
+#' ```
+#' #> [1] "6:36:00 abends" "1:08:00 nachts" NA
 #' ```
 #'
 #' We can always use [info_time_style()] to call up an info table that serves as
-#' a handy reference to all of the time styles.
+#' a handy reference to all of the `time_style` options.
 #'
 #' As a last example, one can wrap the time values in a pattern with the
 #' `pattern` argument. Note here that `NA` values won't have the pattern
 #' applied.
 #'
 #' ```r
-#' vec_fmt_time(str_vals, time_style = 4, pattern = "Time: {x}")
+#' vec_fmt_time(
+#'   str_vals,
+#'   time_style = "hm",
+#'   pattern = "temps: {x}",
+#'   locale = "fr_CA"
+#' )
 #' ```
 #' ```
-#' #> [1] "Time: 6:36 PM" "Time: 1:08 AM" NA
+#' #> [1] "temps: 6:36 PM" "temps: 1:08 AM" NA
 #' ```
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-11
+#' 14-12
 #'
 #' @export
 vec_fmt_time <- function(
     x,
-    time_style = 2,
+    time_style = "iso",
     pattern = "{x}",
+    locale = NULL,
     output = c("auto", "plain", "html", "latex", "rtf", "word")
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1682,65 +1884,611 @@ vec_fmt_time <- function(
       gt(dplyr::tibble(x = x)),
       columns = "x", rows = everything(),
       time_style = time_style,
-      pattern = pattern
+      pattern = pattern,
+      locale = locale
     ),
     output = output
   )
 }
 
-#' Format a vector as date-time values
+#' Format a vector as datetime values
 #'
 #' @description
-#' Format vector values to date-time values using one of fourteen presets for
-#' the date component and one of five presets for the time component. Input can
-#' be in the form of `POSIXct` (i.e., date-times), the `Date` type, or
-#' `character` (must be in the ISO 8601 form of `YYYY-MM-DD HH:MM:SS` or
-#' `YYYY-MM-DD`).
+#' Format values in a vector to datetime values using either presets for the
+#' date and time components or a formatting directive (this can either use a
+#' *CLDR* datetime pattern or `strptime` formatting). Input can be in the form
+#' of `POSIXt` (i.e., datetimes), the `Date` type, or `character` (must be in
+#' the ISO 8601 form of `YYYY-MM-DD HH:MM:SS` or `YYYY-MM-DD`).
 #'
-#' Once the appropriate data cells are targeted with `columns` (and, optionally,
-#' `rows`), we can simply apply preset date and time styles to format the
-#' date-time values. The following date styles are available for formatting of
-#' the date portion (all using the input date of `2000-02-29` in the example
-#' output dates):
+#' @section Formatting with the `date_style` argument:
 #'
-#' 1. `"iso"`: `2000-02-29`
-#' 2. `"wday_month_day_year"`: `Tuesday, February 29, 2000`
-#' 3. `"wd_m_day_year"`: `Tue, Feb 29, 2000`
-#' 4. `"wday_day_month_year"`: `Tuesday 29 February 2000`
-#' 5. `"month_day_year"`: `February 29, 2000`
-#' 6. `"m_day_year"`: `Feb 29, 2000`
-#' 7. `"day_m_year"`: `29 Feb 2000`
-#' 8. `"day_month_year"`: `29 February 2000`
-#' 9. `"day_month"`: `29 February`
-#' 10. `"year"`: `2000`
-#' 11. `"month"`: `February`
-#' 12. `"day"`: `29`
-#' 13. `"year.mn.day"`: `2000/02/29`
-#' 14. `"y.mn.day"`: `00/02/29`
+#' We can supply a preset date style to the `date_style` argument to separately
+#' handle the date portion of the output. The date styles are numerous and can
+#' handle localization to any supported locale. A large segment of date styles
+#' are termed flexible date formats and this means that their output will adapt
+#' to any `locale` provided. That feature makes the flexible date formats a
+#' better option for locales other than `"en"` (the default locale).
 #'
-#' The following time styles are available for formatting of the time portion
-#' (all using the input time of `14:35:00` in the example output times):
+#' The following table provides a listing of all date styles and their output
+#' values (corresponding to an input date of `2000-02-29`).
 #'
-#' 1. `"hms"`: `14:35:00`
-#' 2. `"hm"`: `14:35`
-#' 3. `"hms_p"`: `2:35:00 PM`
-#' 4. `"hm_p"`: `2:35 PM`
-#' 5. `"h_p"`: `2 PM`
+#' |    | Date Style            | Output                  | Notes         |
+#' |----|-----------------------|-------------------------|---------------|
+#' | 1  | `"iso"`               | `"2000-02-29"`          | ISO 8601      |
+#' | 2  | `"wday_month_day_year"`| `"Tuesday, February 29, 2000"`  |      |
+#' | 3  | `"wd_m_day_year"`     | `"Tue, Feb 29, 2000"`   |               |
+#' | 4  | `"wday_day_month_year"`| `"Tuesday 29 February 2000"`    |      |
+#' | 5  | `"month_day_year"`    | `"February 29, 2000"`   |               |
+#' | 6  | `"m_day_year"`        | `"Feb 29, 2000"`        |               |
+#' | 7  | `"day_m_year"`        | `"29 Feb 2000"`         |               |
+#' | 8  | `"day_month_year"`    | `"29 February 2000"`    |               |
+#' | 9  | `"day_month"`         | `"29 February"`         |               |
+#' | 10 | `"day_m"`             | `"29 Feb"`              |               |
+#' | 11 | `"year"`              | `"2000"`                |               |
+#' | 12 | `"month"`             | `"February"`            |               |
+#' | 13 | `"day"`               | `"29"`                  |               |
+#' | 14 | `"year.mn.day"`       | `"2000/02/29"`          |               |
+#' | 15 | `"y.mn.day"`          | `"00/02/29"`            |               |
+#' | 16 | `"year_week"`         | `"2000-W09"`            |               |
+#' | 17 | `"year_quarter"`      | `"2000-Q1"`             |               |
+#' | 18 | `"yMd"`               | `"2/29/2000"`           | flexible      |
+#' | 19 | `"yMEd"`              | `"Tue, 2/29/2000"`      | flexible      |
+#' | 20 | `"yMMM"`              | `"Feb 2000"`            | flexible      |
+#' | 21 | `"yMMMM"`             | `"February 2000"`       | flexible      |
+#' | 22 | `"yMMMd"`             | `"Feb 29, 2000"`        | flexible      |
+#' | 23 | `"yMMMEd"`            | `"Tue, Feb 29, 2000"`   | flexible      |
+#' | 24 | `"GyMd"`              | `"2/29/2000 A"`         | flexible      |
+#' | 25 | `"GyMMMd"`            | `"Feb 29, 2000 AD"`     | flexible      |
+#' | 26 | `"GyMMMEd"`           | `"Tue, Feb 29, 2000 AD"`| flexible      |
+#' | 27 | `"yM"`                | `"2/2000"`              | flexible      |
+#' | 28 | `"Md"`                | `"2/29"`                | flexible      |
+#' | 29 | `"MEd"`               | `"Tue, 2/29"`           | flexible      |
+#' | 30 | `"MMMd"`              | `"Feb 29"`              | flexible      |
+#' | 31 | `"MMMEd"`             | `"Tue, Feb 29"`         | flexible      |
+#' | 32 | `"MMMMd"`             | `"February 29"`         | flexible      |
+#' | 33 | `"GyMMM"`             | `"Feb 2000 AD"`         | flexible      |
+#' | 34 | `"yQQQ"`              | `"Q1 2000"`             | flexible      |
+#' | 35 | `"yQQQQ"`             | `"1st quarter 2000"`    | flexible      |
+#' | 36 | `"Gy"`                | `"2000 AD"`             | flexible      |
+#' | 37 | `"y"`                 | `"2000"`                | flexible      |
+#' | 38 | `"M"`                 | `"2"`                   | flexible      |
+#' | 39 | `"MMM"`               | `"Feb"`                 | flexible      |
+#' | 40 | `"d"`                 | `"29"`                  | flexible      |
+#' | 41 | `"Ed"`                | `"29 Tue"`              | flexible      |
 #'
-#' We can use the [info_date_style()] and [info_time_style()] functions as
-#' useful references for all of the possible inputs to `date_style` and
-#' `time_style`.
+#' We can use the [info_date_style()] within the console to view a similar table
+#' of date styles with example output.
 #'
-#' @section Date and Time Formats:
-#' Using `format` to create custom time formats isn't so hard once we know about
-#' all of the different format codes. The formats are all indicated with a
-#' leading `%` and literal characters are any of those without the leading `%`.
-#' We'll use the date and time `"2015-06-08 23:05:37.48"` for all of the
-#' examples here.
+#' @section Formatting with the `time_style` argument:
+#'
+#' We can supply a preset time style to the `time_style` argument to separately
+#' handle the time portion of the output. There are many time styles and all of
+#' them can handle localization to any supported locale. Many of the time styles
+#' are termed flexible time formats and this means that their output will adapt
+#' to any `locale` provided. That feature makes the flexible time formats a
+#' better option for locales other than `"en"` (the default locale).
+#'
+#' The following table provides a listing of all time styles and their output
+#' values (corresponding to an input time of `14:35:00`). It is noted which of
+#' these represent 12- or 24-hour time. Some of the flexible formats (those
+#' that begin with `"E"`) include the the day of the week. Keep this in mind
+#' when pairing such `time_style` values with a `date_style` so as to avoid
+#' redundant or repeating information.
+#'
+#' |    | Time Style    | Output                          | Notes         |
+#' |----|---------------|---------------------------------|---------------|
+#' | 1  | `"iso"`       | `"14:35:00"`                    | ISO 8601, 24h |
+#' | 2  | `"iso-short"` | `"14:35"`                       | ISO 8601, 24h |
+#' | 3  | `"h_m_s_p"`   | `"2:35:00 PM"`                  | 12h           |
+#' | 4  | `"h_m_p"`     | `"2:35 PM"`                     | 12h           |
+#' | 5  | `"h_p"`       | `"2 PM"`                        | 12h           |
+#' | 6  | `"Hms"`       | `"14:35:00"`                    | flexible, 24h |
+#' | 7  | `"Hm"`        | `"14:35"`                       | flexible, 24h |
+#' | 8  | `"H"`         | `"14"`                          | flexible, 24h |
+#' | 9  | `"EHm"`       | `"Thu 14:35"`                   | flexible, 24h |
+#' | 10 | `"EHms"`      | `"Thu 14:35:00"`                | flexible, 24h |
+#' | 11 | `"Hmsv"`      | `"14:35:00 GMT+00:00"`          | flexible, 24h |
+#' | 12 | `"Hmv"`       | `"14:35 GMT+00:00"`             | flexible, 24h |
+#' | 13 | `"hms"`       | `"2:35:00 PM"`                  | flexible, 12h |
+#' | 14 | `"hm"`        | `"2:35 PM"`                     | flexible, 12h |
+#' | 15 | `"h"`         | `"2 PM"`                        | flexible, 12h |
+#' | 16 | `"Ehm"`       | `"Thu 2:35 PM"`                 | flexible, 12h |
+#' | 17 | `"Ehms"`      | `"Thu 2:35:00 PM"`              | flexible, 12h |
+#' | 18 | `"EBhms"`   | `"Thu 2:35:00 in the afternoon"`  | flexible, 12h |
+#' | 19 | `"Bhms"`      | `"2:35:00 in the afternoon"`    | flexible, 12h |
+#' | 20 | `"EBhm"`      | `"Thu 2:35 in the afternoon"`   | flexible, 12h |
+#' | 21 | `"Bhm"`       | `"2:35 in the afternoon"`       | flexible, 12h |
+#' | 22 | `"Bh"`        | `"2 in the afternoon"`          | flexible, 12h |
+#' | 23 | `"hmsv"`      | `"2:35:00 PM GMT+00:00"`        | flexible, 12h |
+#' | 24 | `"hmv"`       | `"2:35 PM GMT+00:00"`           | flexible, 12h |
+#' | 25 | `"ms"`        | `"35:00"`                       | flexible      |
+#'
+#' We can use the [info_time_style()] within the console to view a similar table
+#' of time styles with example output.
+#'
+#' @section Formatting with a *CLDR* datetime pattern:
+#'
+#' We can use a *CLDR* datetime pattern with the `format` argument to create
+#' a highly customized and locale-aware output. This is a character string that
+#' consists of two types of elements:
+#'
+#' - Pattern fields, which repeat a specific pattern character one or more
+#'   times. These fields are replaced with date and time data when formatting.
+#'   The character sets of `A`-`Z` and `a`-`z` are reserved for use as pattern
+#'   characters.
+#' - Literal text, which is output verbatim when formatting. This can include:
+#'     - Any characters outside the reserved character sets, including
+#'       spaces and punctuation.
+#'     - Any text between single vertical quotes (e.g., `'text'`).
+#'     - Two adjacent single vertical quotes (''), which represent a literal
+#'     single quote, either inside or outside quoted text.
+#'
+#' The number of pattern fields is quite sizable so let's first look at how some
+#' *CLDR* datetime patterns work. We'll use the datetime string
+#' `"2018-07-04T22:05:09.2358(America/Vancouver)"` for all of the examples that
+#' follow.
+#'
+#' - `"mm/dd/y"` -> `"05/04/2018"`
+#' - `"EEEE, MMMM d, y"` -> `"Wednesday, July 4, 2018"`
+#' - `"MMM d E"` -> `"Jul 4 Wed"`
+#' - `"HH:mm"` -> `"22:05"`
+#' - `"h:mm a"` -> `"10:05 PM"`
+#' - `"EEEE, MMMM d, y 'at' h:mm a"` -> `"Wednesday, July 4, 2018 at 10:05 PM"`
+#'
+#' Here are the individual pattern fields:
+#'
+#' ## Year
+#'
+#' ### Calendar Year
+#'
+#' This yields the calendar year, which is always numeric. In most cases the
+#' length of the `"y"` field specifies the minimum number of digits to display,
+#' zero-padded as necessary. More digits will be displayed if needed to show the
+#' full year. There is an exception: `"yy"` gives use just the two low-order
+#' digits of the year, zero-padded as necessary. For most use cases, `"y"` or
+#' `"yy"` should be good enough.
+#'
+#' | Field Patterns                 | Output                                 |
+#' |------------------------------- |----------------------------------------|
+#' | `"y"`                          | `"2018"`                               |
+#' | `"yy"`                         | `"18"`                                 |
+#' | `"yyy"` to `"yyyyyyyyy"`       | `"2018"` to `"000002018"`              |
+#'
+#' ### Year in the Week in Year Calendar
+#'
+#' This is the year in 'Week of Year' based calendars in which the year
+#' transition occurs on a week boundary. This may differ from calendar year
+#' `"y"` near a year transition. This numeric year designation is used in
+#' conjunction with pattern character `"w"` in the ISO year-week calendar as
+#' defined by ISO 8601.
+#'
+#' | Field Patterns                 | Output                                 |
+#' |--------------------------------|----------------------------------------|
+#' | `"Y"`                          | `"2018"`                               |
+#' | `"YY"`                         | `"18"`                                 |
+#' | `"YYY"` to `"YYYYYYYYY"`       | `"2018"` to `"000002018"`              |
+#'
+#' ## Quarter
+#'
+#' ### Quarter of the Year: formatting and standalone versions
+#'
+#' The quarter names are identified numerically, starting at `1` and ending at
+#' `4`. Quarter names may vary along two axes: the width and the context. The
+#' context is either 'formatting' (taken as a default), which the form used
+#' within a complete date format string, or, 'standalone', the form for date
+#' elements used independently (such as in calendar headers). The standalone
+#' form may be used in any other date format that shares the same form of the
+#' name. Here, the formatting form for quarters of the year consists of some run
+#' of `"Q"` values whereas the standalone form uses `"q"`.
+#'
+#' | Field Patterns    | Output          | Notes                             |
+#' |-------------------|-----------------|-----------------------------------|
+#' | `"Q"`/`"q"`       | `"3"`           | Numeric, one digit                |
+#' | `"QQ"`/`"qq"`     | `"03"`          | Numeric, two digits (zero padded) |
+#' | `"QQQ"`/`"qqq"`   | `"Q3"`          | Abbreviated                       |
+#' | `"QQQQ"`/`"qqqq"` | `"3rd quarter"` | Wide                              |
+#' | `"QQQQQ"`/`"qqqqq"` | `"3"`         | Narrow                            |
+#'
+#' ## Month
+#'
+#' ### Month: formatting and standalone versions
+#'
+#' The month names are identified numerically, starting at `1` and ending at
+#' `12`. Month names may vary along two axes: the width and the context. The
+#' context is either 'formatting' (taken as a default), which the form used
+#' within a complete date format string, or, 'standalone', the form for date
+#' elements used independently (such as in calendar headers). The standalone
+#' form may be used in any other date format that shares the same form of the
+#' name. Here, the formatting form for months consists of some run of `"M"`
+#' values whereas the standalone form uses `"L"`.
+#'
+#' | Field Patterns    | Output          | Notes                             |
+#' |-------------------|-----------------|-----------------------------------|
+#' | `"M"`/`"L"`       | `"7"`           | Numeric, minimum digits           |
+#' | `"MM"`/`"LL"`     | `"07"`          | Numeric, two digits (zero padded) |
+#' | `"MMM"`/`"LLL"`   | `"Jul"`         | Abbreviated                       |
+#' | `"MMMM"`/`"LLLL"` | `"July"`        | Wide                              |
+#' | `"MMMMM"`/`"LLLLL"` | `"J"`         | Narrow                            |
+#'
+#' ## Week
+#'
+#' ### Week of Year
+#'
+#' Values calculated for the week of year range from `1` to `53`. Week `1` for a
+#' year is the first week that contains at least the specified minimum number of
+#' days from that year. Weeks between week `1` of one year and week `1` of the
+#' following year are numbered sequentially from `2` to `52` or `53` (if
+#' needed).
+#'
+#' There are two available field lengths. Both will display the week of year
+#' value but the `"ww"` width will always show two digits (where weeks `1` to
+#' `9` are zero padded).
+#'
+#' | Field Patterns   | Output    | Notes                                    |
+#' |------------------|-----------|------------------------------------------|
+#' | `"w"`            | `"27"`    | Minimum digits                           |
+#' | `"ww"`           | `"27"`    | Two digits (zero padded)                 |
+#'
+#' ### Week of Month
+#'
+#' The week of a month can range from `1` to `5`. The first day of every month
+#' always begins at week `1` and with every transition into the beginning of a
+#' week, the week of month value is incremented by `1`.
+#'
+#' | Field Pattern    | Output                                               |
+#' |------------------|------------------------------------------------------|
+#' | `"W"`            | `"1"`                                                |
+#'
+#' ## Day
+#'
+#' ### Day of Month
+#'
+#' The day of month value is always numeric and there are two available field
+#' length choices in its formatting. Both will display the day of month value
+#' but the `"dd"` formatting will always show two digits (where days `1` to `9`
+#' are zero padded).
+#'
+#' | Field Patterns | Output    | Notes                                      |
+#' |----------------|-----------|--------------------------------------------|
+#' | `"d"`          | `"4"`     | Minimum digits                             |
+#' | `"dd"`         | `"04"`    | Two digits, zero padded                    |
+#'
+#' ### Day of Year
+#'
+#' The day of year value ranges from `1` (January 1) to either `365` or `366`
+#' (December 31), where the higher value of the range indicates that the year is
+#' a leap year (29 days in February, instead of 28). The field length specifies
+#' the minimum number of digits, with zero-padding as necessary.
+#'
+#' | Field Patterns  | Output   | Notes                                      |
+#' |-----------------|----------|--------------------------------------------|
+#' | `"D"`           | `"185"`  |                                            |
+#' | `"DD"`          | `"185"`  | Zero padded to minimum width of 2          |
+#' | `"DDD"`         | `"185"`  | Zero padded to minimum width of 3          |
+#'
+#' ### Day of Week in Month
+#'
+#' The day of week in month returns a numerical value indicating the number of
+#' times a given weekday had occurred in the month (e.g., '2nd Monday in
+#' March'). This conveniently resolves to predicable case structure where ranges
+#' of day of the month values return predictable day of week in month values:
+#'
+#' - days `1` - `7` -> `1`
+#' - days `8` - `14` -> `2`
+#' - days `15` - `21` -> `3`
+#' - days `22` - `28` -> `4`
+#' - days `29` - `31` -> `5`
+#'
+#' | Field Pattern                  | Output                                 |
+#' |--------------------------------|----------------------------------------|
+#' | `"F"`                          | `"1"`                                  |
+#'
+#' ### Modified Julian Date
+#'
+#' The modified version of the Julian date is obtained by subtracting
+#' 2,400,000.5 days from the Julian date (the number of days since January 1,
+#' 4713 BC). This essentially results in the number of days since midnight
+#' November 17, 1858. There is a half day offset (unlike the Julian date, the
+#' modified Julian date is referenced to midnight instead of noon).
+#'
+#' | Field Patterns                 | Output                                 |
+#' |--------------------------------|----------------------------------------|
+#' | `"g"` to `"ggggggggg"`         | `"58303"` -> `"000058303"`             |
+#'
+#' ## Weekday
+#'
+#' ### Day of Week Name
+#'
+#' The name of the day of week is offered in four different widths.
+#'
+#' | Field Patterns             | Output         | Notes                     |
+#' |----------------------------|----------------|---------------------------|
+#' | `"E"`, `"EE"`, or `"EEE"`  | `"Wed"`        | Abbreviated               |
+#' | `"EEEE"`                   | `"Wednesday"`  | Wide                      |
+#' | `"EEEEE"`                  | `"W"`          | Narrow                    |
+#' | `"EEEEEE"`                 | `"We"`         | Short                     |
+#'
+#' ## Periods
+#'
+#' ### AM/PM Period of Day
+#'
+#' This denotes before noon and after noon time periods. May be upper or
+#' lowercase depending on the locale and other options. The wide form may be
+#' the same as the short form if the 'real' long form (e.g. 'ante meridiem') is
+#' not customarily used. The narrow form must be unique, unlike some other
+#' fields.
+#'
+#' | Field Patterns                 | Output   | Notes                       |
+#' |--------------------------------|----------|-----------------------------|
+#' | `"a"`, `"aa"`, or `"aaa"`      | `"PM"`   | Abbreviated                 |
+#' | `"aaaa"`                       | `"PM"`   | Wide                        |
+#' | `"aaaaa"`                      | `"p"`    | Narrow                      |
+#'
+#' ### AM/PM Period of Day Plus Noon and Midnight
+#'
+#' Provide AM and PM as well as phrases for exactly noon and midnight. May be
+#' upper or lowercase depending on the locale and other options. If the locale
+#' doesn't have the notion of a unique 'noon' (i.e., 12:00), then the PM form
+#' may be substituted. A similar behavior can occur for 'midnight' (00:00) and
+#' the AM form. The narrow form must be unique, unlike some other fields.
+#'
+#' (a) `input_midnight`: `"2020-05-05T00:00:00"`
+#' (b) `input_noon`: `"2020-05-05T12:00:00"`
+#'
+#' | Field Patterns                 | Output             | Notes             |
+#' |--------------------------------|--------------------|-------------------|
+#' | `"b"`, `"bb"`, or `"bbb"`      | (a) `"midnight"`   | Abbreviated       |
+#' |                                | (b) `"noon"`       |                   |
+#' | `"bbbb"`                       | (a) `"midnight"`   | Wide              |
+#' |                                | (b) `"noon"`       |                   |
+#' | `"bbbbb"`                      | (a) `"mi"`         | Narrow            |
+#' |                                | (b) `"n"`          |                   |
+#'
+#' ### Flexible Day Periods
+#'
+#' Flexible day periods denotes things like 'in the afternoon', 'in the
+#' evening', etc., and the flexibility comes from a locale's language and
+#' script. Each locale has an associated rule set that specifies when the day
+#' periods start and end for that locale.
+#'
+#' (a) `input_morning`: `"2020-05-05T00:08:30"`
+#' (b) `input_afternoon`: `"2020-05-05T14:00:00"`
+#'
+#' | Field Patterns             | Output                   | Notes           |
+#' |----------------------------|--------------------------|-----------------|
+#' | `"B"`, `"BB"`, or `"BBB"`  | (a) `"in the morning"`   | Abbreviated     |
+#' |                            | (b) `"in the afternoon"` |                 |
+#' | `"BBBB"`                   | (a) `"in the morning"`   | Wide            |
+#' |                            | (b) `"in the afternoon"` |                 |
+#' | `"BBBBB"`                  | (a) `"in the morning"`   | Narrow          |
+#' |                            | (b) `"in the afternoon"` |                 |
+#'
+#' ## Hours, Minutes, and Seconds
+#'
+#' ### Hour 0-23
+#'
+#' Hours from `0` to `23` are for a standard 24-hour clock cycle (midnight plus
+#' 1 minute is `00:01`) when using `"HH"` (which is the more common width that
+#' indicates zero-padding to 2 digits).
+#'
+#' Using `"2015-08-01T08:35:09"`:
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"H"`                  | `"8"`   | Numeric, minimum digits              |
+#' | `"HH"`                 | `"08"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Hour 1-12
+#'
+#' Hours from `1` to `12` are for a standard 12-hour clock cycle (midnight plus
+#' 1 minute is `12:01`) when using `"hh"` (which is the more common width that
+#' indicates zero-padding to 2 digits).
+#'
+#' Using `"2015-08-01T08:35:09"`:
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"h"`                  | `"8"`   | Numeric, minimum digits              |
+#' | `"hh"`                 | `"08"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Hour 1-24
+#'
+#' Using hours from `1` to `24` is a less common way to express a 24-hour clock
+#' cycle (midnight plus 1 minute is `24:01`) when using `"kk"` (which is the
+#' more common width that indicates zero-padding to 2 digits).
+#'
+#' Using `"2015-08-01T08:35:09"`:
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"k"`                  | `"9"`   | Numeric, minimum digits              |
+#' | `"kk"`                 | `"09"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Hour 0-11
+#'
+#' Using hours from `0` to `11` is a less common way to express a 12-hour clock
+#' cycle (midnight plus 1 minute is `00:01`) when using `"KK"` (which is the
+#' more common width that indicates zero-padding to 2 digits).
+#'
+#' Using `"2015-08-01T08:35:09"`:
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"K"`                  | `"7"`   | Numeric, minimum digits              |
+#' | `"KK"`                 | `"07"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Minute
+#'
+#' The minute of the hour which can be any number from `0` to `59`. Use `"m"` to
+#' show the minimum number of digits, or `"mm"` to always show two digits
+#' (zero-padding, if necessary).
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"m"`                  | `"5"`   | Numeric, minimum digits              |
+#' | `"mm"`                 | `"06"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Seconds
+#'
+#' The second of the minute which can be any number from `0` to `59`. Use `"s"`
+#' to show the minimum number of digits, or `"ss"` to always show two digits
+#' (zero-padding, if necessary).
+#'
+#' | Field Patterns         | Output  | Notes                                |
+#' |------------------------|---------|--------------------------------------|
+#' | `"s"`                  | `"9"`   | Numeric, minimum digits              |
+#' | `"ss"`                 | `"09"`  | Numeric, 2 digits (zero padded)      |
+#'
+#' ### Fractional Second
+#'
+#' The fractional second truncates (like other time fields) to the width
+#' requested (i.e., count of letters). So using pattern `"SSSS"` will display
+#' four digits past the decimal (which, incidentally, needs to be added manually
+#' to the pattern).
+#'
+#' | Field Patterns                 | Output                                 |
+#' |--------------------------------|----------------------------------------|
+#' | `"S"` to `"SSSSSSSSS"`         | `"2"` -> `"235000000"`                 |
+#'
+#' ### Milliseconds Elapsed in Day
+#'
+#' There are 86,400,000 milliseconds in a day and the `"A"` pattern will provide
+#' the whole number. The width can go up to nine digits with `"AAAAAAAAA"` and
+#' these higher field widths will result in zero padding if necessary.
+#'
+#' Using `"2011-07-27T00:07:19.7223"`:
+#'
+#' | Field Patterns                 | Output                                 |
+#' |--------------------------------|----------------------------------------|
+#' | `"A"` to `"AAAAAAAAA"`         | `"439722"` -> `"000439722"`            |
+#'
+#' ## Era
+#'
+#' ### The Era Designator
+#'
+#' This provides the era name for the given date. The Gregorian calendar has two
+#' eras: AD and BC. In the AD year numbering system, AD 1 is immediately
+#' preceded by 1 BC, with nothing in between them (there was no year zero).
+#'
+#' | Field Patterns                 | Output          | Notes                |
+#' |--------------------------------|-----------------|----------------------|
+#' | `"G"`, `"GG"`, or `"GGG"`      | `"AD"`          | Abbreviated          |
+#' | `"GGGG"`                       | `"Anno Domini"` | Wide                 |
+#' | `"GGGGG"`                      | `"A"`           | Narrow               |
+#'
+#' ## Time Zones
+#'
+#' ### TZ // Short and Long Specific non-Location Format
+#'
+#' The short and long specific non-location formats for time zones are suggested
+#' for displaying a time with a user friendly time zone name. Where the short
+#' specific format is unavailable, it will fall back to the short localized GMT
+#' format (`"O"`). Where the long specific format is unavailable, it will fall
+#' back to the long localized GMT format (`"OOOO"`).
+#'
+#' | Field Patterns             | Output                    | Notes          |
+#' |----------------------------|---------------------------|----------------|
+#' | `"z"`, `"zz"`, or `"zzz"`  | `"PDT"`                   | Short Specific |
+#' | `"zzzz"`                   | `"Pacific Daylight Time"` | Long Specific  |
+#'
+#' ### TZ // Common UTC Offset Formats
+#'
+#' The ISO8601 basic format with hours, minutes and optional seconds fields is
+#' represented by `"Z"`, `"ZZ"`, or `"ZZZ"`. The format is equivalent to RFC 822
+#' zone format (when the optional seconds field is absent). This is equivalent
+#' to the `"xxxx"` specifier. The field pattern `"ZZZZ"` represents the long
+#' localized GMT format. This is equivalent to the `"OOOO"` specifier. Finally,
+#' `"ZZZZZ"` pattern yields the ISO8601 extended format with hours, minutes and
+#' optional seconds fields. The ISO8601 UTC indicator `Z` is used when local
+#' time offset is `0`. This is equivalent to the `"XXXXX"` specifier.
+#'
+#' | Field Patterns             | Output       | Notes                       |
+#' |----------------------------|--------------|-----------------------------|
+#' | `"Z"`, `"ZZ"`, or `"ZZZ"`  | `"-0700"`    | ISO 8601 basic format       |
+#' | `"ZZZZ"`                   | `"GMT-7:00"` | Long localized GMT format   |
+#' | `"ZZZZZ"`                  | `"-07:00"`   | ISO 8601 extended format    |
+#'
+#' ### TZ // Short and Long Localized GMT Formats
+#'
+#' The localized GMT formats come in two widths `"O"` (which removes the minutes
+#' field if it's `0`) and `"OOOO"` (which always contains the minutes field).
+#' The use of the `GMT` indicator changes according to the locale.
+#'
+#' | Field Patterns          | Output        | Notes                         |
+#' |-------------------------|---------------|-------------------------------|
+#' | `"O"`                   | `"GMT-7"`     | Short localized GMT format    |
+#' | `"OOOO"`                | `"GMT-07:00"` | Long localized GMT format     |
+#'
+#' ### TZ // Short and Long Generic non-Location Formats
+#'
+#' The generic non-location formats are useful for displaying a recurring wall
+#' time (e.g., events, meetings) or anywhere people do not want to be overly
+#' specific. Where either of these is unavailable, there is a fallback to the
+#' generic location format (`"VVVV"`), then the short localized GMT format as
+#' the final fallback.
+#'
+#' | Field Patterns  | Output           | Notes                              |
+#' |-----------------|------------------|------------------------------------|
+#' | `"v"`           | `"PT"`           | Short generic non-location format  |
+#' | `"vvvv"`        | `"Pacific Time"` | Long generic non-location format   |
+#'
+#' ### TZ // Short Time Zone IDs and Exemplar City Formats
+#'
+#' These formats provide variations of the time zone ID and often include the
+#' exemplar city. The widest of these formats, `"VVVV"`, is useful for
+#' populating a choice list for time zones, because it supports 1-to-1 name/zone
+#' ID mapping and is more uniform than other text formats.
+#'
+#' | Field Patterns     | Output                | Notes                      |
+#' |--------------------|-----------------------|----------------------------|
+#' | `"V"`              | `"cavan"`             | Short time zone ID         |
+#' | `"VV"`             | `"America/Vancouver"` | Long time zone ID          |
+#' | `"VVV"`            | `"Vancouver"`         | The tz exemplar city       |
+#' | `"VVVV"`           | `"Vancouver Time"`    | Generic location format    |
+#'
+#' ### TZ // ISO 8601 Formats with Z for +0000
+#'
+#' The `"X"`-`"XXX"` field patterns represent valid ISO 8601 patterns for time
+#' zone offsets in datetimes. The final two widths, `"XXXX"` and `"XXXXX"` allow
+#' for optional seconds fields. The seconds field is *not* supported by the ISO
+#' 8601 specification. For all of these, the ISO 8601 UTC indicator `Z` is used
+#' when the local time offset is `0`.
+#'
+#' | Field Patterns | Output     | Notes                                     |
+#' |----------------|------------|-------------------------------------------|
+#' | `"X"`          | `"-07"`    | ISO 8601 basic format (h, optional m)     |
+#' | `"XX"`         | `"-0700"`  | ISO 8601 basic format (h & m)             |
+#' | `"XXX"`        | `"-07:00"` | ISO 8601 extended format (h & m)          |
+#' | `"XXXX"`       | `"-0700"`  | ISO 8601 basic format (h & m, optional s) |
+#' | `"XXXXX"`      | `"-07:00"` | ISO 8601 extended format (h & m, optional s) |
+#'
+#' ### TZ // ISO 8601 Formats (no use of Z for +0000)
+#'
+#' The `"x"`-`"xxxxx"` field patterns represent valid ISO 8601 patterns for time
+#' zone offsets in datetimes. They are similar to the `"X"`-`"XXXXX"` field
+#' patterns except that the ISO 8601 UTC indicator `Z` *will not* be used when
+#' the local time offset is `0`.
+#'
+#' | Field Patterns | Output     | Notes                                     |
+#' |----------------|------------|-------------------------------------------|
+#' | `"x"`          | `"-07"`    | ISO 8601 basic format (h, optional m)     |
+#' | `"xx"`         | `"-0700"`  | ISO 8601 basic format (h & m)             |
+#' | `"xxx"`        | `"-07:00"` | ISO 8601 extended format (h & m)          |
+#' | `"xxxx"`       | `"-0700"`  | ISO 8601 basic format (h & m, optional s) |
+#' | `"xxxxx"`      | `"-07:00"` | ISO 8601 extended format (h & m, optional s) |
+#'
+#' @section Formatting with a `strptime` format code:
+#'
+#' Performing custom date/time formatting with the `format` argument can also
+#' occur with a `strptime` format code. This works by constructing a string of
+#' individual format codes representing formatted date and time elements. These
+#' are all indicated with a leading `%`, literal characters are interpreted as
+#' any characters not starting with a `%` character.
 #'
 #' First off, let's look at a few format code combinations that work well
-#' together as format codes. This will give us an intuition on how these
-#' generally work.
+#' together as a `strptime` format. This will give us an intuition on how these
+#' generally work. We'll use the datetime `"2015-06-08 23:05:37.48"` for all of
+#' the examples that follow.
 #'
 #' - `"%m/%d/%Y"` -> `"06/08/2015"`
 #' - `"%A, %B %e, %Y"` -> `"Monday, June 8, 2015"`
@@ -1749,7 +2497,7 @@ vec_fmt_time <- function(
 #' - `"%I:%M %p"` -> `"11:05 pm"`
 #' - `"%A, %B %e, %Y at %I:%M %p"` -> `"Monday, June 8, 2015 at 11:05 pm"`
 #'
-#' Here are the individual format codes for date components:
+#' Here are the individual format codes for the date components:
 #'
 #' - `"%a"` -> `"Mon"` (abbreviated day of week name)
 #' - `"%A"` -> `"Monday"` (full day of week name)
@@ -1762,22 +2510,23 @@ vec_fmt_time <- function(
 #' - `"%m"` -> `"06"` (month number)
 #' - `"%d"` -> `"08"` (day number, zero-padded)
 #' - `"%e"` -> `"8"` (day number without zero padding)
+#' - `"%j"` -> `"159"` (day of the year, always zero-padded)
+#' - `"%W"` -> `"23"` (week number for the year, always zero-padded)
+#' - `"%V"` -> `"24"` (week number for the year, following the ISO 8601
+#' standard)
+#' - `"%C"` -> `"20"` (the century number)
 #'
-#' Here are the individual format codes for time components:
+#' Here are the individual format codes for the time components:
 #'
 #' - `"%H"` -> `"23"` (24h hour)
 #' - `"%I"` -> `"11"` (12h hour)
 #' - `"%M"` -> `"05"` (minute)
 #' - `"%S"` -> `"37"` (second)
 #' - `"%OS3"` -> `"37.480"` (seconds with decimals; `3` decimal places here)
-#' - `%p` -> `"pm"` (AM or PM indicator, may not appear in certain locales)
+#' - `%p` -> `"pm"` (AM or PM indicator)
 #'
 #' Here are some extra formats that you may find useful:
 #'
-#' - `"%j"` -> `"159"` (day of the year, always zero-padded)
-#' - `"%W"` -> `"23"` (week number for the year, always zero-padded)
-#' - `"%V"` -> `"24"` (week number for the year, following ISO 8601 standard)
-#' - `"%C"` -> `"20"` (the century number)
 #' - `"%z"` -> `"+0000"` (signed time zone offset, here using UTC)
 #' - `"%F"` -> `"2015-06-08"` (the date in the ISO 8601 date format)
 #' - `"%%"` -> `"%"` (the literal "`%`" character, in case you need it)
@@ -1809,51 +2558,95 @@ vec_fmt_time <- function(
 #' str_vals <- c("2022-06-13 18:36", "2019-01-25 01:08", NA)
 #' ```
 #'
-#' Using `vec_fmt_datetime()` with the default options will create a character
-#' vector of formatted datetime values. Any `NA` values remain as `NA` values.
-#' The rendering context will be autodetected unless specified in the `output`
-#' argument (here, it is of the `"plain"` output type).
-#'
-#' ```r
-#' vec_fmt_datetime(str_vals)
-#' ```
-#' ```
-#' #> [1] "Monday, June 13, 2022 18:36"
-#' #> [2] "Friday, January 25, 2019 01:08"
-#' #> [3] NA
-#' ```
-#'
-#' We can change the formatting style of the date and time portions separately
-#' with the `date_style` (values `1`-`14`) and `time_style` (values `1`-`5`)
-#' arguments. The `sep` option allows for a customized separator string between
-#' the date and time.
+#' Using `vec_fmt_datetime()` with different `date_style` and `time_style`
+#' options (here, `date_style = "yMMMEd"` and `time_style = "Hm"`) will result
+#' in a character vector of formatted datetime values. Any `NA` values remain as
+#' `NA` values. The rendering context will be autodetected unless specified in
+#' the `output` argument (here, it is of the `"plain"` output type).
 #'
 #' ```r
 #' vec_fmt_datetime(
 #'   str_vals,
-#'   date_style = 2,
-#'   time_style = 4,
-#'   sep = " at "
+#'   date_style = "yMMMEd",
+#'   time_style = "Hm"
 #' )
 #' ```
 #' ```
-#' #> [1] "Monday, June 13, 2022 at 6:36 PM"
-#' #> [2] "Friday, January 25, 2019 at 1:08 AM"
-#' #> [3] NA
+#' #> [1] "Mon, Jun 13, 2022 18:36" "Fri, Jan 25, 2019 01:08" NA
+#' ```
+#'
+#' We can choose from any of 41 different date styles and 25 time formatting
+#' styles. Many of these styles are flexible, meaning that the structure of the
+#' format will adapt to different locales. Let's use a combination of the the
+#' `"yMMMd"` and `"hms"` date and time styles to demonstrate this (first in the
+#' default locale of `"en"`):
+#'
+#' ```r
+#' vec_fmt_datetime(
+#'   str_vals,
+#'   date_style = "yMMMd",
+#'   time_style = "hms"
+#' )
+#' ```
+#' ```
+#' #> [1] "Jun 13, 2022 6:36:00 PM" "Jan 25, 2019 1:08:00 AM" NA
+#' ```
+#'
+#' Let's perform the same type of formatting in the Italian (`"it"`) locale:
+#'
+#' ```r
+#' vec_fmt_datetime(
+#'   str_vals,
+#'   date_style = "yMMMd",
+#'   time_style = "hms",
+#'   locale = "it"
+#' )
+#' ```
+#' ```
+#' #> [1] "13 giu 2022 6:36:00 PM" "25 gen 2019 1:08:00 AM" NA
 #' ```
 #'
 #' We can always use [info_date_style()] or [info_time_style()] to call up info
-#' tables that serve as handy references to all of the date and time styles.
+#' tables that serve as handy references to all of the `date_style` and
+#' `time_style` options.
 #'
-#' It's possible to supply our own time formatting pattern and have greater
-#' control over the final formatting (even including string literals as please):
+#' It's possible to supply our own time formatting pattern within the `format`
+#' argument. One way is with a CLDR pattern, which is locale-aware:
+#'
+#' ```r
+#' vec_fmt_datetime(str_vals, format = "EEEE, MMMM d, y, h:mm a")
+#' ```
+#' ```
+#' #> [1] "Monday, June 13, 2022, 06:36 PM"
+#' #> [2] "Friday, January 25, 2019, 01:08 AM"
+#' #> [3] NA
+#' ```
+#'
+#' By using the `locale` argument, this can be formatted as Dutch datetime
+#' values:
+#'
+#' ```r
+#' vec_fmt_datetime(
+#'   str_vals,
+#'   format = "EEEE, MMMM d, y, h:mm a",
+#'   locale = "nl"
+#' )
+#' ```
+#' ```
+#' #> [1] "maandag, juni 13, 2022, 6:36 p.m."
+#' #> [2] "vrijdag, januari 25, 2019, 1:08 a.m."
+#' #> [3] NA
+#' ```
+#'
+#' It's also possible to use a `strptime` format code with `format` (however,
+#' any value provided to `locale` will be ignored).
 #'
 #' ```r
 #' vec_fmt_datetime(str_vals, format = "%A, %B %e, %Y at %I:%M %p")
 #' ```
 #' ```
-#' #> [1] "Monday, June 13, 2022 at 06:36 PM"
-#' #> [2] "Friday, January 25, 2019 at 01:08 AM"
+#' #> [1] "Monday, June 13, 2022 at 06:36 pm"
+#' #> [2] "Friday, January 25, 2019 at 01:08 am"
 #' #> [3] NA
 #' ```
 #'
@@ -1864,36 +2657,35 @@ vec_fmt_time <- function(
 #' ```r
 #' vec_fmt_datetime(
 #'   str_vals,
-#'   date_style = 6,
-#'   time_style = 4,
 #'   sep = " at ",
 #'   pattern = "Date and Time: {x}"
 #' )
 #' ```
 #' ```
-#' #> [1] "Date and Time: Jun 13, 2022 at 6:36 PM"
-#' #> [2] "Date and Time: Jan 25, 2019 at 1:08 AM"
+#' #> [1] "Date and Time: 2022-06-13 at 18:36:00"
+#' #> [2] "Date and Time: 2019-01-25 at 01:08:00"
 #' #> [3] NA
 #' ```
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-12
+#' 14-13
 #'
 #' @export
 vec_fmt_datetime <- function(
     x,
-    date_style = 2,
-    time_style = 2,
+    date_style = "iso",
+    time_style = "iso",
     sep = " ",
     format = NULL,
     tz = NULL,
     pattern = "{x}",
+    locale = NULL,
     output = c("auto", "plain", "html", "latex", "rtf", "word")
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1918,7 +2710,8 @@ vec_fmt_datetime <- function(
       sep = sep,
       format = format,
       tz = tz,
-      pattern = pattern
+      pattern = pattern,
+      locale = locale
     ),
     output = output
   )
@@ -2096,7 +2889,7 @@ vec_fmt_datetime <- function(
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-13
+#' 14-14
 #'
 #' @export
 vec_fmt_duration <- function(
@@ -2115,7 +2908,7 @@ vec_fmt_duration <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -2125,7 +2918,7 @@ vec_fmt_duration <- function(
   stop_if_not_vector(x)
 
   # Ensure that `duration_style` is matched correctly to one option
-  duration_style <- match.arg(duration_style)
+  duration_style <- rlang::arg_match(duration_style)
 
   # Stop function if class of `x` is incompatible with the formatting
   if (!vector_class_is_valid(x, valid_classes = c("numeric", "difftime"))) {
@@ -2198,7 +2991,7 @@ vec_fmt_duration <- function(
 #'
 #' @family vector formatting functions
 #' @section Function ID:
-#' 14-14
+#' 14-15
 #'
 #' @export
 vec_fmt_markdown <- function(
@@ -2207,7 +3000,7 @@ vec_fmt_markdown <- function(
 ) {
 
   # Ensure that `output` is matched correctly to one option
-  output <- match.arg(output)
+  output <- rlang::arg_match(output)
 
   if (output == "auto") {
     output <- determine_output_format()

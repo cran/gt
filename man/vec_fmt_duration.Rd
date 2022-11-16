@@ -80,11 +80,11 @@ for this option. The default is \code{FALSE}, where only negative value will
 display a minus sign.}
 
 \item{locale}{An optional locale ID that can be used for formatting the value
-according the locale's rules. Examples include \code{"en_US"} for English
-(United States) and \code{"fr_FR"} for French (France). The use of a valid
-locale ID will override any values provided in \code{sep_mark} and \code{dec_mark}.
-We can use the \code{\link[=info_locales]{info_locales()}} function as a useful reference for all of
-the locales that are supported.}
+according the locale's rules. Examples include \code{"en"} for English (United
+States) and \code{"fr"} for French (France). The use of a valid locale ID will
+override any values provided in \code{sep_mark} and \code{dec_mark}. We can use the
+\code{\link[=info_locales]{info_locales()}} function as a useful reference for all of the locales that
+are supported.}
 
 \item{output}{The output style of the resulting character vector. This can
 either be \code{"auto"} (the default), \code{"plain"}, \code{"html"}, \code{"latex"}, \code{"rtf"},
@@ -218,7 +218,7 @@ locale.
 
 \section{Function ID}{
 
-14-13
+14-14
 }
 
 \seealso{
@@ -234,6 +234,7 @@ Other vector formatting functions:
 \code{\link{vec_fmt_number}()},
 \code{\link{vec_fmt_partsper}()},
 \code{\link{vec_fmt_percent}()},
+\code{\link{vec_fmt_roman}()},
 \code{\link{vec_fmt_scientific}()},
 \code{\link{vec_fmt_time}()}
 }

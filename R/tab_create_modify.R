@@ -105,7 +105,7 @@ tab_header <- function(
 #' ```r
 #' gtcars %>%
 #'   dplyr::select(
-#'     -mfr, -trim, bdy_style, drivetrain,
+#'     -mfr, -trim, bdy_style,
 #'     -drivetrain, -trsmn, -ctry_origin
 #'   ) %>%
 #'   dplyr::slice(1:8) %>%
@@ -127,6 +127,7 @@ tab_header <- function(
 #' @section Function ID:
 #' 2-2
 #'
+#' @import rlang
 #' @export
 tab_spanner <- function(
     data,
@@ -280,8 +281,16 @@ resolve_spanner_level <- function(
   highest_level <- 0L
 
   spanners_tbl <- dplyr::select(spanners_tbl, spanner_id, vars, spanner_level)
-  highest_level <- spanners_tbl %>%
-    dplyr::filter(vapply(vars, function(x) any(column_names %in% x), logical(1))) %>%
+
+  highest_level <-
+    dplyr::filter(
+      spanners_tbl,
+      vapply(
+        vars,
+        FUN.VALUE = logical(1),
+        FUN = function(x) any(column_names %in% x)
+      )
+    ) %>%
     dplyr::pull("spanner_level") %>%
     max(0) # Max of ^ and 0
 
@@ -369,6 +378,7 @@ resolve_spanned_column_names <- function(
 #' @section Function ID:
 #' 2-3
 #'
+#' @import rlang
 #' @export
 tab_spanner_delim <- function(
     data,
@@ -380,16 +390,18 @@ tab_spanner_delim <- function(
   # Perform input object validation
   stop_if_not_gt(data = data)
 
-  split <- match.arg(split)
+  split <- rlang::arg_match(split)
 
   # Get all of the columns in the dataset
   all_cols <- dt_boxhead_get_vars(data = data)
 
   # Get the columns supplied in `columns` as a character vector
   columns <-
-    resolve_cols_c(
-      expr = {{ columns }},
-      data = data
+    suppressWarnings(
+      resolve_cols_c(
+        expr = {{ columns }},
+        data = data
+      )
     )
 
   if (!is.null(columns)) {
@@ -664,7 +676,7 @@ tab_row_group <- function(
 
     cli::cli_warn(c(
       "Since gt v0.3.0 the `group` argument has been deprecated.",
-      "*" =  "Use the `label` argument to specify the group label."
+      "*" = "Use the `label` argument to specify the group label."
     ))
   }
 
@@ -874,6 +886,7 @@ tab_stubhead <- function(
 #' @section Function ID:
 #' 2-6
 #'
+#' @import rlang
 #' @export
 tab_stub_indent <- function(
     data,
@@ -1046,7 +1059,7 @@ tab_footnote <- function(
     placement = c("auto", "right", "left")
 ) {
 
-  placement <- match.arg(placement)
+  placement <- rlang::arg_match(placement)
 
   # Perform input object validation
   stop_if_not_gt(data = data)
@@ -1359,7 +1372,7 @@ set_footnote.cells_footnotes <- function(loc, data, footnote, placement) {
 #'
 #' @family part creation/modification functions
 #' @section Function ID:
-#' 2-89
+#' 2-8
 #'
 #' @export
 tab_source_note <- function(
@@ -1373,6 +1386,62 @@ tab_source_note <- function(
   dt_source_notes_add(
     data = data,
     source_note = source_note
+  )
+}
+
+#' Add a table caption
+#'
+#' @description
+#' Add a caption to a **gt** table, which is handled specially for a table
+#' within an R Markdown, Quarto, or **bookdown** context. The addition of
+#' captions makes tables cross-referencing across the containing document. The
+#' caption location (i.e., top, bottom, margin) is handled at the document level
+#' in each of these system.
+#'
+#' @inheritParams fmt_number
+#' @param caption The table caption to use for cross-referencing in R Markdown,
+#'   Quarto, or **bookdown**.
+#'
+#' @return An object of class `gt_tbl`.
+#'
+#' @section Examples:
+#'
+#' Use [`gtcars`] to create a **gt** table. Add a header part with the
+#' [tab_header()] function, and, add a caption as well with `tab_caption()`.
+#'
+#' ```r
+#' gtcars %>%
+#'   dplyr::select(mfr, model, msrp) %>%
+#'   dplyr::slice(1:5) %>%
+#'   gt() %>%
+#'   tab_header(
+#'     title = md("Data listing from **gtcars**"),
+#'     subtitle = md("`gtcars` is an R dataset")
+#'   ) %>%
+#'   tab_caption(caption = md("**gt** table example."))
+#' ```
+#'
+#' \if{html}{\out{
+#' `r man_get_image_tag(file = "man_tab_caption_1.png")`
+#' }}
+#'
+#' @family part creation/modification functions
+#' @section Function ID:
+#' 2-9
+#'
+#' @export
+tab_caption <- function(
+    data,
+    caption
+) {
+
+  # Perform input object validation
+  stop_if_not_gt(data = data)
+
+  dt_options_set_value(
+    data = data,
+    option = "table_caption",
+    value = caption
   )
 }
 
@@ -1508,7 +1577,7 @@ tab_source_note <- function(
 #'
 #' @family part creation/modification functions
 #' @section Function ID:
-#' 2-9
+#' 2-10
 #'
 #' @seealso [cell_text()], [cell_fill()], and [cell_borders()] as helpers for
 #'   defining custom styles and [cells_body()] as one of many useful helper
@@ -1875,11 +1944,13 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' components, the subcomponents, and the element that can adjusted.
 #'
 #' @inheritParams fmt_number
-#' @param container.width,container.height The width and height of the table's
-#'   container. Can be specified as a single-length character with units of
-#'   pixels or as a percentage. If provided as a single-length numeric vector,
-#'   it is assumed that the value is given in units of pixels. The [px()] and
-#'   [pct()] helper functions can also be used to pass in numeric values and
+#' @param container.width,container.height,container.padding.x,container.padding.y
+#'   The width and height of the table's container, and, the vertical and
+#'   horizontal padding of the table's container. The container width and height
+#'   can be specified with units of pixels or as a percentage. The padding is to
+#'   be specified as a length with units of pixels. If provided as a numeric
+#'   value, it is assumed that the value is given in units of pixels. The [px()]
+#'   and [pct()] helper functions can also be used to pass in numeric values and
 #'   obtain values as pixel or percent units.
 #' @param container.overflow.x,container.overflow.y Options to enable scrolling
 #'   in the horizontal and vertical directions when the table content overflows
@@ -2197,13 +2268,15 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'
 #' @family part creation/modification functions
 #' @section Function ID:
-#' 2-10
+#' 2-12
 #'
 #' @export
 tab_options <- function(
     data,
     container.width = NULL,
     container.height = NULL,
+    container.padding.x = NULL,
+    container.padding.y = NULL,
     container.overflow.x = NULL,
     container.overflow.y = NULL,
     table.width = NULL,

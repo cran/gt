@@ -1,38 +1,85 @@
-#' Create a tibble containing date formats
+#' Get a tibble containing date formats
 #'
 #' @noRd
 date_formats <- function() {
-
   dplyr::tribble(
-    ~format_number, ~format_name,           ~format_code,
-    "1",	          "iso",                  "%F",
-    "2",	          "wday_month_day_year",  "%A, %B %d, %Y",
-    "3",	          "wd_m_day_year",        "%a, %b %d, %Y",
-    "4",	          "wday_day_month_year",  "%A %d %B %Y",
-    "5",	          "month_day_year",       "%B %d, %Y",
-    "6",	          "m_day_year",           "%b %d, %Y",
-    "7",	          "day_m_year",           "%d %b %Y",
-    "8",	          "day_month_year",       "%d %B %Y",
-    "9",	          "day_month",            "%d %B",
-    "10",	          "year",                 "%Y",
-    "11",	          "month",                "%B",
-    "12",	          "day",                  "%d",
-    "13",	          "year.mn.day",          "%Y/%m/%d",
-    "14",	          "y.mn.day",             "%y/%m/%d")
+    ~format_number, ~format_name,           ~format_code,       ~flexible,
+    "1",	          "iso",                  "y-MM-dd",          FALSE,
+    "2",	          "wday_month_day_year",  "EEEE, MMMM d, y",  FALSE,
+    "3",	          "wd_m_day_year",        "EEE, MMM d, y",    FALSE,
+    "4",	          "wday_day_month_year",  "EEEE d MMMM y",    FALSE,
+    "5",	          "month_day_year",       "MMMM d, y",        FALSE,
+    "6",	          "m_day_year",           "MMM d, y",         FALSE,
+    "7",	          "day_m_year",           "d MMM y",          FALSE,
+    "8",	          "day_month_year",       "d MMMM y",         FALSE,
+    "9",	          "day_month",            "d MMMM",           FALSE,
+    "10",	          "day_m",                "d MMM",            FALSE,
+    "11",	          "year",                 "y",                FALSE,
+    "12",	          "month",                "MMMM",             FALSE,
+    "13",	          "day",                  "dd",               FALSE,
+    "14",	          "year.mn.day",          "y/MM/dd",          FALSE,
+    "15",	          "y.mn.day",             "yy/MM/dd",         FALSE,
+    "16",           "year_week",            "y-'W'ww",          FALSE,
+    "17",           "year_quarter",         "y-'Q'Q",           FALSE,
+    "18",           "yMd",                  NA_character_,      TRUE,
+    "19",           "yMEd",                 NA_character_,      TRUE,
+    "20",           "yMMM",                 NA_character_,      TRUE,
+    "21",           "yMMMM",                NA_character_,      TRUE,
+    "22",           "yMMMd",                NA_character_,      TRUE,
+    "23",           "yMMMEd",               NA_character_,      TRUE,
+    "24",           "GyMd",                 NA_character_,      TRUE,
+    "25",           "GyMMMd",               NA_character_,      TRUE,
+    "26",           "GyMMMEd",              NA_character_,      TRUE,
+    "27",           "yM",                   NA_character_,      TRUE,
+    "28",           "Md",                   NA_character_,      TRUE,
+    "29",           "MEd",                  NA_character_,      TRUE,
+    "30",           "MMMd",                 NA_character_,      TRUE,
+    "31",           "MMMEd",                NA_character_,      TRUE,
+    "32",           "MMMMd",                NA_character_,      TRUE,
+    "33",           "GyMMM",                NA_character_,      TRUE,
+    "34",           "yQQQ",                 NA_character_,      TRUE,
+    "35",           "yQQQQ",                NA_character_,      TRUE,
+    "36",           "Gy",                   NA_character_,      TRUE,
+    "37",           "y",                    NA_character_,      TRUE,
+    "38",           "M",                    NA_character_,      TRUE,
+    "39",           "MMM",                  NA_character_,      TRUE,
+    "40",           "d",                    NA_character_,      TRUE,
+    "41",           "Ed",                   NA_character_,      TRUE
+  )
 }
 
-#' Create a tibble containing time formats
+#' Get a tibble containing time formats
 #'
 #' @noRd
 time_formats <- function() {
-
   dplyr::tribble(
-    ~format_number, ~format_name, ~format_code,
-    "1",	          "hms",        "%H:%M:%S",
-    "2",	          "hm",         "%H:%M",
-    "3",	          "hms_p",      "%I:%M:%S %P",
-    "4",	          "hm_p",       "%I:%M %P",
-    "5",	          "h_p",        "%I %P")
+    ~format_number,  ~format_name,  ~format_code,    ~time_type,    ~flexible,
+    "1",	           "iso",         "HH:mm:ss",      "24h",         FALSE,
+    "2",	           "iso-short",   "HH:mm",         "24h",         FALSE,
+    "3",	           "h_m_s_p",     "h:mm:ss a",     "12h",         FALSE,
+    "4",	           "h_m_p",       "h:mm a",        "12h",         FALSE,
+    "5",	           "h_p",         "h a",           "12h",         FALSE,
+    "6",             "Hms",         NA_character_,   "24h",         TRUE,
+    "7",             "Hm",          NA_character_,   "24h",         TRUE,
+    "8",             "H",           NA_character_,   "24h",         TRUE,
+    "9",             "EHm",         NA_character_,   "24h",         TRUE,
+    "10",            "EHms",        NA_character_,   "24h",         TRUE,
+    "11",            "Hmsv",        NA_character_,   "24h",         TRUE,
+    "12",            "Hmv",         NA_character_,   "24h",         TRUE,
+    "13",            "hms",         NA_character_,   "12h",         TRUE,
+    "14",            "hm",          NA_character_,   "12h",         TRUE,
+    "15",            "h",           NA_character_,   "12h",         TRUE,
+    "16",            "Ehm",         NA_character_,   "12h",         TRUE,
+    "17",            "Ehms",        NA_character_,   "12h",         TRUE,
+    "18",            "EBhms",       NA_character_,   "12h",         TRUE,
+    "19",            "Bhms",        NA_character_,   "12h",         TRUE,
+    "20",            "EBhm",        NA_character_,   "12h",         TRUE,
+    "21",            "Bhm",         NA_character_,   "12h",         TRUE,
+    "22",            "Bh",          NA_character_,   "12h",         TRUE,
+    "23",            "hmsv",        NA_character_,   "12h",         TRUE,
+    "24",            "hmv",         NA_character_,   "12h",         TRUE,
+    "25",            "ms",          NA_character_,   NA_character_, TRUE
+  )
 }
 
 #' Transform a `date_style` to a `date_format`
@@ -79,8 +126,14 @@ get_date_format <- function(date_style) {
     date_style <- which(date_format_tbl$format_name == date_style)
   }
 
-  # Obtain the correct date format code for use with `strptime()`
-  date_format_tbl[["format_code"]][date_style]
+  # Obtain the correct date format directive
+  date_format_tbl_i <- date_format_tbl[date_style, ]
+
+  if (date_format_tbl_i[["flexible"]]) {
+    return(bigD::flex_d_lst[[date_format_tbl_i[["format_name"]]]])
+  } else {
+    return(date_format_tbl_i[["format_code"]])
+  }
 }
 
 #' Transform a `time_style` to a `time_format`
@@ -126,8 +179,23 @@ get_time_format <- function(time_style) {
     time_style <- which(time_format_tbl$format_name == time_style)
   }
 
-  # Obtain the correct time format code for use with `strptime()`
-  time_format_tbl[["format_code"]][time_style]
+  # Obtain the correct time format directive
+  time_format_tbl_i <- time_format_tbl[time_style, ]
+
+  if (time_format_tbl_i[["flexible"]]) {
+
+    if (
+      !is.na(time_format_tbl_i[["time_type"]]) &&
+      time_format_tbl_i[["time_type"]] == "12h"
+    ) {
+      return(bigD::flex_t12_lst[[time_format_tbl_i[["format_name"]]]])
+    } else {
+      return(bigD::flex_t24_lst[[time_format_tbl_i[["format_name"]]]])
+    }
+
+  } else {
+    return(time_format_tbl_i[["format_code"]])
+  }
 }
 
 #' Are string values 24 hour times?
@@ -142,7 +210,7 @@ is_string_time <- function(x) {
   is.character(x) & grepl("^\\d{1,2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$", x)
 }
 
-check_format_string <- function(format) {
+check_format_code <- function(format) {
 
   if (!is.character(format) || length(format) != 1) {
     cli::cli_abort(
@@ -423,7 +491,7 @@ process_text <- function(text, context = "html") {
 
     } else {
 
-      text <- rtf_escape(text)
+      text <- escape_rtf(text)
 
       return(text)
     }
@@ -610,7 +678,7 @@ markdown_to_xml <- function(text) {
   text
 }
 
-# TODO: Make XML versions of these
+
 cmark_rules_xml <- list(
 
   heading = function(x, process) {
@@ -671,11 +739,9 @@ cmark_rules_xml <- list(
   },
   html_inline = function(x, process) {
 
-    # TODO: make this work for XML
-
     tag <- xml2::xml_text(x)
 
-    match <- stringr::str_match(tag, pattern = "^<(/?)([a-zA-Z0-9\\-]+)")
+    match <- str_get_match(tag, pattern = "^<(/?)([a-zA-Z0-9\\-]+)")
 
     if (!is.na(match[1, 1])) {
 
@@ -766,7 +832,9 @@ cmark_rules_xml <- list(
 )
 
 cmark_rules_rtf <- list(
+
   heading = function(x, process) {
+
     heading_sizes <- c(36, 32, 28, 24, 20, 16)
     fs <- heading_sizes[as.numeric(xml2::xml_attr(x, attr = "level"))]
 
@@ -823,7 +891,7 @@ cmark_rules_rtf <- list(
   },
   item = function(x, process) {
     # TODO: probably needs something like process_children()
-    rtf_escape(xml2::xml_text(x))
+    escape_rtf(xml2::xml_text(x))
   },
   code_block = function(x, process) {
     rtf_paste0(rtf_raw("{\\f1 "), xml2::xml_text(x), rtf_raw("}"))
@@ -832,7 +900,7 @@ cmark_rules_rtf <- list(
 
     tag <- xml2::xml_text(x)
 
-    match <- stringr::str_match(tag, pattern = "^<(/?)([a-zA-Z0-9\\-]+)")
+    match <- str_get_match(tag, pattern = "^<(/?)([a-zA-Z0-9\\-]+)")
 
     if (!is.na(match[1, 1])) {
 
@@ -899,7 +967,7 @@ cmark_rules_rtf <- list(
     rtf_raw("{\\i ", process(xml2::xml_children(x)), rtf_raw("}"))
   },
   text = function(x, process) {
-    rtf_escape(xml2::xml_text(x))
+    escape_rtf(xml2::xml_text(x))
   },
   paragraph = function(x, process) {
 
@@ -1399,148 +1467,8 @@ remove_html <- function(text) {
   gsub("<.+?>", "", text)
 }
 
-#' Transform a CSS stylesheet to a tibble representation
-#'
-#' @noRd
-get_css_tbl <- function(data) {
-
-  raw_css_vec <- unlist(strsplit(as.character(compile_scss(data)), "\n"))
-
-  ruleset_start <- which(grepl("\\{\\s*", raw_css_vec))
-  ruleset_end <- which(grepl("\\s*\\}\\s*", raw_css_vec))
-
-  css_tbl <- dplyr::tibble()
-
-  for (i in seq(ruleset_start)) {
-
-    css_tbl <-
-      dplyr::bind_rows(
-        css_tbl,
-        dplyr::tibble(
-          selector = rep(
-            stringr::str_remove(raw_css_vec[ruleset_start[i]], "\\s*\\{\\s*$"),
-            (ruleset_end[i] - ruleset_start[i] - 1)),
-          property = raw_css_vec[(ruleset_start[i] + 1):(ruleset_end[i] - 1)] %>%
-            stringr::str_extract("[a-zA-z-]*?(?=:)") %>%
-            stringr::str_trim(),
-          value = raw_css_vec[(ruleset_start[i] + 1):(ruleset_end[i] - 1)] %>%
-            stringr::str_extract("(?<=:).*") %>%
-            stringr::str_remove(pattern = ";\\s*") %>%
-            stringr::str_remove(pattern = "\\/\\*.*") %>%
-            stringr::str_trim()
-        ) %>%
-          dplyr::filter(!is.na(property))
-      )
-  }
-
-  # Add a column that has the selector type for each row
-  # For anything other than a class selector, the class type
-  # will entered as NA
-  css_tbl <-
-    dplyr::mutate(
-      css_tbl,
-      type = dplyr::case_when(
-        stringr::str_detect(selector, "^\\.") ~ "class",
-        !stringr::str_detect(selector, "^\\.") ~ NA_character_
-      )
-    )
-  css_tbl <- dplyr::select(css_tbl, selector, type, property, value)
-
-  # Stop function if any NA values found while inspecting the
-  # selector names (e.g., not determined to be class selectors)
-  if (any(is.na(css_tbl$type))) {
-    cli::cli_abort("All selectors must be class selectors.")
-  }
-
-  css_tbl
-}
-
-#' Create an inlined style block from a CSS tibble
-#'
-#' @noRd
-create_inline_styles <- function(
-    class_names,
-    css_tbl,
-    extra_style = ""
-) {
-
-  class_names <- unlist(stringr::str_split(class_names, "\\s+"))
-
-  paste0(
-    "style=\"",
-    css_tbl %>%
-      dplyr::filter(selector %in% paste0(".", class_names)) %>%
-      dplyr::select(property, value) %>%
-      dplyr::distinct() %>%
-      dplyr::mutate(property_value = paste0(property, ": ", value, "; ")) %>%
-      dplyr::pull(property_value) %>%
-      paste(collapse = ""),
-    extra_style,
-    "\"") %>%
-    tidy_gsub(" \\\"$", "\\\"")
-}
-
 extract_strings <- function(text, pattern, perl = TRUE) {
   sapply(regmatches(text, regexec(pattern, text, perl = perl)), "[", 1)
-}
-
-#' Transform HTML to inlined HTML using a CSS tibble
-#'
-#' @noRd
-inline_html_styles <- function(html, css_tbl) {
-
-  cls_sty_pattern <- "class=\\\"(.*?)\\\"\\s+style=\\\"(.*?)\\\""
-  cls_names_pattern <- "(?<=\\\").*?(?=\\\")"
-  sty_exist_pattern <- "style=\\\"(.*?)\\\""
-  cls_pattern <- "class=\\\"(.*?)\\\""
-
-  repeat {
-
-    matching_css_style <- extract_strings(html, cls_sty_pattern)
-
-    if (is.na(matching_css_style)) break
-
-    class_names <- extract_strings(matching_css_style, cls_names_pattern)
-
-    existing_style <- stringr::str_match(matching_css_style, sty_exist_pattern)[, 2]
-
-    inline_styles <-
-      create_inline_styles(
-        class_names = class_names,
-        css_tbl = css_tbl,
-        extra_style = existing_style
-      )
-
-    html <-
-      stringr::str_replace(
-        html,
-        pattern = cls_sty_pattern,
-        replacement = inline_styles
-      )
-  }
-
-  repeat {
-
-    class_names <- stringr::str_extract(html, pattern = cls_pattern)
-    class_names <- stringr::str_extract(class_names, pattern = cls_names_pattern)
-
-    if (is.na(class_names)) break
-
-    inline_styles <-
-      create_inline_styles(
-        class_names = class_names,
-        css_tbl = css_tbl
-      )
-
-    html <-
-      stringr::str_replace(
-        html,
-        pattern = cls_pattern,
-        replacement = inline_styles
-      )
-  }
-
-  html
 }
 
 #' Split any strings that are values in scientific notation

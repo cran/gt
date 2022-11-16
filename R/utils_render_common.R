@@ -63,6 +63,7 @@ render_formats <- function(data, context) {
 
   # Render input data to output data where formatting
   # is specified
+
   for (fmt in formats)  {
 
     # Determine if the formatter has a function relevant
@@ -91,6 +92,52 @@ render_formats <- function(data, context) {
   }
 
   dt_body_set(data = data, body = body)
+}
+
+#' Render any formatting directives available in the `substitutions` list
+#'
+#' @noRd
+render_substitutions <- function(
+    data,
+    context
+) {
+
+  body <- dt_body_get(data = data)
+  data_tbl <- dt_data_get(data = data)
+  substitutions <- dt_substitutions_get(data = data)
+
+  # Render input data to output data where formatting
+  # is specified
+  for (subst in substitutions)  {
+
+    # Determine if the formatter has a function relevant
+    # to the context; if not, use the `default` function
+    # (which should always be present)
+    if (context %in% names(subst$func)) {
+      eval_func <- context
+    } else {
+      eval_func <- "default"
+    }
+
+    for (col in subst[["cols"]]) {
+
+      # Perform rendering but only do so if the column is present
+      if (col %in% colnames(data_tbl)) {
+
+        result <- subst$func[[eval_func]](data_tbl[[col]][subst$rows])
+
+        # If any of the resulting output is `NA`, that
+        # means we want to NOT make changes to those
+        # particular cells' output (i.e. inherit the
+        # results of the previous substitution).
+        body[[col]][subst$rows][!is.na(result)] <- stats::na.omit(result)
+      }
+    }
+  }
+
+  data <- dt_body_set(data = data, body = body)
+
+  data
 }
 
 # Move input data cells to `body` that didn't have any rendering applied
@@ -122,10 +169,10 @@ migrate_unformatted_to_output <- function(data, context) {
                 )
             }
 
-            x %>%
-              tidy_gsub("\\s+$", "") %>%
-              process_text(context = context) %>%
-              paste(collapse = ", ")
+            x <- tidy_gsub(x, "\\s+$", "")
+            x <- process_text(x, context = context)
+            x <- paste(x, collapse = ", ")
+            x
           }
         )
 
@@ -135,6 +182,7 @@ migrate_unformatted_to_output <- function(data, context) {
       vals <- data_tbl[[colname]][row_index]
 
       if (is.numeric(vals)) {
+
         vals <-
           format(
             vals,
@@ -142,6 +190,10 @@ migrate_unformatted_to_output <- function(data, context) {
             trim = TRUE,
             justify = "none"
           )
+      }
+
+      if (is.factor(vals)) {
+        vals <- as.character(vals)
       }
 
       body[[colname]][row_index] <- process_text(text = vals, context = context)
@@ -191,11 +243,10 @@ get_row_reorder_df <- function(groups, stub_df) {
     )
   }
 
-  indices <-
-    lapply(stub_df$group_id, `%in%`, x = groups) %>%
-    lapply(which) %>%
-    unlist() %>%
-    order()
+  indices <- lapply(stub_df$group_id, `%in%`, x = groups)
+  indices <- lapply(indices, which)
+  indices <- unlist(indices)
+  indices <- order(indices)
 
   dplyr::tibble(
     rownum_start = seq_along(indices),
@@ -209,12 +260,14 @@ reorder_footnotes <- function(data) {
   stub_df <- dt_stub_df_get(data = data)
   footnotes_tbl <- dt_footnotes_get(data = data)
 
-  rownum_final <- stub_df$rownum_i %>% as.numeric()
+  rownum_final <- as.numeric(stub_df$rownum_i)
 
   for (i in seq_len(nrow(footnotes_tbl))) {
 
-    if (!is.na(footnotes_tbl[i, ][["rownum"]]) &&
-        footnotes_tbl[i, ][["locname"]] %in% c("data", "stub")) {
+    if (
+      !is.na(footnotes_tbl[i, ][["rownum"]]) &&
+      footnotes_tbl[i, ][["locname"]] %in% c("data", "stub")
+    ) {
 
       footnotes_tbl[i, ][["rownum"]] <-
         which(rownum_final == footnotes_tbl[i, ][["rownum"]])
@@ -237,6 +290,7 @@ reorder_styles <- function(data) {
   tmp_mask <- vector("logical", sz)
 
   for (i in seq_len(sz)) {
+
     if (
       !is.na(styles_tbl$rownum[i]) &&
       !grepl("summary_cells", styles_tbl$locname[i])
@@ -492,7 +546,7 @@ last_non_na <- function(vect) {
 # Determine whether the table should have row labels
 # set within a column in the stub
 stub_rownames_has_column <- function(data) {
-  isTRUE("rowname" %in% dt_stub_components(data = data))
+  isTRUE("row_id" %in% dt_stub_components(data = data))
 }
 
 # Determine whether the table should have row group labels
@@ -519,7 +573,8 @@ get_number_of_visible_data_columns <- function(data) {
 get_effective_number_of_columns <- function(data) {
 
   # Check if the table has been built, return an error if that's not the case
-  if (!dt_has_built(data)) {
+  if (!dt_has_built(data = data)) {
+
     cli::cli_abort(
       "The `get_effective_number_of_columns()` function can only be used on
       gt objects that have tables 'built'."
@@ -528,7 +583,7 @@ get_effective_number_of_columns <- function(data) {
 
   # Obtain the number of visible columns in the built table
   n_data_cols <- get_number_of_visible_data_columns(data = data)
-  n_data_cols + length(get_stub_layout(data))
+  n_data_cols + length(get_stub_layout(data = data))
 }
 
 get_stub_layout <- function(data) {
@@ -542,6 +597,7 @@ get_stub_layout <- function(data) {
 
   # Resolve the layout of the stub (i.e., the roles of columns if present)
   if (n_stub_cols == 0) {
+
     # If summary rows are present, we will use the `rowname` column
     # for the summary row labels
     if (dt_summary_exists(data = data)) {

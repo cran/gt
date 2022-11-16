@@ -20,9 +20,9 @@
 #'   `"auto"` option (the default), will automatically align values in columns
 #'   according to the data type (see the Details section for specifics on which
 #'   alignments are applied).
-#' @param columns An optional vector of column names for which the alignment
-#'   should be applied. If nothing is supplied, or if `columns` is `TRUE`, then
-#'   the chosen alignment affects all columns.
+#' @param columns The columns for which the alignment should be applied. By
+#'   default this is set to `everything()` which means that the chosen alignment
+#'   affects all columns.
 #'
 #' @return An object of class `gt_tbl`.
 #'
@@ -62,13 +62,14 @@ cols_align <- function(
   stop_if_not_gt(data = data)
 
   # Get the `align` value, this stops the function if there is no match
-  align <- match.arg(align)
+  align <- rlang::arg_match(align)
 
   # Get the columns supplied in `columns` as a character vector
   column_names <-
     resolve_cols_c(
       expr = {{ columns }},
-      data = data
+      data = data,
+      excl_stub = FALSE
     )
 
   if (align == "auto") {
@@ -76,8 +77,7 @@ cols_align <- function(
     # Get the internal data table
     data_tbl <- dt_data_get(data = data)
 
-    # Obtain a vector of column classes for each of the column
-    # names
+    # Obtain a vector of column classes for each of the column names
     col_classes <- unlist(lapply(lapply(data_tbl[column_names], class), `[[`, 1))
 
     # Check whether all values in 'character' columns are
@@ -142,6 +142,218 @@ determine_which_character_number <- function(
   }
 
   col_classes
+}
+
+#' Align all numeric values in a column along the decimal mark
+#'
+#' @description
+#' For numeric columns that contain values with decimal portions, it is
+#' sometimes useful to have them lined up along the decimal mark for easier
+#' readability. We can do this with `cols_align_decimal()` and provide any
+#' number of columns (the function will skip over columns that don't require
+#' this type of alignment).
+#'
+#' @param data A table object that is created using the [gt()] function.
+#' @param columns The columns for which the alignment should be applied. By
+#'   default this is set to `everything()` which means that the chosen alignment
+#'   affects all columns.
+#' @param dec_mark The character used as a decimal mark in the numeric values to
+#'   be aligned. If a locale value was used when formatting the numeric values
+#'   then `locale` is better to use and it will override any value here in
+#'   `dec_mark`.
+#' @param locale An optional locale ID that can be used to obtain the type of
+#'   decimal mark used in the numeric values to be aligned. Examples include
+#'   `"en"` for English (United States) and `"fr"` for French (France). The use
+#'   of a valid locale ID will override any value provided in `dec_mark`. We can
+#'   use the [info_locales()] function as a useful reference for all of the
+#'   locales that are supported. Any `locale` value provided here will override
+#'   any global locale setting performed in [gt()]'s own `locale` argument.
+#'
+#' @return An object of class `gt_tbl`.
+#'
+#' @section Examples:
+#'
+#' Let's put together a two-column table to create a **gt** table. The first
+#' column `char` just contains letters whereas the second column, `num`, has a
+#' collection of numbers and `NA` values. We could format the numbers with
+#' [fmt_number()] and elect to drop the trailing zeros past the decimal mark
+#' with `drop_trailing_zeros = TRUE`. This can leave formatted numbers that are
+#' hard to scan through because the decimal mark isn't fixed horizontally. We
+#' could remedy this and align the numbers by the decimal mark with
+#' `cols_align_decimal()`.
+#'
+#' ```r
+#' dplyr::tibble(
+#'   char = LETTERS[1:9],
+#'   num = c(1.2, -33.52, 9023.2, -283.527, NA, 0.401, -123.1, NA, 41)
+#' ) %>%
+#'   gt() %>%
+#'   fmt_number(
+#'     columns = num,
+#'     decimals = 3,
+#'     drop_trailing_zeros = TRUE
+#'   ) %>%
+#'   cols_align_decimal()
+#' ```
+#'
+#' \if{html}{\out{
+#' `r man_get_image_tag(file = "man_cols_align_decimal_1.png")`
+#' }}
+#'
+#' @family column modification functions
+#' @section Function ID:
+#' 4-2
+#'
+#' @import rlang
+#' @export
+cols_align_decimal <- function(
+    data,
+    columns = everything(),
+    dec_mark = ".",
+    locale = NULL
+) {
+
+  # Perform input object validation
+  stop_if_not_gt(data = data)
+
+  # Resolve the `locale` value here with the global locale value
+  locale <- resolve_locale(data = data, locale = locale)
+
+  # Obtain the decimal mark if a locale ID is provided
+  dec_mark <- get_locale_dec_mark(locale, dec_mark)
+
+  # Get the columns supplied in `columns` as a character vector
+  resolved <-
+    resolve_cols_c(
+      expr = {{ columns }},
+      data = data,
+      excl_stub = FALSE
+    )
+
+  # Only numeric columns should be transformed through
+  # `cols_align_decimal()` so `column_names` should be filtered
+  # to those types of columns
+  table_data <- dt_data_get(data = data)
+  table_data <- dplyr::select(table_data, dplyr::all_of(resolved))
+
+  cols_are_numeric <-
+    vapply(
+      table_data,
+      FUN.VALUE = logical(1),
+      USE.NAMES = FALSE,
+      FUN = function(x) inherits(x, "numeric") || inherits(x, "integer")
+    )
+
+  # Subset columns to those that are numeric in the input table data
+  columns <- colnames(table_data)[cols_are_numeric]
+
+  # If the subsetting of columns finally results in no columns, return
+  # the data unchanged
+  if (length(columns) < 1) {
+    return(data)
+  }
+
+  # Ensure that right alignment is set for all columns undergoing
+  # the decimal alignment transformation
+  data <- cols_align(data = data, columns = columns, align = "right")
+
+  # Pass `data`, `columns`, `rows`, and the formatting
+  # functions (as a function list) to `subst()`
+  text_transform(
+    data = data,
+    locations = cells_body(
+      columns = columns,
+      rows = everything()
+    ),
+    fn = function(x) {
+      align_to_char(x, align_at = dec_mark)
+    }
+  )
+}
+
+align_to_char <- function(x, align_at = ".") {
+
+  na_x_vals <- grepl("^NA$", x)
+  no_a_char <- !grepl(align_at, x, fixed = TRUE) & !grepl("[0-9]", x)
+  has_t_dec <- grepl("[0-9]\\.$", x)
+
+  x_no_align <- na_x_vals | no_a_char
+
+  x_str <- as.character(x)
+
+  split_x <- strsplit(x[!x_no_align], align_at, fixed = TRUE)
+
+  x_lhs <-
+    unlist(
+      lapply(
+        split_x,
+        FUN = function(x) x[1]
+      )
+    )
+
+  x_rhs <-
+    unlist(
+      lapply(
+        split_x,
+        FUN = function(x) paste0(x[-1], collapse = align_at)
+      )
+    )
+
+  x_piece_lhs <-
+    paste0(
+      strrep("\U02007", max(nchar(x_lhs)) - nchar(x_lhs)),
+      x_lhs
+    )
+
+  x_piece_rhs <-
+    paste0(
+      x_rhs,
+      strrep("\U02007", max(nchar(x_rhs)) - nchar(x_rhs))
+    )
+
+  for (i in seq_along(x_piece_lhs)) {
+
+    if (grepl("[^0-9]$", x_piece_lhs[i])) {
+
+      extracted <- str_single_extract(x_piece_lhs[i], "[^0-9]+$")
+
+      n_char_extracted <- nchar(extracted)
+
+      x_piece_lhs[i] <- gsub(extracted, "", x_piece_lhs[i], fixed = TRUE)
+
+      x_piece_rhs[i] <- paste0(extracted, x_piece_rhs[i])
+
+      x_piece_rhs[i] <-
+        gsub(
+          paste0(paste(rep("\U02007", n_char_extracted), collapse = ""), "$"),
+          "",
+          x_piece_rhs[i]
+      )
+    }
+  }
+
+  x_align <- paste(x_piece_lhs, x_piece_rhs, sep = align_at)
+
+  x_align_parens <- grepl("\\(.+?\\)", x_align)
+
+  if (grepl(align_at, paste(x[!x_no_align], collapse = "|"), fixed = TRUE)) {
+
+    x_align[!nchar(x_rhs) > 0 & !grepl(align_at, x[!x_no_align], fixed = TRUE)] <-
+      sub(align_at, " ", x_align[!nchar(x_rhs) > 0], fixed = TRUE)
+
+    x_align[x_align_parens] <- paste0(x_align[x_align_parens], "\U000A0")
+
+  } else {
+
+    x_align[!nchar(x_rhs) > 0 & !grepl(align_at, x[!x_no_align], fixed = TRUE)] <-
+      sub(align_at, "", x_align[!nchar(x_rhs) > 0], fixed = TRUE)
+
+    x_align[!x_align_parens] <- paste0(x_align[!x_align_parens], "\U000A0")
+  }
+
+  x_str[!x_no_align] <- x_align
+
+  x_str
 }
 
 #' Set the widths of columns
@@ -210,7 +422,7 @@ determine_which_character_number <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-2
+#' 4-3
 #'
 #' @export
 cols_width <- function(
@@ -384,7 +596,7 @@ cols_width <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-3
+#' 4-4
 #'
 #' @import rlang
 #' @export
@@ -512,7 +724,7 @@ cols_label <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-4
+#' 4-5
 #'
 #' @import rlang
 #' @export
@@ -616,7 +828,7 @@ cols_move_to_start <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-5
+#' 4-6
 #'
 #' @import rlang
 #' @export
@@ -711,7 +923,7 @@ cols_move_to_end <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-6
+#' 4-7
 #'
 #' @import rlang
 #' @export
@@ -850,7 +1062,7 @@ cols_move <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-7
+#' 4-8
 #'
 #' @seealso [cols_unhide()] to perform the inverse operation.
 #'
@@ -868,7 +1080,8 @@ cols_hide <- function(
   columns <-
     resolve_cols_c(
       expr = {{ columns }},
-      data = data
+      data = data,
+      excl_stub = FALSE
     )
 
   vars <- dt_boxhead_get_vars(data = data)
@@ -947,7 +1160,7 @@ cols_hide <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-8
+#' 4-9
 #'
 #' @seealso [cols_hide()] to perform the inverse operation.
 #'
@@ -1072,7 +1285,7 @@ cols_unhide <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-9
+#' 4-10
 #'
 #' @import rlang
 #' @export
@@ -1198,7 +1411,7 @@ cols_merge_uncert <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-10
+#' 4-11
 #'
 #' @import rlang
 #' @export
@@ -1238,7 +1451,8 @@ cols_merge_range <- function(
     col_end <-
       resolve_cols_c(
         expr = {{ col_end }},
-        data = data
+        data = data,
+        excl_stub = FALSE
       )
 
     data <-
@@ -1257,14 +1471,16 @@ cols_merge_resolver <- function(data, col_begin, col_end, sep) {
   col_begin <-
     resolve_cols_c(
       expr = {{ col_begin }},
-      data = data
+      data = data,
+      excl_stub = FALSE
     )
 
   # Get the columns supplied in `col_end` as a character vector
   col_end <-
     resolve_cols_c(
       expr = {{ col_end }},
-      data = data
+      data = data,
+      excl_stub = FALSE
     )
 
   columns <- c(col_begin, col_end)
@@ -1372,7 +1588,7 @@ cols_merge_resolver <- function(data, col_begin, col_end, sep) {
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-11
+#' 4-12
 #'
 #' @import rlang
 #' @export
@@ -1491,7 +1707,7 @@ cols_merge_n_pct <- function(
 #'
 #' @family column modification functions
 #' @section Function ID:
-#' 4-12
+#' 4-13
 #'
 #' @import rlang
 #' @export
@@ -1509,7 +1725,8 @@ cols_merge <- function(
   columns <-
     resolve_cols_c(
       expr = {{ columns }},
-      data = data
+      data = data,
+      excl_stub = FALSE
     )
 
   # NOTE: It's important that `hide_columns` NOT be evaluated until after the

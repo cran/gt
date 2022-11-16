@@ -83,13 +83,12 @@ display a minus sign.}
 and the units. The default of \code{TRUE} uses a space character for separation.}
 
 \item{locale}{An optional locale ID that can be used for formatting the value
-according the locale's rules. Examples include \code{"en_US"} for English
-(United States) and \code{"fr_FR"} for French (France). The use of a valid
-locale ID will override any values provided in \code{sep_mark} and \code{dec_mark}.
-We can use the \code{\link[=info_locales]{info_locales()}} function as a useful reference for all of
-the locales that are supported. Any \code{locale} value provided here will
-override any global locale setting performed in \code{\link[=gt]{gt()}}'s own \code{locale}
-argument.}
+according the locale's rules. Examples include \code{"en"} for English (United
+States) and \code{"fr"} for French (France). The use of a valid locale ID will
+override any values provided in \code{sep_mark} and \code{dec_mark}. We can use the
+\code{\link[=info_locales]{info_locales()}} function as a useful reference for all of the locales that
+are supported. Any \code{locale} value provided here will override any global
+locale setting performed in \code{\link[=gt]{gt()}}'s own \code{locale} argument.}
 }
 \value{
 An object of class \code{gt_tbl}.
@@ -117,12 +116,15 @@ values
 formatting specific to the chosen locale
 }
 }
-\details{
+\section{Targeting the values to be formatted}{
+
+
 Targeting of values is done through \code{columns} and additionally by \code{rows} (if
 nothing is provided for \code{rows} then entire columns are selected). Conditional
 formatting is possible by providing a conditional expression to the \code{rows}
 argument. See the \emph{Arguments} section for more information on this.
 }
+
 \section{Examples}{
 
 
@@ -158,7 +160,7 @@ byte sizes as binary values.
 
 \section{Function ID}{
 
-3-9
+3-10
 }
 
 \seealso{
@@ -176,12 +178,14 @@ Other data formatting functions:
 \code{\link{fmt_partsper}()},
 \code{\link{fmt_passthrough}()},
 \code{\link{fmt_percent}()},
+\code{\link{fmt_roman}()},
 \code{\link{fmt_scientific}()},
 \code{\link{fmt_time}()},
 \code{\link{fmt}()},
 \code{\link{sub_large_vals}()},
 \code{\link{sub_missing}()},
 \code{\link{sub_small_vals}()},
+\code{\link{sub_values}()},
 \code{\link{sub_zero}()},
 \code{\link{text_transform}()}
 }
