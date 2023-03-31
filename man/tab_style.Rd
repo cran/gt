@@ -9,11 +9,12 @@ tab_style(data, style, locations)
 \arguments{
 \item{data}{A table object that is created using the \code{\link[=gt]{gt()}} function.}
 
-\item{style}{a vector of styles to use. The \code{\link[=cell_text]{cell_text()}}, \code{\link[=cell_fill]{cell_fill()}}, and
-\code{\link[=cell_borders]{cell_borders()}} helper functions can be used here to more easily generate
-valid styles.  If using more than one helper function to define styles, all
-calls must be enclosed in a \code{\link[=list]{list()}}. Custom CSS declarations can be used
-for HTML output by including a \code{\link[=css]{css()}}-based statement as a list item.}
+\item{style}{The styles to use for the cells at the targeted \code{locations}. The
+\code{\link[=cell_text]{cell_text()}}, \code{\link[=cell_fill]{cell_fill()}}, and \code{\link[=cell_borders]{cell_borders()}} helper functions can be
+used here to more easily generate valid styles. If using more than one
+helper function to define styles, all calls must be enclosed in a \code{\link[=list]{list()}}.
+Custom CSS declarations can be used for HTML output by including a
+\code{\link[=css]{css()}}-based statement as a list item.}
 
 \item{locations}{the cell or set of cells to be associated with the style.
 Supplying any of the \verb{cells_*()} helper functions is a useful way to target
@@ -56,13 +57,13 @@ bold text (the degree of choice is greater with variable fonts)
 Use \code{\link{exibble}} to create a \strong{gt} table. Add styles that are to be applied
 to data cells that satisfy a condition (using \code{tab_style()}).
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  dplyr::select(num, currency) \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  dplyr::select(num, currency) |>
+  gt() |>
   fmt_number(
     columns = c(num, currency),
     decimals = 1
-  ) \%>\%
+  ) |>
   tab_style(
     style = list(
       cell_fill(color = "lightcyan"),
@@ -72,7 +73,7 @@ to data cells that satisfy a condition (using \code{tab_style()}).
       columns = num,
       rows = num >= 5000
     )
-  ) \%>\%
+  ) |>
   tab_style(
     style = list(
       cell_fill(color = "#F9E3D6"),
@@ -92,17 +93,17 @@ to data cells that satisfy a condition (using \code{tab_style()}).
 Use \code{\link{sp500}} to create a \strong{gt} table. Color entire rows of cells based on
 values in a particular column.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sp500 \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{sp500 |>
   dplyr::filter(
     date >= "2015-12-01" &
     date <= "2015-12-15"
-  ) \%>\%
-  dplyr::select(-c(adj_close, volume)) \%>\%
-  gt() \%>\%
+  ) |>
+  dplyr::select(-c(adj_close, volume)) |>
+  gt() |>
   tab_style(
     style = cell_fill(color = "lightgreen"),
     locations = cells_body(rows = close > open)
-  ) \%>\%
+  ) |>
   tab_style(
     style = list(
       cell_fill(color = "red"),
@@ -120,10 +121,10 @@ Use \code{\link{exibble}} to create a \strong{gt} table. Replace missing values 
 \code{\link[=sub_missing]{sub_missing()}} function and then add styling to the \code{char} column with
 \code{\link[=cell_fill]{cell_fill()}} and with a CSS style declaration.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  dplyr::select(char, fctr) \%>\%
-  gt() \%>\%
-  sub_missing() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  dplyr::select(char, fctr) |>
+  gt() |>
+  sub_missing() |>
   tab_style(
     style = list(
       cell_fill(color = "lightcyan"),
@@ -141,6 +142,11 @@ Use \code{\link{exibble}} to create a \strong{gt} table. Replace missing values 
 \section{Function ID}{
 
 2-10
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

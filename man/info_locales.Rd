@@ -46,7 +46,12 @@ with a \code{"v"}.
 
 \section{Function ID}{
 
-10-4
+11-4
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

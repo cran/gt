@@ -42,8 +42,8 @@ required each and every context.
 Use \code{\link{exibble}} to create a \strong{gt} table. Format the \code{currency} column to
 have currency values in guilder (a defunct Dutch currency).
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  gt() |>
   fmt_currency(
     columns = currency,
     currency = currency(
@@ -61,7 +61,12 @@ have currency values in guilder (a defunct Dutch currency).
 
 \section{Function ID}{
 
-7-19
+8-19
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -92,6 +97,7 @@ Other helper functions:
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

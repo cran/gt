@@ -30,8 +30,8 @@ analogous helper function \code{\link[=pct]{pct()}} will be more useful.
 Use \code{\link{exibble}} to create a \strong{gt} table. Use the \code{pct()} helper to define
 the font size for the column labels.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  gt() |>
   tab_style(
     style = cell_text(size = pct(75)),
     locations = cells_column_labels()
@@ -45,7 +45,12 @@ the font size for the column labels.
 
 \section{Function ID}{
 
-7-4
+8-4
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -76,6 +81,7 @@ Other helper functions:
 \code{\link{md}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

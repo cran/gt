@@ -4,10 +4,30 @@
 \alias{as_rtf}
 \title{Output a \strong{gt} object as RTF}
 \usage{
-as_rtf(data)
+as_rtf(
+  data,
+  incl_open = TRUE,
+  incl_header = TRUE,
+  incl_page_info = TRUE,
+  incl_body = TRUE,
+  incl_close = TRUE
+)
 }
 \arguments{
 \item{data}{A table object that is created using the \code{gt()} function.}
+
+\item{incl_open, incl_close}{Options that govern whether the opening or
+closing \code{"{"} and \code{"}"} should be included. By default, both options are
+\code{TRUE}.}
+
+\item{incl_header}{Should the RTF header be included in the output? By
+default, this is \code{TRUE}.}
+
+\item{incl_page_info}{Should the RTF output include directives for the
+document pages? This is \code{TRUE} by default.}
+
+\item{incl_body}{An option to include the body of RTF document. By
+default, this is \code{TRUE}.}
 }
 \description{
 Get the RTF content from a \code{gt_tbl} object as as a single-element character
@@ -21,14 +41,14 @@ Use \code{\link{gtcars}} to create a \strong{gt} table. Add a header and then ex
 code.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_rtf <-
-  gtcars \%>\%
-  dplyr::select(mfr, model) \%>\%
-  dplyr::slice(1:2) \%>\%
-  gt() \%>\%
+  gtcars |>
+  dplyr::select(mfr, model) |>
+  dplyr::slice(1:2) |>
+  gt() |>
   tab_header(
     title = md("Data listing from **gtcars**"),
     subtitle = md("`gtcars` is an R dataset")
-  ) \%>\%
+  ) |>
   as_rtf()
 }\if{html}{\out{</div>}}
 }
@@ -36,6 +56,11 @@ code.
 \section{Function ID}{
 
 13-4
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

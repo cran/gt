@@ -1,6 +1,7 @@
 #' Understand what's been set inside of a **gt** table object
 #'
 #' @description
+#'
 #' It can become increasingly difficult to recall the ID values associated with
 #' different labels in a **gt** table. Further to this, there are also
 #' situations where **gt** will generate ID values on your behalf (e.g., with
@@ -29,16 +30,16 @@
 #'
 #' ```r
 #' gt_tbl <-
-#'   gtcars %>%
-#'   dplyr::select(model, year, starts_with("hp"), msrp) %>%
-#'   dplyr::slice(1:4) %>%
-#'   gt(rowname_col = "model") %>%
+#'   gtcars |>
+#'   dplyr::select(model, year, starts_with("hp"), msrp) |>
+#'   dplyr::slice(1:4) |>
+#'   gt(rowname_col = "model") |>
 #'   tab_spanner(
 #'     label = "performance",
 #'     columns = starts_with("hp")
 #'   )
 #'
-#' gt_tbl %>% tab_info()
+#' gt_tbl |> tab_info()
 #' ```
 #'
 #' \if{html}{\out{
@@ -48,6 +49,9 @@
 #' @family part creation/modification functions
 #' @section Function ID:
 #' 2-12
+#'
+#' @section Function Introduced:
+#' `v0.8.0` (November 16, 2022)
 #'
 #' @export
 tab_info <- function(data) {
@@ -197,7 +201,7 @@ tab_info <- function(data) {
         if (group_id %in% names(list_of_summaries$summary_df_data_list)) {
 
           group_summary_row_id <-
-            list_of_summaries$summary_df_data_list[[group_id]][["rowname"]]
+            names(list_of_summaries$summary_df_data_list[[group_id]][["rowname"]])
 
           group_summary_i <-
             dplyr::bind_rows(
@@ -233,7 +237,7 @@ tab_info <- function(data) {
     if (grand_summary_col %in% names(list_of_summaries$summary_df_data_list)) {
 
       grand_summary_row_id <-
-        list_of_summaries$summary_df_data_list[[grand_summary_col]][["rowname"]]
+        names(list_of_summaries$summary_df_data_list[[grand_summary_col]][["rowname"]])
 
       grand_summary <-
         dplyr::tibble(
@@ -252,6 +256,7 @@ tab_info <- function(data) {
         group_summary,
         grand_summary
       )
+
   } else {
     summaries <- empty_tbl
   }

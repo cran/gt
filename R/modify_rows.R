@@ -1,6 +1,7 @@
 #' Modify the ordering of any row groups
 #'
 #' @description
+#'
 #' We can modify the display order of any row groups in a **gt** object with the
 #' `row_group_order()` function. The `groups` argument takes a vector of row
 #' group ID values. After this function is invoked, the row groups will adhere
@@ -24,12 +25,12 @@
 #' new ordering in `groups`.
 #'
 #' ```r
-#' exibble %>%
-#'   dplyr::select(char, currency, row, group) %>%
+#' exibble |>
+#'   dplyr::select(char, currency, row, group) |>
 #'   gt(
 #'     rowname_col = "row",
 #'     groupname_col = "group"
-#'   ) %>%
+#'   ) |>
 #'   row_group_order(groups = c("grp_b", "grp_a"))
 #' ```
 #'
@@ -39,7 +40,10 @@
 #'
 #' @family row addition/modification functions
 #' @section Function ID:
-#' 5-3
+#' 6-3
+#'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
 #'
 #' @export
 row_group_order <- function(
@@ -48,7 +52,7 @@ row_group_order <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   # Stop function if `groups` is not a `character` vector
   if (!inherits(groups, "character")) {

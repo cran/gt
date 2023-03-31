@@ -19,11 +19,12 @@ tab_style_body(
 \arguments{
 \item{data}{A table object that is created using the \code{\link[=gt]{gt()}} function.}
 
-\item{style}{a vector of styles to use. The \code{\link[=cell_text]{cell_text()}}, \code{\link[=cell_fill]{cell_fill()}}, and
-\code{\link[=cell_borders]{cell_borders()}} helper functions can be used here to more easily generate
-valid styles. If using more than one helper function to define styles, all
-calls must be enclosed in a \code{\link[=list]{list()}}. Custom CSS declarations can be used
-for HTML output by including a \code{\link[=css]{css()}}-based statement as a list item.}
+\item{style}{The styles to use for the targeted cells. The \code{\link[=cell_text]{cell_text()}},
+\code{\link[=cell_fill]{cell_fill()}}, and \code{\link[=cell_borders]{cell_borders()}} helper functions can be used here to
+more easily generate valid styles. If using more than one helper function
+to define styles, all calls must be enclosed in a \code{\link[=list]{list()}}. Custom CSS
+declarations can be used for HTML output by including a \code{\link[=css]{css()}}-based
+statement as a list item.}
 
 \item{columns}{Optional columns for constraining the targeting process.
 Providing \code{\link[=everything]{everything()}} (the default) results in cells in all \code{columns}
@@ -92,6 +93,44 @@ bold text (the degree of choice is greater with variable fonts)
 \item the cell borders (\code{\link[=cell_borders]{cell_borders()}})
 }
 }
+\section{Targeting cells with \code{columns} and \code{rows}}{
+
+
+Targeting of values is done through \code{columns} and additionally by \code{rows} (if
+nothing is provided for \code{rows} then entire columns are selected). The
+\code{columns} argument allows us to constrain a subset of cells contained in the
+resolved columns. We say resolved because aside from declaring column names
+in \code{c()} (with bare column names or names in quotes) we can use
+\strong{tidyselect}-style expressions. This can be as basic as supplying a select
+helper like \code{starts_with()}, or, providing a more complex incantation like
+
+\code{where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)}
+
+which targets numeric columns that have a maximum value greater than
+1,000,000 (excluding any \code{NA}s from consideration).
+
+By default all columns and rows are selected (with the \code{everything()}
+defaults). Cell values that are incompatible with a given search will be
+skipped over. So it's safe to select all columns with a type of search (only
+those values that can be formatted will be formatted), but, you may not want
+that. One strategy is to format the bulk of cell values with one formatting
+function and then constrain the columns for later passes with other types of
+formatting (the last formatting done to a cell is what you get in the final
+output).
+
+Once the columns are targeted, we may also target the \code{rows} within those
+columns. This can be done in a variety of ways. If a stub is present, then we
+potentially have row identifiers. Those can be used much like column names in
+the \code{columns}-targeting scenario. We can use simpler \strong{tidyselect}-style
+expressions (the select helpers should work well here) and we can use quoted
+row identifiers in \code{c()}. It's also possible to use row indices (e.g.,
+\code{c(3, 5, 6)}) though these index values must correspond to the row numbers of
+the input data (the indices won't necessarily match those of rearranged rows
+if row groups are present). One more type of expression is possible, an
+expression that takes column values (can involve any of the available columns
+in the table) and returns a logical vector.
+}
+
 \section{Examples}{
 
 
@@ -100,7 +139,7 @@ contains an assortment of values that could potentially undergo some styling
 via \code{tab_style_body()}.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl <-
-  exibble \%>\%
+  exibble |>
   gt(
     rowname_col = "row",
     groupname_col = "group"
@@ -112,7 +151,7 @@ in the \code{values} argument of \code{tab_style_body()}. It's okay to search fo
 numerical, character, or logical values across all columns. Let's target the
 values \code{49.95} and \code{33.33} and style those cells with an orange fill.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     style = cell_fill(color = "orange"),
     values = c(49.95, 33.33)
@@ -126,7 +165,7 @@ values \code{49.95} and \code{33.33} and style those cells with an orange fill.
 Multiple styles can be combined in a \code{list}, here's an example of that using
 the same cell targets:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     style = list(
       cell_text(font = google_font("Inter"), color = "white"),
@@ -150,12 +189,12 @@ with those specific keywords in the \code{targets} argument. For the \code{49.95
 we will style the entire row and with \code{33.33} the entire column will get the
 same styling.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     style = cell_fill(color = "lightblue"),
     values = 49.95,
     targets = "row"
-  ) \%>\%
+  ) |>
   tab_style_body(
     style = cell_fill(color = "lightblue"),
     values = 33.33,
@@ -173,13 +212,13 @@ is done with the \code{extents} argument. Valid keywords that can be included in
 the vector are: \code{"body"} (the default) and \code{"stub"}. Let's take the previous
 example and extend the styling of the row into the stub.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     style = cell_fill(color = "lightblue"),
     values = 49.95,
     targets = "row",
     extents = c("body", "stub")
-  ) \%>\%
+  ) |>
   tab_style_body(
     style = cell_fill(color = "lightblue"),
     values = 33.33,
@@ -195,7 +234,7 @@ We can also use the \code{pattern} argument to target cell values in
 \code{character}-based columns. The \code{"fctr"} column is skipped because it is in
 fact a factor-based column.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     style = cell_fill(color = "green"),
     pattern = "ne|na"
@@ -212,7 +251,7 @@ The function you give to \code{fn} will be invoked separately on all cells so th
 should be evaluated. For this next example, the supplied function should only
 be used on numeric values and we can make sure of this by using \code{columns = where(is.numeric)}.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gt_tbl |>
   tab_style_body(
     columns = where(is.numeric),
     style = cell_fill(color = "pink"),
@@ -228,6 +267,11 @@ be used on numeric values and we can make sure of this by using \code{columns = 
 \section{Function ID}{
 
 2-11
+}
+
+\section{Function Introduced}{
+
+\code{v0.8.0} (November 16, 2022)
 }
 
 \seealso{

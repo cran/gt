@@ -27,9 +27,9 @@ rendered... to HTML.
 Use \code{\link{exibble}} to create a \strong{gt} table. When adding a title, use the
 \code{html()} helper to use HTML formatting.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  dplyr::select(currency, char) \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  dplyr::select(currency, char) |>
+  gt() |>
   tab_header(title = html("<em>HTML</em>"))
 }\if{html}{\out{</div>}}
 
@@ -40,7 +40,12 @@ Use \code{\link{exibble}} to create a \strong{gt} table. When adding a title, us
 
 \section{Function ID}{
 
-7-2
+8-2
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -71,6 +76,7 @@ Other helper functions:
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

@@ -1,6 +1,7 @@
 #' Add a table header
 #'
 #' @description
+#'
 #' We can add a table header to the **gt** table with a title and even a
 #' subtitle. A table header is an optional table part that is positioned above
 #' the column labels. We have the flexibility to use Markdown formatting for the
@@ -23,10 +24,10 @@
 #' `tab_header()` function so that we get a title and a subtitle for the table.
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(mfr, model, msrp) %>%
-#'   dplyr::slice(1:5) %>%
-#'   gt() %>%
+#' gtcars |>
+#'   dplyr::select(mfr, model, msrp) |>
+#'   dplyr::slice(1:5) |>
+#'   gt() |>
 #'   tab_header(
 #'     title = md("Data listing from **gtcars**"),
 #'     subtitle = md("`gtcars` is an R dataset")
@@ -41,6 +42,9 @@
 #' @section Function ID:
 #' 2-1
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @export
 tab_header <- function(
     data,
@@ -50,7 +54,7 @@ tab_header <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   dt_set_heading_components(
     data = data,
@@ -63,6 +67,7 @@ tab_header <- function(
 #' Add a spanner column label
 #'
 #' @description
+#'
 #' Set a spanner column label by mapping it to columns already in the table.
 #' This label is placed above one or more column labels, spanning the width of
 #' those columns and column labels.
@@ -103,13 +108,13 @@ tab_header <- function(
 #' column with the label `"performance"`.
 #'
 #' ```r
-#' gtcars %>%
+#' gtcars |>
 #'   dplyr::select(
 #'     -mfr, -trim, bdy_style,
 #'     -drivetrain, -trsmn, -ctry_origin
-#'   ) %>%
-#'   dplyr::slice(1:8) %>%
-#'   gt(rowname_col = "model") %>%
+#'   ) |>
+#'   dplyr::slice(1:8) |>
+#'   gt(rowname_col = "model") |>
 #'   tab_spanner(
 #'     label = "performance",
 #'     columns = c(
@@ -127,6 +132,9 @@ tab_header <- function(
 #' @section Function ID:
 #' 2-2
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @import rlang
 #' @export
 tab_spanner <- function(
@@ -141,7 +149,7 @@ tab_spanner <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   present_spanner_ids <- dt_spanners_get_ids(data = data)
 
@@ -323,23 +331,12 @@ resolve_spanned_column_names <- function(
 #' Create column labels and spanners via delimited names
 #'
 #' @description
+#'
 #' This function will split selected delimited column names such that the first
 #' components (LHS) are promoted to being spanner column labels, and the
 #' secondary components (RHS) will become the column labels. Please note that
 #' reference to individual columns must continue to be the column names from the
 #' input table data (which are unique by necessity).
-#'
-#' @details
-#' If we look to the column names in the `iris` dataset as an example of how
-#' `tab_spanner_delim()` might be useful, we find the names `Sepal.Length`,
-#' `Sepal.Width`, `Petal.Length`, `Petal.Width`. From this naming system, it's
-#' easy to see that the `Sepal` and `Petal` can group together the repeated
-#' common `Length` and `Width` values. In your own datasets, we can avoid a
-#' lengthy relabeling with [cols_label()] if column names can be fashioned
-#' beforehand to contain both the spanner column label and the column label. An
-#' additional advantage is that the column names in the input table data remain
-#' unique even though there may eventually be repeated column labels in the
-#' rendered output table).
 #'
 #' @inheritParams tab_spanner
 #' @param delim The delimiter to use to split an input column name. The
@@ -355,6 +352,19 @@ resolve_spanned_column_names <- function(
 #'
 #' @return An object of class `gt_tbl`.
 #'
+#' @details
+#'
+#' If we look to the column names in the `iris` dataset as an example of how
+#' `tab_spanner_delim()` might be useful, we find the names `Sepal.Length`,
+#' `Sepal.Width`, `Petal.Length`, `Petal.Width`. From this naming system, it's
+#' easy to see that the `Sepal` and `Petal` can group together the repeated
+#' common `Length` and `Width` values. In your own datasets, we can avoid a
+#' lengthy relabeling with [cols_label()] if column names can be fashioned
+#' beforehand to contain both the spanner column label and the column label. An
+#' additional advantage is that the column names in the input table data remain
+#' unique even though there may eventually be repeated column labels in the
+#' rendered output table).
+#'
 #' @section Examples:
 #'
 #' Use `iris` to create a **gt** table and use the `tab_spanner_delim()`
@@ -363,10 +373,10 @@ resolve_spanned_column_names <- function(
 #' column labels (second part).
 #'
 #' ```r
-#' iris %>%
-#'   dplyr::group_by(Species) %>%
-#'   dplyr::slice(1:4) %>%
-#'   gt() %>%
+#' iris |>
+#'   dplyr::group_by(Species) |>
+#'   dplyr::slice(1:4) |>
+#'   gt() |>
 #'   tab_spanner_delim(delim = ".")
 #' ```
 #'
@@ -378,6 +388,9 @@ resolve_spanned_column_names <- function(
 #' @section Function ID:
 #' 2-3
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @import rlang
 #' @export
 tab_spanner_delim <- function(
@@ -388,8 +401,9 @@ tab_spanner_delim <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
+  # Ensure that arguments are matched
   split <- rlang::arg_match(split)
 
   # Get all of the columns in the dataset
@@ -556,18 +570,43 @@ tab_spanner_delim <- function(
   # Re-label column labels included in `colnames_spanners`
   #
 
-  new_labels <-
-    strsplit(colnames_spanners_ordered, split = delim, fixed = TRUE) %>%
-    vapply(FUN.VALUE = character(1), utils::tail, 1)
+  new_labels <- strsplit(colnames_spanners_ordered, split = delim, fixed = TRUE)
+  new_labels <- vapply(new_labels, FUN.VALUE = character(1), utils::tail, 1)
 
   new_label_list <- stats::setNames(as.list(new_labels), colnames_spanners)
 
+  #
+  # Merge any column labels previously set by `cols_label()`
+  #
+
+  boxh <- dt_boxhead_get(data = data)
+
+  old_label_list <- as.list(boxh$column_label)
+  names(old_label_list) <- boxh$var
+
+  for (name in names(new_label_list)) {
+
+    if (!(name %in% names(old_label_list))) next
+
+    if (
+      !is.character(old_label_list[[name]]) ||
+      (
+        is.character(old_label_list[[name]]) &&
+        old_label_list[[name]] != name
+      )
+    ) {
+      new_label_list[[name]] <- old_label_list[[name]]
+    }
+  }
+
+  # Conclude by invoking `cols_label()` on the data
   cols_label(data, .list = new_label_list)
 }
 
 #' Add a row group to a **gt** table
 #'
 #' @description
+#'
 #' Create a row group with a collection of rows. This requires specification of
 #' the rows to be included, either by supplying row labels, row indices, or
 #' through use of a select helper function like [starts_with()]. To modify the
@@ -610,10 +649,10 @@ tab_spanner_delim <- function(
 #' label ends up being rendered without a label at all.
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(model, year, hp, trq) %>%
-#'   dplyr::slice(1:8) %>%
-#'   gt(rowname_col = "model") %>%
+#' gtcars |>
+#'   dplyr::select(model, year, hp, trq) |>
+#'   dplyr::slice(1:8) |>
+#'   gt(rowname_col = "model") |>
 #'   tab_row_group(
 #'     label = "numbered",
 #'     rows = matches("^[0-9]")
@@ -630,14 +669,14 @@ tab_spanner_delim <- function(
 #' provided to the `rows` argument).
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(model, year, hp, trq) %>%
-#'   dplyr::slice(1:8) %>%
-#'   gt(rowname_col = "model") %>%
+#' gtcars |>
+#'   dplyr::select(model, year, hp, trq) |>
+#'   dplyr::slice(1:8) |>
+#'   gt(rowname_col = "model") |>
 #'   tab_row_group(
 #'     label = "powerful",
 #'     rows = hp <= 600
-#'   ) %>%
+#'   ) |>
 #'   tab_row_group(
 #'     label = "super powerful",
 #'     rows = hp > 600
@@ -652,6 +691,9 @@ tab_spanner_delim <- function(
 #' @section Function ID:
 #' 2-4
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @import rlang
 #' @export
 tab_row_group <- function(
@@ -664,7 +706,7 @@ tab_row_group <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   arrange_groups_vars <- dt_row_groups_get(data = data)
 
@@ -677,7 +719,10 @@ tab_row_group <- function(
     cli::cli_warn(c(
       "Since gt v0.3.0 the `group` argument has been deprecated.",
       "*" = "Use the `label` argument to specify the group label."
-    ))
+    ),
+    .frequency = "regularly",
+    .frequency_id = "tab_row_group_group_arg_deprecated"
+    )
   }
 
   # Warn user about `others_label` deprecation
@@ -693,7 +738,10 @@ tab_row_group <- function(
       "Since gt v0.3.0 the `others_label` argument has been deprecated.",
       "*" = "Use `tab_options(row_group.default_label = <label>)` to set
       this label."
-    ))
+    ),
+    .frequency = "regularly",
+    .frequency_id = "tab_row_group_others_label_arg_deprecated"
+    )
 
     if (missing(label) && missing(rows) && missing(id)) {
       return(data)
@@ -747,6 +795,7 @@ tab_row_group <- function(
 #' Add label text to the stubhead
 #'
 #' @description
+#'
 #' Add a label to the stubhead of a **gt** table. The stubhead is the lone
 #' element that is positioned left of the column labels, and above the stub. If
 #' a stub does not exist, then there is no stubhead (so no change will be made
@@ -768,10 +817,10 @@ tab_row_group <- function(
 #' is in the stub.
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(model, year, hp, trq) %>%
-#'   dplyr::slice(1:5) %>%
-#'   gt(rowname_col = "model") %>%
+#' gtcars |>
+#'   dplyr::select(model, year, hp, trq) |>
+#'   dplyr::slice(1:5) |>
+#'   gt(rowname_col = "model") |>
 #'   tab_stubhead(label = "car")
 #' ```
 #'
@@ -783,6 +832,9 @@ tab_row_group <- function(
 #' @section Function ID:
 #' 2-5
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @export
 tab_stubhead <- function(
     data,
@@ -790,7 +842,7 @@ tab_stubhead <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   dt_stubhead_label(data = data, label = label)
 }
@@ -798,6 +850,7 @@ tab_stubhead <- function(
 #' Control indentation of row labels in the stub
 #'
 #' @description
+#'
 #' Indentation of row labels is an effective way for establishing structure in a
 #' table stub. The `tab_stub_indent()` function allows for fine control over
 #' row label indentation through either explicit definition of an indentation
@@ -821,60 +874,38 @@ tab_stubhead <- function(
 #'
 #' @section Examples:
 #'
-#' Use [`pizzaplace`] to create a **gt** table. With `tab_stub_indent()` we can
-#' add indentation to targeted row labels in the stub. Here we target the
-#' different pizza sizes and avoid selecting the repeating `"All Sizes"` row
-#' label.
+#' Use [`pizzaplace`] to create a **gt** table with summary rows at the top of
+#' each row group. With `tab_stub_indent()` we can add indentation to the row
+#' labels in the stub.
 #'
 #' ```r
-#' dplyr::bind_rows(
-#'   pizzaplace %>%
-#'     dplyr::group_by(type, size) %>%
-#'     dplyr::summarize(
-#'       sold = n(),
-#'       income = sum(price),
-#'       .groups = "drop_last"
-#'     ) %>%
-#'     dplyr::summarize(
-#'       sold = sum(sold),
-#'       income = sum(income),
-#'       size = "All Sizes",
-#'       .groups = "drop"
-#'     ),
-#'   pizzaplace %>%
-#'     dplyr::group_by(type, size) %>%
-#'     dplyr::summarize(
-#'       sold = n(),
-#'       income = sum(price),
-#'       .groups = "drop"
+#' pizzaplace |>
+#'   dplyr::group_by(type, size) |>
+#'   dplyr::summarize(
+#'     sold = dplyr::n(),
+#'     income = sum(price),
+#'     .groups = "drop"
+#'   ) |>
+#'   gt(rowname_col = "size", groupname_col = "type") |>
+#'   tab_header(title = "Pizzas Sold in 2015") |>
+#'   fmt_integer(columns = sold) |>
+#'   fmt_currency(columns = income) |>
+#'   summary_rows(
+#'     fns = list(label = "All Sizes", fn = "sum"),
+#'     side = "top",
+#'     fmt = list(
+#'       ~ fmt_integer(., columns = sold),
+#'       ~ fmt_currency(., columns = income)
 #'     )
-#' ) %>%
-#'   gt(rowname_col = "size", groupname_col = "type") %>%
-#'   tab_header(title = "Pizzas Sold in 2015") %>%
-#'   fmt_number(
-#'     columns = sold,
-#'     decimals = 0,
-#'     use_seps = TRUE
-#'   ) %>%
-#'   fmt_currency(
-#'     columns = income,
-#'     currency = "USD"
-#'   ) %>%
+#'   ) |>
 #'   tab_options(
-#'     summary_row.background.color = "#ACEACE",
+#'     summary_row.background.color = "gray95",
 #'     row_group.background.color = "#FFEFDB",
 #'     row_group.as_column = TRUE
-#'   ) %>%
+#'   ) |>
 #'   tab_stub_indent(
-#'     rows = matches("^L|^M|^S|^XL|^XXL"),
+#'     rows = everything(),
 #'     indent = 2
-#'   ) %>%
-#'   tab_style(
-#'     style = cell_fill(color = "gray95"),
-#'     locations = list(
-#'       cells_body(rows = matches("^All")),
-#'       cells_stub(rows = matches("^All"))
-#'     )
 #'   )
 #' ```
 #'
@@ -886,6 +917,9 @@ tab_stubhead <- function(
 #' @section Function ID:
 #' 2-6
 #'
+#' @section Function Introduced:
+#' `v0.7.0` (Aug 25, 2022)
+#'
 #' @import rlang
 #' @export
 tab_stub_indent <- function(
@@ -895,7 +929,7 @@ tab_stub_indent <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   # Capture the `rows` expression
   row_expr <- rlang::enquo(rows)
@@ -969,6 +1003,7 @@ tab_stub_indent <- function(
 #' Add a table footnote
 #'
 #' @description
+#'
 #' The `tab_footnote()` function can make it a painless process to add a
 #' footnote to a **gt** table. There are two components to a footnote: (1) a
 #' footnote mark that is attached to the targeted cell text, and (2) the
@@ -976,20 +1011,6 @@ tab_stub_indent <- function(
 #' placed in the table's footer area. Each call of `tab_footnote()` will add a
 #' different note, and one or more cells can be targeted via the location helper
 #' functions (e.g., [cells_body()], [cells_column_labels()], etc.).
-#'
-#' @details
-#' The formatting of the footnotes can be controlled through the use of various
-#' parameters in the [tab_options()] function:
-#' - `footnotes.multiline`: a setting that determines whether footnotes each
-#' start on a new line or are combined into a single block.
-#' - `footnotes.sep`: allows for a choice of the separator between consecutive
-#' footnotes in the table footer. By default, this is set to a single space
-#' character.
-#' - `footnotes.marks`: the set of sequential characters or numbers used to
-#' identify the footnotes.
-#' - `footnotes.font.size`: the size of the font used in the footnote section.
-#' - `footnotes.padding`: the amount of padding to apply between the footnote
-#' and source note sections in the table footer.
 #'
 #' @inheritParams fmt_number
 #' @param footnote The text to be used in the footnote. We can optionally use
@@ -1013,6 +1034,21 @@ tab_stub_indent <- function(
 #'
 #' @return An object of class `gt_tbl`.
 #'
+#' @details
+#'
+#' The formatting of the footnotes can be controlled through the use of various
+#' parameters in the [tab_options()] function:
+#' - `footnotes.multiline`: a setting that determines whether footnotes each
+#' start on a new line or are combined into a single block.
+#' - `footnotes.sep`: allows for a choice of the separator between consecutive
+#' footnotes in the table footer. By default, this is set to a single space
+#' character.
+#' - `footnotes.marks`: the set of sequential characters or numbers used to
+#' identify the footnotes.
+#' - `footnotes.font.size`: the size of the font used in the footnote section.
+#' - `footnotes.padding`: the amount of padding to apply between the footnote
+#' and source note sections in the table footer.
+#'
 #' @section Examples:
 #'
 #' Use [`sza`] to create a **gt** table. Color the `sza` column using the
@@ -1020,21 +1056,19 @@ tab_stub_indent <- function(
 #' `sza` column label (explaining what the color scale signifies).
 #'
 #' ```r
-#' sza %>%
+#' sza |>
 #'   dplyr::filter(
 #'     latitude == 20 &
 #'       month == "jan" &
 #'       !is.na(sza)
-#'   ) %>%
-#'   dplyr::select(-latitude, -month) %>%
-#'   gt() %>%
+#'   ) |>
+#'   dplyr::select(-latitude, -month) |>
+#'   gt() |>
 #'   data_color(
 #'     columns = sza,
-#'     colors = scales::col_numeric(
-#'       palette = c("white", "yellow", "navyblue"),
-#'       domain = c(0, 90)
-#'     )
-#'   ) %>%
+#'     palette = c("white", "yellow", "navyblue"),
+#'     domain = c(0, 90)
+#'   ) |>
 #'   tab_footnote(
 #'     footnote = "Color indicates height of sun.",
 #'     locations = cells_column_labels(
@@ -1051,6 +1085,9 @@ tab_stub_indent <- function(
 #' @section Function ID:
 #' 2-7
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @export
 tab_footnote <- function(
     data,
@@ -1062,7 +1099,7 @@ tab_footnote <- function(
   placement <- rlang::arg_match(placement)
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   if (is.null(locations)) {
 
@@ -1108,7 +1145,12 @@ set_footnote <- function(loc, data, footnote, placement) {
   UseMethod("set_footnote")
 }
 
-set_footnote.cells_title <- function(loc, data, footnote, placement) {
+set_footnote.cells_title <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   title_components <- rlang::eval_tidy(loc$groups)
 
@@ -1145,7 +1187,12 @@ set_footnote.cells_title <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_stubhead <- function(loc, data, footnote, placement) {
+set_footnote.cells_stubhead <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   data <-
     dt_footnotes_add(
@@ -1162,7 +1209,12 @@ set_footnote.cells_stubhead <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_column_labels <- function(loc, data, footnote, placement) {
+set_footnote.cells_column_labels <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   resolved <- resolve_cells_column_labels(data = data, object = loc)
 
@@ -1185,7 +1237,12 @@ set_footnote.cells_column_labels <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_column_spanners <- function(loc, data, footnote, placement) {
+set_footnote.cells_column_spanners <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   resolved <- resolve_cells_column_spanners(data = data, object = loc)
 
@@ -1206,7 +1263,12 @@ set_footnote.cells_column_spanners <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_row_groups <- function(loc, data, footnote, placement) {
+set_footnote.cells_row_groups <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   row_groups <- dt_row_groups_get(data = data)
 
@@ -1235,7 +1297,12 @@ set_footnote.cells_row_groups <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_body <- function(loc, data, footnote, placement) {
+set_footnote.cells_body <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   resolved <- resolve_cells_body(data = data, object = loc)
 
@@ -1258,7 +1325,12 @@ set_footnote.cells_body <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_stub <- function(loc, data, footnote, placement) {
+set_footnote.cells_stub <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   resolved <- resolve_cells_stub(data = data, object = loc)
 
@@ -1279,7 +1351,12 @@ set_footnote.cells_stub <- function(loc, data, footnote, placement) {
   data
 }
 
-set_footnote.cells_summary <- function(loc, data, footnote, placement) {
+set_footnote.cells_summary <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   add_summary_location_row(
     loc = loc,
@@ -1290,7 +1367,12 @@ set_footnote.cells_summary <- function(loc, data, footnote, placement) {
   )
 }
 
-set_footnote.cells_grand_summary <- function(loc, data, footnote, placement) {
+set_footnote.cells_grand_summary <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   add_grand_summary_location_row(
     loc = loc,
@@ -1301,7 +1383,12 @@ set_footnote.cells_grand_summary <- function(loc, data, footnote, placement) {
   )
 }
 
-set_footnote.cells_stub_summary <- function(loc, data, footnote, placement) {
+set_footnote.cells_stub_summary <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   add_summary_location_row(
     loc = loc,
@@ -1312,7 +1399,12 @@ set_footnote.cells_stub_summary <- function(loc, data, footnote, placement) {
   )
 }
 
-set_footnote.cells_stub_grand_summary <- function(loc, data, footnote, placement) {
+set_footnote.cells_stub_grand_summary <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
 
   add_grand_summary_location_row(
     loc = loc,
@@ -1323,23 +1415,28 @@ set_footnote.cells_stub_grand_summary <- function(loc, data, footnote, placement
   )
 }
 
-set_footnote.cells_source_notes <- function(loc, data, footnote, placement) {
-
+set_footnote.cells_source_notes <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
   cli::cli_abort("Footnotes cannot be applied to source notes.")
-
-  data
 }
 
-set_footnote.cells_footnotes <- function(loc, data, footnote, placement) {
-
+set_footnote.cells_footnotes <- function(
+    loc,
+    data,
+    footnote,
+    placement
+) {
   cli::cli_abort("Footnotes cannot be applied to other footnotes.")
-
-  data
 }
 
 #' Add a source note citation
 #'
 #' @description
+#'
 #' Add a source note to the footer part of the **gt** table. A source note is
 #' useful for citing the data included in the table. Several can be added to the
 #' footer, simply use multiple calls of `tab_source_note()` and they will be
@@ -1359,10 +1456,10 @@ set_footnote.cells_footnotes <- function(loc, data, footnote, placement) {
 #' source note to the table footer that cites the data source.
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(mfr, model, msrp) %>%
-#'   dplyr::slice(1:5) %>%
-#'   gt() %>%
+#' gtcars |>
+#'   dplyr::select(mfr, model, msrp) |>
+#'   dplyr::slice(1:5) |>
+#'   gt() |>
 #'   tab_source_note(source_note = "From edmunds.com")
 #' ```
 #'
@@ -1374,6 +1471,9 @@ set_footnote.cells_footnotes <- function(loc, data, footnote, placement) {
 #' @section Function ID:
 #' 2-8
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @export
 tab_source_note <- function(
     data,
@@ -1381,7 +1481,7 @@ tab_source_note <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   dt_source_notes_add(
     data = data,
@@ -1392,6 +1492,7 @@ tab_source_note <- function(
 #' Add a table caption
 #'
 #' @description
+#'
 #' Add a caption to a **gt** table, which is handled specially for a table
 #' within an R Markdown, Quarto, or **bookdown** context. The addition of
 #' captions makes tables cross-referencing across the containing document. The
@@ -1410,14 +1511,14 @@ tab_source_note <- function(
 #' [tab_header()] function, and, add a caption as well with `tab_caption()`.
 #'
 #' ```r
-#' gtcars %>%
-#'   dplyr::select(mfr, model, msrp) %>%
-#'   dplyr::slice(1:5) %>%
-#'   gt() %>%
+#' gtcars |>
+#'   dplyr::select(mfr, model, msrp) |>
+#'   dplyr::slice(1:5) |>
+#'   gt() |>
 #'   tab_header(
 #'     title = md("Data listing from **gtcars**"),
 #'     subtitle = md("`gtcars` is an R dataset")
-#'   ) %>%
+#'   ) |>
 #'   tab_caption(caption = md("**gt** table example."))
 #' ```
 #'
@@ -1429,6 +1530,9 @@ tab_source_note <- function(
 #' @section Function ID:
 #' 2-9
 #'
+#' @section Function Introduced:
+#' `v0.8.0` (November 16, 2022)
+#'
 #' @export
 tab_caption <- function(
     data,
@@ -1436,7 +1540,7 @@ tab_caption <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   dt_options_set_value(
     data = data,
@@ -1448,6 +1552,7 @@ tab_caption <- function(
 #' Add custom styles to one or more cells
 #'
 #' @description
+#'
 #' With the `tab_style()` function we can target specific cells and apply styles
 #' to them. This is best done in conjunction with the helper functions
 #' [cell_text()], [cell_fill()], and [cell_borders()]. At present this function
@@ -1467,11 +1572,12 @@ tab_caption <- function(
 #' - the cell borders ([cell_borders()])
 #'
 #' @inheritParams fmt_number
-#' @param style a vector of styles to use. The [cell_text()], [cell_fill()], and
-#'   [cell_borders()] helper functions can be used here to more easily generate
-#'   valid styles.  If using more than one helper function to define styles, all
-#'   calls must be enclosed in a [list()]. Custom CSS declarations can be used
-#'   for HTML output by including a [css()]-based statement as a list item.
+#' @param style The styles to use for the cells at the targeted `locations`. The
+#'   [cell_text()], [cell_fill()], and [cell_borders()] helper functions can be
+#'   used here to more easily generate valid styles. If using more than one
+#'   helper function to define styles, all calls must be enclosed in a [list()].
+#'   Custom CSS declarations can be used for HTML output by including a
+#'   [css()]-based statement as a list item.
 #' @param locations the cell or set of cells to be associated with the style.
 #'   Supplying any of the `cells_*()` helper functions is a useful way to target
 #'   the location cells that are associated with the styling. These helper
@@ -1492,13 +1598,13 @@ tab_caption <- function(
 #' to data cells that satisfy a condition (using `tab_style()`).
 #'
 #' ```r
-#' exibble %>%
-#'   dplyr::select(num, currency) %>%
-#'   gt() %>%
+#' exibble |>
+#'   dplyr::select(num, currency) |>
+#'   gt() |>
 #'   fmt_number(
 #'     columns = c(num, currency),
 #'     decimals = 1
-#'   ) %>%
+#'   ) |>
 #'   tab_style(
 #'     style = list(
 #'       cell_fill(color = "lightcyan"),
@@ -1508,7 +1614,7 @@ tab_caption <- function(
 #'       columns = num,
 #'       rows = num >= 5000
 #'     )
-#'   ) %>%
+#'   ) |>
 #'   tab_style(
 #'     style = list(
 #'       cell_fill(color = "#F9E3D6"),
@@ -1529,17 +1635,17 @@ tab_caption <- function(
 #' values in a particular column.
 #'
 #' ```r
-#' sp500 %>%
+#' sp500 |>
 #'   dplyr::filter(
 #'     date >= "2015-12-01" &
 #'     date <= "2015-12-15"
-#'   ) %>%
-#'   dplyr::select(-c(adj_close, volume)) %>%
-#'   gt() %>%
+#'   ) |>
+#'   dplyr::select(-c(adj_close, volume)) |>
+#'   gt() |>
 #'   tab_style(
 #'     style = cell_fill(color = "lightgreen"),
 #'     locations = cells_body(rows = close > open)
-#'   ) %>%
+#'   ) |>
 #'   tab_style(
 #'     style = list(
 #'       cell_fill(color = "red"),
@@ -1558,10 +1664,10 @@ tab_caption <- function(
 #' [cell_fill()] and with a CSS style declaration.
 #'
 #' ```r
-#' exibble %>%
-#'   dplyr::select(char, fctr) %>%
-#'   gt() %>%
-#'   sub_missing() %>%
+#' exibble |>
+#'   dplyr::select(char, fctr) |>
+#'   gt() |>
+#'   sub_missing() |>
 #'   tab_style(
 #'     style = list(
 #'       cell_fill(color = "lightcyan"),
@@ -1579,6 +1685,9 @@ tab_caption <- function(
 #' @section Function ID:
 #' 2-10
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @seealso [cell_text()], [cell_fill()], and [cell_borders()] as helpers for
 #'   defining custom styles and [cells_body()] as one of many useful helper
 #'   functions for targeting the locations to be styled.
@@ -1591,7 +1700,7 @@ tab_style <- function(
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   # Upgrade `style` to be within a list if not provided as such
   if (inherits(style, "cell_styles")) {
@@ -1940,24 +2049,11 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' Modify the table output options
 #'
 #' @description
+#'
 #' Modify the options available in a table. These options are named by the
 #' components, the subcomponents, and the element that can adjusted.
 #'
 #' @inheritParams fmt_number
-#' @param container.width,container.height,container.padding.x,container.padding.y
-#'   The width and height of the table's container, and, the vertical and
-#'   horizontal padding of the table's container. The container width and height
-#'   can be specified with units of pixels or as a percentage. The padding is to
-#'   be specified as a length with units of pixels. If provided as a numeric
-#'   value, it is assumed that the value is given in units of pixels. The [px()]
-#'   and [pct()] helper functions can also be used to pass in numeric values and
-#'   obtain values as pixel or percent units.
-#' @param container.overflow.x,container.overflow.y Options to enable scrolling
-#'   in the horizontal and vertical directions when the table content overflows
-#'   the container dimensions. Using `TRUE` (the default for both) means that
-#'   horizontal or vertical scrolling is enabled to view the entire table in
-#'   those directions. With `FALSE`, the table may be clipped if the table width
-#'   or height exceeds the `container.width` or `container.height`.
 #' @param table.width The width of the table. Can be specified as a
 #'   single-length character with units of pixels or as a percentage. If
 #'   provided as a single-length numeric vector, it is assumed that the value is
@@ -2104,7 +2200,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'   the `footnotes` location.
 #' @param footnotes.marks The set of sequential marks used to reference and
 #'   identify each of the footnotes (same input as the [opt_footnote_marks()]
-#'   function. We can supply a vector that represents the series of footnote
+#'   function). We can supply a vector that represents the series of footnote
 #'   marks. This vector is recycled when its usage goes beyond the length of the
 #'   set. At each cycle, the marks are simply combined (e.g., `*` -> `**` ->
 #'   `***`). The option exists for providing keywords for certain types of
@@ -2113,6 +2209,14 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'   `"LETTERS"`. There is the option for using a traditional symbol set where
 #'   `"standard"` provides four symbols, and, `"extended"` adds two more
 #'   symbols, making six.
+#' @param footnotes.spec_ref,footnotes.spec_ftr Optional specifications for
+#'   formatting of footnote references (`footnotes.spec_ref`) and their
+#'   associated marks the footer section (`footnotes.spec_ftr`) (same input as
+#'   the [opt_footnote_spec()] function). This is a string containing
+#'   specification control characters. The default is the spec string `"^i"`,
+#'   which is superscript text set in italics. Other control characters that can
+#'   be used are: (1) `"b"` for bold text, and (2) `"("` / `")"` for the
+#'   enclosure of footnote marks in parentheses.
 #' @param footnotes.multiline,source_notes.multiline An option to either put
 #'   footnotes and source notes in separate lines (the default, or `TRUE`) or
 #'   render them as a continuous line of text with `footnotes.sep` providing the
@@ -2134,6 +2238,66 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'   when striping rows.
 #' @param row.striping.include_table_body An option for whether to include the
 #'   table body when striping rows.
+#' @param container.width,container.height,container.padding.x,container.padding.y
+#'   The width and height of the table's container, and, the vertical and
+#'   horizontal padding of the table's container. The container width and height
+#'   can be specified with units of pixels or as a percentage. The padding is to
+#'   be specified as a length with units of pixels. If provided as a numeric
+#'   value, it is assumed that the value is given in units of pixels. The [px()]
+#'   and [pct()] helper functions can also be used to pass in numeric values and
+#'   obtain values as pixel or percent units.
+#' @param container.overflow.x,container.overflow.y Options to enable scrolling
+#'   in the horizontal and vertical directions when the table content overflows
+#'   the container dimensions. Using `TRUE` (the default for both) means that
+#'   horizontal or vertical scrolling is enabled to view the entire table in
+#'   those directions. With `FALSE`, the table may be clipped if the table width
+#'   or height exceeds the `container.width` or `container.height`.
+#' @param ihtml.active The option for displaying an interactive version of an
+#'   HTML table (rather than an otherwise 'static' table). This enables the use
+#'   of controls for pagination, global search, filtering, and sorting. The
+#'   individual features are controlled by the other `table.*` options. By
+#'   default, the pagination (`ihtml.use_pagination`) and sorting
+#'   (`ihtml.use_sorting`) features are enabled. The `ihtml.active` option,
+#'   however, is `FALSE` by default.
+#' @param ihtml.use_pagination,ihtml.use_pagination_info For interactive HTML
+#'   output, the option for using pagination controls (below the table body) can
+#'   be controlled with `ihtml.use_pagination`. By default, this is `TRUE` and
+#'   it will allow the use to page through table content. The informational
+#'   display text regarding the current page can be set with
+#'   `ihtml.use_pagination_info` (which is `TRUE` by default).
+#' @param ihtml.use_sorting For interactive HTML output, the option to provide
+#'   controls for sorting column values. By default, this is `TRUE`.
+#' @param ihtml.use_search For interactive HTML output, an option that places a
+#'   search field for globally filtering rows to the requested content. By
+#'   default, this is `FALSE`.
+#' @param ihtml.use_filters For interactive HTML output, this places search
+#'   fields below each column header and allows for filtering by column. By
+#'   default, this is `FALSE`.
+#' @param ihtml.use_resizers For interactive HTML output, this allows for
+#'   interactive resizing of columns. By default, this is `FALSE`.
+#' @param ihtml.use_highlight For interactive HTML output, this highlights
+#'   individual rows upon hover. By default, this is `FALSE`.
+#' @param ihtml.use_compact_mode For interactive HTML output, an option to
+#'   reduce vertical padding and thus make the table consume less vertical
+#'   space. By default, this is `FALSE`.
+#' @param ihtml.use_text_wrapping For interactive HTML output, an option to
+#'   control text wrapping. By default (`TRUE`), text will be wrapped to
+#'   multiple lines; if `FALSE`, text will be truncated to a single line.
+#' @param ihtml.use_page_size_select,ihtml.page_size_default,ihtml.page_size_values
+#'   For interactive HTML output, `ihtml.use_page_size_select` provides the
+#'   option to display a dropdown menu for the number of rows to show per page
+#'   of data. By default, this is the vector `c(10, 25, 50, 100)` which
+#'   corresponds to options for `10`, `25`, `50`, and `100` rows of data per
+#'   page. To modify these page-size options, provide a numeric vector to
+#'   `ihtml.page_size_values`. The default page size (initially set as `10`) can
+#'   be modified with `ihtml.page_size_default` and this works whether or not
+#'   `ihtml.use_page_size_select` is set to `TRUE`.
+#' @param ihtml.pagination_type For interactive HTML output and when using
+#'   pagination, one of three options for presentation pagination controls. The
+#'   default is `"numbers"`, where a series of page-number buttons is presented
+#'   along with 'previous' and 'next' buttons. The `"jump"` option provides an
+#'   input field with a stepper for the page number. With `"simple"`, only the
+#'   'previous' and 'next' buttons are displayed.
 #' @param page.orientation For RTF output, this provides an two options for page
 #'   orientation: `"portrait"` (the default) and `"landscape"`.
 #' @param page.numbering Within RTF output, should page numbering be displayed?
@@ -2155,6 +2319,13 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'   bottom page margins. The default values for each of these is `1.0in`.
 #' @param page.header.height,page.footer.height The heights of the page header
 #'   and footer for RTF table outputs. Default values for both are `0.5in`.
+#' @param quarto.use_bootstrap,quarto.disable_processing When rendering a **gt**
+#'   table with Quarto, the table can undergo transformations to support
+#'   advanced Quarto features. Setting `quarto.use_bootstrap` to `TRUE` (`FALSE`
+#'   by default) will allow Quarto to add Bootstrap classes to the table,
+#'   allowing those styles to permeate the table. Quarto performs other
+#'   alterations as well but they can all be deactivated with
+#'   `quarto.disable_processing = TRUE` (this option is `FALSE` by default).
 #'
 #' @return An object of class `gt_tbl`.
 #'
@@ -2166,32 +2337,32 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #'
 #' ```r
 #' tab_1 <-
-#'   exibble %>%
-#'   dplyr::select(-c(fctr, date, time, datetime)) %>%
+#'   exibble |>
+#'   dplyr::select(-c(fctr, date, time, datetime)) |>
 #'   gt(
 #'     rowname_col = "row",
 #'     groupname_col = "group"
-#'   ) %>%
+#'   ) |>
 #'   tab_header(
 #'     title = md("Data listing from **exibble**"),
 #'     subtitle = md("`exibble` is an R dataset")
-#'   ) %>%
-#'   fmt_number(columns = num) %>%
-#'   fmt_currency(columns = currency) %>%
+#'   ) |>
+#'   fmt_number(columns = num) |>
+#'   fmt_currency(columns = currency) |>
 #'   tab_footnote(
 #'     footnote = "Using commas for separators.",
 #'     locations = cells_body(
 #'       columns = num,
 #'       rows = num > 1000
 #'     )
-#'   ) %>%
+#'   ) |>
 #'   tab_footnote(
 #'     footnote = "Using commas for separators.",
 #'     locations = cells_body(
 #'       columns = currency,
 #'       rows = currency > 1000
 #'     )
-#'   ) %>%
+#'   ) |>
 #'   tab_footnote(
 #'     footnote = "Alphabetical fruit.",
 #'     locations = cells_column_labels(columns = char)
@@ -2208,7 +2379,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' area).
 #'
 #' ```r
-#' tab_1 %>% tab_options(table.width = pct(100))
+#' tab_1 |> tab_options(table.width = pct(100))
 #' ```
 #' \if{html}{\out{
 #' `r man_get_image_tag(file = "man_tab_options_2.png")`
@@ -2217,7 +2388,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' Modify the table's background color to be `"lightcyan"`.
 #'
 #' ```r
-#' tab_1 %>% tab_options(table.background.color = "lightcyan")
+#' tab_1 |> tab_options(table.background.color = "lightcyan")
 #' ```
 #'
 #' \if{html}{\out{
@@ -2228,7 +2399,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' the footer by spaces instead of newlines.
 #'
 #' ```r
-#' tab_1 %>%
+#' tab_1 |>
 #'   tab_options(
 #'     footnotes.marks = letters,
 #'     footnotes.multiline = FALSE
@@ -2242,7 +2413,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' Change the padding of data rows to 5 px.
 #'
 #' ```r
-#' tab_1 %>%
+#' tab_1 |>
 #'   tab_options(
 #'     data_row.padding = px(5)
 #'   )
@@ -2255,7 +2426,7 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' Reduce the size of the title and the subtitle text.
 #'
 #' ```r
-#' tab_1 %>%
+#' tab_1 |>
 #'   tab_options(
 #'     heading.title.font.size = "small",
 #'     heading.subtitle.font.size = "small"
@@ -2270,15 +2441,12 @@ set_style.cells_source_notes <- function(loc, data, style) {
 #' @section Function ID:
 #' 2-12
 #'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
+#'
 #' @export
 tab_options <- function(
     data,
-    container.width = NULL,
-    container.height = NULL,
-    container.padding.x = NULL,
-    container.padding.y = NULL,
-    container.overflow.x = NULL,
-    container.overflow.y = NULL,
     table.width = NULL,
     table.layout = NULL,
     table.align = NULL,
@@ -2410,6 +2578,8 @@ tab_options <- function(
     footnotes.border.lr.width = NULL,
     footnotes.border.lr.color = NULL,
     footnotes.marks = NULL,
+    footnotes.spec_ref = NULL,
+    footnotes.spec_ftr = NULL,
     footnotes.multiline = NULL,
     footnotes.sep = NULL,
     source_notes.background.color = NULL,
@@ -2427,6 +2597,26 @@ tab_options <- function(
     row.striping.background_color = NULL,
     row.striping.include_stub = NULL,
     row.striping.include_table_body = NULL,
+    container.width = NULL,
+    container.height = NULL,
+    container.padding.x = NULL,
+    container.padding.y = NULL,
+    container.overflow.x = NULL,
+    container.overflow.y = NULL,
+    ihtml.active = NULL,
+    ihtml.use_pagination = NULL,
+    ihtml.use_pagination_info = NULL,
+    ihtml.use_sorting = NULL,
+    ihtml.use_search = NULL,
+    ihtml.use_filters = NULL,
+    ihtml.use_resizers = NULL,
+    ihtml.use_highlight = NULL,
+    ihtml.use_compact_mode = NULL,
+    ihtml.use_text_wrapping = NULL,
+    ihtml.use_page_size_select = NULL,
+    ihtml.page_size_default = NULL,
+    ihtml.page_size_values = NULL,
+    ihtml.pagination_type = NULL,
     page.orientation = NULL,
     page.numbering = NULL,
     page.header.use_tbl_headings = NULL,
@@ -2438,16 +2628,23 @@ tab_options <- function(
     page.margin.top = NULL,
     page.margin.bottom = NULL,
     page.header.height = NULL,
-    page.footer.height = NULL
+    page.footer.height = NULL,
+    quarto.use_bootstrap = NULL,
+    quarto.disable_processing = NULL
 ) {
 
   # Perform input object validation
-  stop_if_not_gt(data = data)
+  stop_if_not_gt_tbl(data = data)
 
   # Extract the options table from `data`
   opts_df <- dt_options_get(data = data)
 
-  arg_names <- base::setdiff(names(formals(tab_options)), "data")
+  arg_names <-
+    base::setdiff(
+      names(formals(tab_options)),
+      c("data", "ihtml.page_size_values", "ihtml.page_size_default")
+    )
+
   arg_vals <- mget(arg_names)
   arg_vals <- arg_vals[!vapply(arg_vals, FUN = is.null, FUN.VALUE = logical(1))]
   arg_vals <- set_super_options(arg_vals = arg_vals)
@@ -2456,19 +2653,23 @@ tab_options <- function(
     dplyr::tibble(
       parameter = tidy_gsub(names(arg_vals), ".", "_", fixed = TRUE),
       value = unname(arg_vals)
-    ) %>%
+    )
+  new_df <-
     dplyr::left_join(
+      new_df,
       dplyr::select(opts_df, parameter, type),
       by = "parameter"
-    ) %>%
+    )
+  new_df <-
     dplyr::mutate(
+      new_df,
       value = mapply(
         preprocess_tab_option,
         option = value, var_name = parameter, type = type,
         SIMPLIFY = FALSE
       )
-    ) %>%
-    dplyr::select(-type)
+    )
+  new_df <- dplyr::select(new_df, -type)
 
   # This rearranges the rows in the `opts_df` table, but this
   # shouldn't be a problem
@@ -2483,7 +2684,33 @@ tab_options <- function(
     )
 
   # Write the modified options table back to `data`
-  dt_options_set(data = data, options = opts_df)
+  data <- dt_options_set(data = data, options = opts_df)
+
+  #
+  # Handle special cases where option values are vectors
+  #
+
+  ihtml_page_size_values <- mget("ihtml.page_size_values")
+  if (!is.null(ihtml_page_size_values[[1]])) {
+    data <-
+      dt_options_set_value(
+        data = data,
+        option = "ihtml_page_size_values",
+        value = unname(unlist(ihtml_page_size_values))
+      )
+  }
+
+  ihtml_page_size_default <- mget("ihtml.page_size_default")
+  if (!is.null(ihtml_page_size_default[[1]])) {
+    data <-
+      dt_options_set_value(
+        data = data,
+        option = "ihtml_page_size_default",
+        value = unname(unlist(ihtml_page_size_default))
+      )
+  }
+
+  data
 }
 
 preprocess_tab_option <- function(option, var_name, type) {

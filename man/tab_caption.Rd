@@ -28,14 +28,14 @@ in each of these system.
 Use \code{\link{gtcars}} to create a \strong{gt} table. Add a header part with the
 \code{\link[=tab_header]{tab_header()}} function, and, add a caption as well with \code{tab_caption()}.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{gtcars \%>\%
-  dplyr::select(mfr, model, msrp) \%>\%
-  dplyr::slice(1:5) \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{gtcars |>
+  dplyr::select(mfr, model, msrp) |>
+  dplyr::slice(1:5) |>
+  gt() |>
   tab_header(
     title = md("Data listing from **gtcars**"),
     subtitle = md("`gtcars` is an R dataset")
-  ) \%>\%
+  ) |>
   tab_caption(caption = md("**gt** table example."))
 }\if{html}{\out{</div>}}
 
@@ -47,6 +47,11 @@ Use \code{\link{gtcars}} to create a \strong{gt} table. Add a header part with t
 \section{Function ID}{
 
 2-9
+}
+
+\section{Function Introduced}{
+
+\code{v0.8.0} (November 16, 2022)
 }
 
 \seealso{

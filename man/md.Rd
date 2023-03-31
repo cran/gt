@@ -26,9 +26,9 @@ get to use Markdown plus any HTML fragments \emph{at the same time}).
 Use \code{\link{exibble}} to create a \strong{gt} table. When adding a title, use the \code{md()}
 helper to use Markdown formatting.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  dplyr::select(currency, char) \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  dplyr::select(currency, char) |>
+  gt() |>
   tab_header(title = md("Using *Markdown*"))
 }\if{html}{\out{</div>}}
 
@@ -39,7 +39,12 @@ helper to use Markdown formatting.
 
 \section{Function ID}{
 
-7-1
+8-1
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -70,6 +75,7 @@ Other helper functions:
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

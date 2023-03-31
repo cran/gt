@@ -4,7 +4,7 @@
 \alias{opt_footnote_marks}
 \title{Option to modify the set of footnote marks}
 \usage{
-opt_footnote_marks(data, marks)
+opt_footnote_marks(data, marks = "numbers")
 }
 \arguments{
 \item{data}{A table object that is created using the \code{\link[=gt]{gt()}} function.}
@@ -25,7 +25,9 @@ Either a vector of marks can be provided (including Unicode characters), or,
 a specific keyword could be used to signify a preset sequence. This function
 serves as a shortcut for using \code{tab_options(footnotes.marks = {marks})}
 }
-\details{
+\section{Specification of footnote marks}{
+
+
 We can supply a vector of that will represent the series of marks.
 The series of footnote marks is recycled when its usage goes beyond the
 length of the set. At each cycle, the marks are simply doubled, tripled, and
@@ -34,7 +36,7 @@ for certain types of footnote marks. The keywords are:
 \itemize{
 \item \code{"numbers"}: numeric marks, they begin from 1 and these marks are not
 subject to recycling behavior
-\item \code{"letters"}: miniscule alphabetic marks, internally uses the \code{letters}
+\item \code{"letters"}: minuscule alphabetic marks, internally uses the \code{letters}
 vector which contains 26 lowercase letters of the Roman alphabet
 \item \code{"LETTERS"}: majuscule alphabetic marks, using the \code{LETTERS} vector
 which has 26 uppercase letters of the Roman alphabet
@@ -43,15 +45,16 @@ which has 26 uppercase letters of the Roman alphabet
 more symbols, making six
 }
 }
+
 \section{Examples}{
 
 
 Use \code{\link{sza}} to create a \strong{gt} table, adding three footnotes. Call
 \code{opt_footnote_marks()} to specify which footnote marks to use.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sza \%>\%
-  dplyr::filter(latitude == 30) \%>\%
-  dplyr::group_by(tst) \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{sza |>
+  dplyr::filter(latitude == 30) |>
+  dplyr::group_by(tst) |>
   dplyr::summarize(
     SZA.Max = if (
       all(is.na(sza))) \{
@@ -66,28 +69,28 @@ Use \code{\link{sza}} to create a \strong{gt} table, adding three footnotes. Cal
       min(sza, na.rm = TRUE)
     \},
     .groups = "drop"
-  ) \%>\%
-  gt(rowname_col = "tst") \%>\%
-  tab_spanner_delim(delim = ".") \%>\%
+  ) |>
+  gt(rowname_col = "tst") |>
+  tab_spanner_delim(delim = ".") |>
   sub_missing(
     columns = everything(),
     missing_text = "90+"
-  ) \%>\%
-  tab_stubhead(label = "TST") \%>\%
+  ) |>
+  tab_stubhead(label = "TST") |>
   tab_footnote(
     footnote = "True solar time.",
     locations = cells_stubhead()
-  ) \%>\%
+  ) |>
   tab_footnote(
     footnote = "Solar zenith angle.",
     locations = cells_column_spanners(
       spanners = "spanner-SZA.Max"
     )
-  ) \%>\%
+  ) |>
   tab_footnote(
     footnote = "The Lowest SZA.",
     locations = cells_stub(rows = "1200")
-  ) \%>\%
+  ) |>
   opt_footnote_marks(marks = "standard")
 }\if{html}{\out{</div>}}
 
@@ -98,7 +101,12 @@ Use \code{\link{sza}} to create a \strong{gt} table, adding three footnotes. Cal
 
 \section{Function ID}{
 
-9-1
+10-3
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -106,7 +114,9 @@ Other table option functions:
 \code{\link{opt_align_table_header}()},
 \code{\link{opt_all_caps}()},
 \code{\link{opt_css}()},
+\code{\link{opt_footnote_spec}()},
 \code{\link{opt_horizontal_padding}()},
+\code{\link{opt_interactive}()},
 \code{\link{opt_row_striping}()},
 \code{\link{opt_stylize}()},
 \code{\link{opt_table_font}()},

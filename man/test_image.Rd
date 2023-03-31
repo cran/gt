@@ -21,7 +21,12 @@ since we test various sizes of the test image within that function.
 }
 \section{Function ID}{
 
-8-4
+9-4
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

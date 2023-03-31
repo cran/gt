@@ -41,8 +41,10 @@ compile_scss <- function(data, id = NULL) {
       glue::glue(
         .open = "<<", .close = ">>",
         "
-        <<ifelse(has_id, 'html', '.gt_table')>> {
+        <<ifelse(has_id, '##{$element_id} table', '.gt_table')>> {
           <<font_family_attr>>
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
 
         <<ifelse(has_id, '##{$element_id} {', '')>>
@@ -50,7 +52,8 @@ compile_scss <- function(data, id = NULL) {
         <<ifelse(has_id, '}', '')>>
 
         <<ifelse(has_additional_css, table_additional_css, '')>>
-        ")
+        "
+      )
     )
   )
 }

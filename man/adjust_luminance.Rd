@@ -19,11 +19,12 @@ adjusted. Must be a number between \code{-2.0} and \code{2.0}.}
 A vector of color values.
 }
 \description{
-This function can brighten or darken a palette of colors by an arbitrary
-number of steps, which is defined by a real number between -2.0 and 2.0. The
-transformation of a palette by a fixed step in this function will tend to
-apply greater darkening or lightening for those colors in the midrange
-compared to any very dark or very light colors in the input palette.
+The \code{adjust_luminance()} function can brighten or darken a palette of colors
+by an arbitrary number of steps, which is defined by a real number between
+-2.0 and 2.0. The transformation of a palette by a fixed step in this
+function will tend to apply greater darkening or lightening for those colors
+in the midrange compared to any very dark or very light colors in the input
+palette.
 }
 \details{
 This function can be useful when combined with the \code{\link[=data_color]{data_color()}} function's
@@ -42,29 +43,29 @@ Get a palette of 8 pastel colors from the \strong{RColorBrewer} package.
 Create lighter and darker variants of the base palette (one step lower, one
 step higher).
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{pal_darker  <- pal \%>\% adjust_luminance(-1.0)
-pal_lighter <- pal \%>\% adjust_luminance(+1.0)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pal_darker  <- pal |> adjust_luminance(-1.0)
+pal_lighter <- pal |> adjust_luminance(+1.0)
 }\if{html}{\out{</div>}}
 
 Create a tibble and make a \strong{gt} table from it. Color each column in order
 of increasingly darker palettes (with \code{\link[=data_color]{data_color()}}).
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{dplyr::tibble(a = 1:8, b = 1:8, c = 1:8) \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{dplyr::tibble(a = 1:8, b = 1:8, c = 1:8) |>
+  gt() |>
   data_color(
     columns = a,
     colors = scales::col_numeric(
       palette = pal_lighter,
       domain = c(1, 8)
     )
-  ) \%>\%
+  ) |>
   data_color(
     columns = b,
     colors = scales::col_numeric(
       palette = pal,
       domain = c(1, 8)
     )
-  ) \%>\%
+  ) |>
   data_color(
     columns = c,
     colors = scales::col_numeric(
@@ -81,7 +82,12 @@ of increasingly darker palettes (with \code{\link[=data_color]{data_color()}}).
 
 \section{Function ID}{
 
-7-23
+8-23
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -112,6 +118,7 @@ Other helper functions:
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

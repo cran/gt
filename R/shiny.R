@@ -1,5 +1,7 @@
 #' A **gt** display table render function for use in Shiny
 #'
+#' @description
+#'
 #' With `render_gt()` we can create a reactive **gt** table that works
 #' wonderfully once assigned to an output slot (with [gt_output()]). This
 #' function is to be used within Shiny's `server()` component. We have some
@@ -28,8 +30,10 @@
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This is useful
 #'   if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [gt_output()] when `render_gt` is used in an interactive R Markdown
-#'   document.
+#'   call to [gt_output()] when `render_gt()` is used in an interactive R
+#'   Markdown document.
+#'
+#' @return An object of class `shiny.render.function`.
 #'
 #' @section Examples:
 #'
@@ -42,31 +46,36 @@
 #' library(shiny)
 #'
 #' gt_tbl <-
-#'   gtcars %>%
-#'   gt() %>%
-#'   cols_hide(contains("_"))
+#'   gtcars |>
+#'   gt() |>
+#'   fmt_currency(columns = msrp, decimals = 0) |>
+#'   cols_hide(columns = -c(mfr, model, year, mpg_c, msrp)) |>
+#'   cols_label_with(columns = everything(), fn = toupper) |>
+#'   data_color(columns = msrp, method = "numeric", palette = "viridis") |>
+#'   sub_missing() |>
+#'   opt_interactive(use_compact_mode = TRUE)
 #'
 #' ui <- fluidPage(
-#'
 #'   gt_output(outputId = "table")
 #' )
 #'
-#' server <- function(input,
-#'                    output,
-#'                    session) {
-#'
-#'   output$table <-
-#'     render_gt(
-#'       expr = gt_tbl,
-#'       height = px(600),
-#'       width = px(600)
-#'     )
+#' server <- function(input, output, session) {
+#'   output$table <- render_gt(expr = gt_tbl)
 #' }
+#'
+#' shinyApp(ui = ui, server = server)
 #' ```
+#'
+#' \if{html}{\out{
+#' `r man_get_image_tag(file = "man_render_gt_1.png")`
+#' }}
 #'
 #' @family Shiny functions
 #' @section Function ID:
 #' 12-1
+#'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
 #'
 #' @export
 render_gt <- function(
@@ -134,6 +143,8 @@ render_gt <- function(
 
 #' Create a **gt** display table output element for Shiny
 #'
+#' @description
+#'
 #' Using `gt_output()` we can render a reactive **gt** table, a process
 #' initiated by using the [render_gt()] function in the `server` component of a
 #' Shiny app. The `gt_output()` call is to be used in the Shiny `ui` component,
@@ -149,6 +160,8 @@ render_gt <- function(
 #'
 #' @param outputId An output variable from which to read the table.
 #'
+#' @return An object of class `shiny.tag`.
+#'
 #' @section Examples:
 #'
 #' Here is a Shiny app (contained within a single file) that (1) prepares a
@@ -160,31 +173,36 @@ render_gt <- function(
 #' library(shiny)
 #'
 #' gt_tbl <-
-#'   gtcars %>%
-#'   gt() %>%
-#'   cols_hide(contains("_"))
+#'   gtcars |>
+#'   gt() |>
+#'   fmt_currency(columns = msrp, decimals = 0) |>
+#'   cols_hide(columns = -c(mfr, model, year, mpg_c, msrp)) |>
+#'   cols_label_with(columns = everything(), fn = toupper) |>
+#'   data_color(columns = msrp, method = "numeric", palette = "viridis") |>
+#'   sub_missing() |>
+#'   opt_interactive(use_compact_mode = TRUE)
 #'
 #' ui <- fluidPage(
-#'
 #'   gt_output(outputId = "table")
 #' )
 #'
-#' server <- function(input,
-#'                    output,
-#'                    session) {
-#'
-#'   output$table <-
-#'     render_gt(
-#'       expr = gt_tbl,
-#'       height = px(600),
-#'       width = px(600)
-#'     )
+#' server <- function(input, output, session) {
+#'   output$table <- render_gt(expr = gt_tbl)
 #' }
+#'
+#' shinyApp(ui = ui, server = server)
 #' ```
+#'
+#' \if{html}{\out{
+#' `r man_get_image_tag(file = "man_render_gt_1.png")`
+#' }}
 #'
 #' @family Shiny functions
 #' @section Function ID:
 #' 12-2
+#'
+#' @section Function Introduced:
+#' `v0.2.0.5` (March 31, 2020)
 #'
 #' @export
 gt_output <- function(outputId) {
@@ -200,8 +218,8 @@ check_shiny <- function() {
   if (!requireNamespace("shiny", quietly = TRUE)) {
 
     cli::cli_abort(c(
-      "Please install the shiny package before using this function.",
-      "*" = "Use `install.packages(\"shiny\")`."
+      "Please install the `shiny` package before using this function.",
+      "*" = "It can be installed with `install.packages(\"shiny\")`."
     ))
   }
 }

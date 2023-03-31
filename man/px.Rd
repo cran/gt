@@ -27,8 +27,8 @@ function \code{\link[=pct]{pct()}}.
 Use \code{\link{exibble}} to create a \strong{gt} table. Use the \code{px()} helper to define the
 font size for the column labels.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble \%>\%
-  gt() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{exibble |>
+  gt() |>
   tab_style(
     style = cell_text(size = px(20)),
     locations = cells_column_labels()
@@ -42,7 +42,12 @@ font size for the column labels.
 
 \section{Function ID}{
 
-7-3
+8-3
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -73,6 +78,7 @@ Other helper functions:
 \code{\link{md}()},
 \code{\link{pct}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

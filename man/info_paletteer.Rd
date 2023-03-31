@@ -77,7 +77,12 @@ from the \strong{paletteer} package).
 
 \section{Function ID}{
 
-10-5
+11-5
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

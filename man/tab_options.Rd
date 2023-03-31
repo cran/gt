@@ -6,12 +6,6 @@
 \usage{
 tab_options(
   data,
-  container.width = NULL,
-  container.height = NULL,
-  container.padding.x = NULL,
-  container.padding.y = NULL,
-  container.overflow.x = NULL,
-  container.overflow.y = NULL,
   table.width = NULL,
   table.layout = NULL,
   table.align = NULL,
@@ -143,6 +137,8 @@ tab_options(
   footnotes.border.lr.width = NULL,
   footnotes.border.lr.color = NULL,
   footnotes.marks = NULL,
+  footnotes.spec_ref = NULL,
+  footnotes.spec_ftr = NULL,
   footnotes.multiline = NULL,
   footnotes.sep = NULL,
   source_notes.background.color = NULL,
@@ -160,6 +156,26 @@ tab_options(
   row.striping.background_color = NULL,
   row.striping.include_stub = NULL,
   row.striping.include_table_body = NULL,
+  container.width = NULL,
+  container.height = NULL,
+  container.padding.x = NULL,
+  container.padding.y = NULL,
+  container.overflow.x = NULL,
+  container.overflow.y = NULL,
+  ihtml.active = NULL,
+  ihtml.use_pagination = NULL,
+  ihtml.use_pagination_info = NULL,
+  ihtml.use_sorting = NULL,
+  ihtml.use_search = NULL,
+  ihtml.use_filters = NULL,
+  ihtml.use_resizers = NULL,
+  ihtml.use_highlight = NULL,
+  ihtml.use_compact_mode = NULL,
+  ihtml.use_text_wrapping = NULL,
+  ihtml.use_page_size_select = NULL,
+  ihtml.page_size_default = NULL,
+  ihtml.page_size_values = NULL,
+  ihtml.pagination_type = NULL,
   page.orientation = NULL,
   page.numbering = NULL,
   page.header.use_tbl_headings = NULL,
@@ -171,26 +187,13 @@ tab_options(
   page.margin.top = NULL,
   page.margin.bottom = NULL,
   page.header.height = NULL,
-  page.footer.height = NULL
+  page.footer.height = NULL,
+  quarto.use_bootstrap = NULL,
+  quarto.disable_processing = NULL
 )
 }
 \arguments{
 \item{data}{A table object that is created using the \code{\link[=gt]{gt()}} function.}
-
-\item{container.width, container.height, container.padding.x, container.padding.y}{The width and height of the table's container, and, the vertical and
-horizontal padding of the table's container. The container width and height
-can be specified with units of pixels or as a percentage. The padding is to
-be specified as a length with units of pixels. If provided as a numeric
-value, it is assumed that the value is given in units of pixels. The \code{\link[=px]{px()}}
-and \code{\link[=pct]{pct()}} helper functions can also be used to pass in numeric values and
-obtain values as pixel or percent units.}
-
-\item{container.overflow.x, container.overflow.y}{Options to enable scrolling
-in the horizontal and vertical directions when the table content overflows
-the container dimensions. Using \code{TRUE} (the default for both) means that
-horizontal or vertical scrolling is enabled to view the entire table in
-those directions. With \code{FALSE}, the table may be clipped if the table width
-or height exceeds the \code{container.width} or \code{container.height}.}
 
 \item{table.width}{The width of the table. Can be specified as a
 single-length character with units of pixels or as a percentage. If
@@ -350,7 +353,7 @@ the \code{footnotes} location.}
 
 \item{footnotes.marks}{The set of sequential marks used to reference and
 identify each of the footnotes (same input as the \code{\link[=opt_footnote_marks]{opt_footnote_marks()}}
-function. We can supply a vector that represents the series of footnote
+function). We can supply a vector that represents the series of footnote
 marks. This vector is recycled when its usage goes beyond the length of the
 set. At each cycle, the marks are simply combined (e.g., \code{*} -> \verb{**} ->
 \verb{***}). The option exists for providing keywords for certain types of
@@ -359,6 +362,15 @@ want to use numeric marks). We can use lowercase \code{"letters"} or uppercase
 \code{"LETTERS"}. There is the option for using a traditional symbol set where
 \code{"standard"} provides four symbols, and, \code{"extended"} adds two more
 symbols, making six.}
+
+\item{footnotes.spec_ref, footnotes.spec_ftr}{Optional specifications for
+formatting of footnote references (\code{footnotes.spec_ref}) and their
+associated marks the footer section (\code{footnotes.spec_ftr}) (same input as
+the \code{\link[=opt_footnote_spec]{opt_footnote_spec()}} function). This is a string containing
+specification control characters. The default is the spec string \code{"^i"},
+which is superscript text set in italics. Other control characters that can
+be used are: (1) \code{"b"} for bold text, and (2) \code{"("} / \code{")"} for the
+enclosure of footnote marks in parentheses.}
 
 \item{footnotes.multiline, source_notes.multiline}{An option to either put
 footnotes and source notes in separate lines (the default, or \code{TRUE}) or
@@ -386,6 +398,77 @@ when striping rows.}
 \item{row.striping.include_table_body}{An option for whether to include the
 table body when striping rows.}
 
+\item{container.width, container.height, container.padding.x, container.padding.y}{The width and height of the table's container, and, the vertical and
+horizontal padding of the table's container. The container width and height
+can be specified with units of pixels or as a percentage. The padding is to
+be specified as a length with units of pixels. If provided as a numeric
+value, it is assumed that the value is given in units of pixels. The \code{\link[=px]{px()}}
+and \code{\link[=pct]{pct()}} helper functions can also be used to pass in numeric values and
+obtain values as pixel or percent units.}
+
+\item{container.overflow.x, container.overflow.y}{Options to enable scrolling
+in the horizontal and vertical directions when the table content overflows
+the container dimensions. Using \code{TRUE} (the default for both) means that
+horizontal or vertical scrolling is enabled to view the entire table in
+those directions. With \code{FALSE}, the table may be clipped if the table width
+or height exceeds the \code{container.width} or \code{container.height}.}
+
+\item{ihtml.active}{The option for displaying an interactive version of an
+HTML table (rather than an otherwise 'static' table). This enables the use
+of controls for pagination, global search, filtering, and sorting. The
+individual features are controlled by the other \verb{table.*} options. By
+default, the pagination (\code{ihtml.use_pagination}) and sorting
+(\code{ihtml.use_sorting}) features are enabled. The \code{ihtml.active} option,
+however, is \code{FALSE} by default.}
+
+\item{ihtml.use_pagination, ihtml.use_pagination_info}{For interactive HTML
+output, the option for using pagination controls (below the table body) can
+be controlled with \code{ihtml.use_pagination}. By default, this is \code{TRUE} and
+it will allow the use to page through table content. The informational
+display text regarding the current page can be set with
+\code{ihtml.use_pagination_info} (which is \code{TRUE} by default).}
+
+\item{ihtml.use_sorting}{For interactive HTML output, the option to provide
+controls for sorting column values. By default, this is \code{TRUE}.}
+
+\item{ihtml.use_search}{For interactive HTML output, an option that places a
+search field for globally filtering rows to the requested content. By
+default, this is \code{FALSE}.}
+
+\item{ihtml.use_filters}{For interactive HTML output, this places search
+fields below each column header and allows for filtering by column. By
+default, this is \code{FALSE}.}
+
+\item{ihtml.use_resizers}{For interactive HTML output, this allows for
+interactive resizing of columns. By default, this is \code{FALSE}.}
+
+\item{ihtml.use_highlight}{For interactive HTML output, this highlights
+individual rows upon hover. By default, this is \code{FALSE}.}
+
+\item{ihtml.use_compact_mode}{For interactive HTML output, an option to
+reduce vertical padding and thus make the table consume less vertical
+space. By default, this is \code{FALSE}.}
+
+\item{ihtml.use_text_wrapping}{For interactive HTML output, an option to
+control text wrapping. By default (\code{TRUE}), text will be wrapped to
+multiple lines; if \code{FALSE}, text will be truncated to a single line.}
+
+\item{ihtml.use_page_size_select, ihtml.page_size_default, ihtml.page_size_values}{For interactive HTML output, \code{ihtml.use_page_size_select} provides the
+option to display a dropdown menu for the number of rows to show per page
+of data. By default, this is the vector \code{c(10, 25, 50, 100)} which
+corresponds to options for \code{10}, \code{25}, \code{50}, and \code{100} rows of data per
+page. To modify these page-size options, provide a numeric vector to
+\code{ihtml.page_size_values}. The default page size (initially set as \code{10}) can
+be modified with \code{ihtml.page_size_default} and this works whether or not
+\code{ihtml.use_page_size_select} is set to \code{TRUE}.}
+
+\item{ihtml.pagination_type}{For interactive HTML output and when using
+pagination, one of three options for presentation pagination controls. The
+default is \code{"numbers"}, where a series of page-number buttons is presented
+along with 'previous' and 'next' buttons. The \code{"jump"} option provides an
+input field with a stepper for the page number. With \code{"simple"}, only the
+'previous' and 'next' buttons are displayed.}
+
 \item{page.orientation}{For RTF output, this provides an two options for page
 orientation: \code{"portrait"} (the default) and \code{"landscape"}.}
 
@@ -412,6 +495,14 @@ bottom page margins. The default values for each of these is \verb{1.0in}.}
 
 \item{page.header.height, page.footer.height}{The heights of the page header
 and footer for RTF table outputs. Default values for both are \verb{0.5in}.}
+
+\item{quarto.use_bootstrap, quarto.disable_processing}{When rendering a \strong{gt}
+table with Quarto, the table can undergo transformations to support
+advanced Quarto features. Setting \code{quarto.use_bootstrap} to \code{TRUE} (\code{FALSE}
+by default) will allow Quarto to add Bootstrap classes to the table,
+allowing those styles to permeate the table. Quarto performs other
+alterations as well but they can all be deactivated with
+\code{quarto.disable_processing = TRUE} (this option is \code{FALSE} by default).}
 }
 \value{
 An object of class \code{gt_tbl}.
@@ -428,32 +519,32 @@ can use this \strong{gt} object going forward to demo some of what's available i
 the \code{tab_options()} function.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 <-
-  exibble \%>\%
-  dplyr::select(-c(fctr, date, time, datetime)) \%>\%
+  exibble |>
+  dplyr::select(-c(fctr, date, time, datetime)) |>
   gt(
     rowname_col = "row",
     groupname_col = "group"
-  ) \%>\%
+  ) |>
   tab_header(
     title = md("Data listing from **exibble**"),
     subtitle = md("`exibble` is an R dataset")
-  ) \%>\%
-  fmt_number(columns = num) \%>\%
-  fmt_currency(columns = currency) \%>\%
+  ) |>
+  fmt_number(columns = num) |>
+  fmt_currency(columns = currency) |>
   tab_footnote(
     footnote = "Using commas for separators.",
     locations = cells_body(
       columns = num,
       rows = num > 1000
     )
-  ) \%>\%
+  ) |>
   tab_footnote(
     footnote = "Using commas for separators.",
     locations = cells_body(
       columns = currency,
       rows = currency > 1000
     )
-  ) \%>\%
+  ) |>
   tab_footnote(
     footnote = "Alphabetical fruit.",
     locations = cells_column_labels(columns = char)
@@ -469,7 +560,7 @@ tab_1
 Modify the table width to be 100\% (which spans the entire content width
 area).
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 \%>\% tab_options(table.width = pct(100))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 |> tab_options(table.width = pct(100))
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
@@ -478,7 +569,7 @@ area).
 
 Modify the table's background color to be \code{"lightcyan"}.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 \%>\% tab_options(table.background.color = "lightcyan")
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 |> tab_options(table.background.color = "lightcyan")
 }\if{html}{\out{</div>}}
 
 \if{html}{\out{
@@ -488,7 +579,7 @@ Modify the table's background color to be \code{"lightcyan"}.
 Use letters as the marks for footnote references. Also, separate footnotes in
 the footer by spaces instead of newlines.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 |>
   tab_options(
     footnotes.marks = letters,
     footnotes.multiline = FALSE
@@ -501,7 +592,7 @@ the footer by spaces instead of newlines.
 
 Change the padding of data rows to 5 px.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 |>
   tab_options(
     data_row.padding = px(5)
   )
@@ -513,7 +604,7 @@ Change the padding of data rows to 5 px.
 
 Reduce the size of the title and the subtitle text.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{tab_1 |>
   tab_options(
     heading.title.font.size = "small",
     heading.subtitle.font.size = "small"
@@ -528,6 +619,11 @@ Reduce the size of the title and the subtitle text.
 \section{Function ID}{
 
 2-12
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

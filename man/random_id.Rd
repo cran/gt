@@ -13,12 +13,18 @@ random_id(n = 10)
 A character vector containing a single, random ID.
 }
 \description{
-This helper function can be used to create a random, character-based ID
-value argument of variable length (the default is 10 letters).
+The \code{random_id()} helper function can be used to create a random,
+character-based ID value argument of variable length (the default is 10
+letters).
 }
 \section{Function ID}{
 
-7-24
+8-24
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -49,6 +55,7 @@ Other helper functions:
 \code{\link{md}()},
 \code{\link{pct}()},
 \code{\link{px}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}

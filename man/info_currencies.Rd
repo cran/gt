@@ -62,7 +62,12 @@ used with \code{\link[=fmt_currency]{fmt_currency()}}.
 
 \section{Function ID}{
 
-10-3
+11-3
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{

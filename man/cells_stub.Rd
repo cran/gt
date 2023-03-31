@@ -23,7 +23,8 @@ might be available in a \strong{gt} table: (1) through specification of a
 \code{\link[=grand_summary_rows]{grand_summary_rows()}} with neither of the previous two conditions being
 true.
 }
-\section{Overview of Location Helper Functions}{
+\section{Overview of location helper functions}{
+
 
 Location helper functions can be used to target cells with virtually any
 function that has a \code{locations} argument. Here is a listing of all of the
@@ -71,13 +72,13 @@ can be targeted by enclosing several \verb{cells_*()} helper functions in a
 Use \code{\link{sza}} to create a \strong{gt} table. Color all of the \code{month} values in the
 table stub with \code{\link[=tab_style]{tab_style()}}, using \code{cells_stub()} in \code{locations}.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sza \%>\%
-  dplyr::filter(latitude == 20 & tst <= "1000") \%>\%
-  dplyr::select(-latitude) \%>\%
-  dplyr::filter(!is.na(sza)) \%>\%
-  tidyr::spread(key = "tst", value = sza) \%>\%
-  gt(rowname_col = "month") \%>\%
-  sub_missing(missing_text = "") \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{sza |>
+  dplyr::filter(latitude == 20 & tst <= "1000") |>
+  dplyr::select(-latitude) |>
+  dplyr::filter(!is.na(sza)) |>
+  tidyr::spread(key = "tst", value = sza) |>
+  gt(rowname_col = "month") |>
+  sub_missing(missing_text = "") |>
   tab_style(
     style = list(
       cell_fill(color = "darkblue"),
@@ -94,7 +95,12 @@ table stub with \code{\link[=tab_style]{tab_style()}}, using \code{cells_stub()}
 
 \section{Function ID}{
 
-7-11
+8-11
+}
+
+\section{Function Introduced}{
+
+\code{v0.2.0.5} (March 31, 2020)
 }
 
 \seealso{
@@ -125,6 +131,7 @@ Other helper functions:
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},
-\code{\link{stub}()}
+\code{\link{stub}()},
+\code{\link{system_fonts}()}
 }
 \concept{helper functions}
