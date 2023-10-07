@@ -7,8 +7,12 @@
 system_fonts(name)
 }
 \arguments{
-\item{name}{A keyword from the set of \code{"system-ui"}, \code{"transitional"},
-\code{"old-style"}, \code{"humanist"}, \code{"geometric-humanist"},
+\item{name}{\emph{Name of font stack}
+
+\verb{scalar<character>} // \strong{required}
+
+The name of a font stack. Must be drawn from the set of \code{"system-ui"},
+\code{"transitional"}, \code{"old-style"}, \code{"humanist"}, \code{"geometric-humanist"},
 \code{"classical-humanist"}, \code{"neo-grotesque"}, \code{"monospace-slab-serif"},
 \code{"monospace-code"}, \code{"industrial"}, \code{"rounded-sans"}, \code{"slab-serif"},
 \code{"antique"}, \code{"didone"}, and \code{"handwritten"}.}
@@ -74,7 +78,7 @@ more readable and easier to read than other sans serif typefaces.
 
 \subsection{Geometric Humanist (\code{"geometric-humanist"})}{
 
-\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: Avenir, 'Avenir Next LT Pro', Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
+\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
 }\if{html}{\out{</div>}}
 
 Clean, geometric forms and consistent stroke widths are characteristics of
@@ -108,7 +112,7 @@ well-known examples of a Neo-grotesque typeface.
 
 \subsection{Monospace Slab Serif (\code{"monospace-slab-serif"})}{
 
-\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: 'Nimbus Mono PS', 'Courier New', 'Cutive Mono', monospace;
+\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: 'Nimbus Mono PS', 'Courier New', monospace;
 }\if{html}{\out{</div>}}
 
 Monospace slab serif typefaces are distinguished by their fixed-width
@@ -142,7 +146,7 @@ straight lines.
 
 \subsection{Rounded Sans (\code{"rounded-sans"})}{
 
-\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif;
+\if{html}{\out{<div class="sourceCode css">}}\preformatted{font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif;
 }\if{html}{\out{</div>}}
 
 The rounded, curved letterforms that define rounded typefaces give them a
@@ -199,12 +203,11 @@ stack tends to use a more casual and commonplace style.
 \section{Examples}{
 
 
-Use \code{\link{sp500}} to create a \strong{gt} table with 10 rows. For the \code{date} column
-and the column labels, let's use a different font stack (the \code{"industrial"}
-one). The system fonts used in this particular stack are \code{"Bahnschrift"},
-\code{"DIN Alternate"}, \code{"Franklin Gothic Medium"}, and \code{"Nimbus Sans Narrow"}
-(the generic \code{"sans-serif-condensed"} and \code{"sans-serif"} are used if the
-aforementioned fonts aren't available).
+Use a subset of the \code{\link{sp500}} dataset to create a \strong{gt} table with 10 rows.
+For the \code{date} column and the column labels, let's use a different font stack
+(the \code{"industrial"} one). The system fonts used in this particular stack are
+\code{"Bahnschrift"}, \code{"DIN Alternate"}, \code{"Franklin Gothic Medium"}, and \code{"Nimbus Sans Narrow"} (the generic \code{"sans-serif-condensed"} and \code{"sans-serif"} are
+used if the aforementioned fonts aren't available).
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{sp500 |>
   dplyr::slice(1:10) |>
@@ -230,12 +233,12 @@ aforementioned fonts aren't available).
 
 \section{Function ID}{
 
-8-29
+8-32
 }
 
 \section{Function Introduced}{
 
-\emph{In Development}
+\code{v0.9.0} (Mar 31, 2023)
 }
 
 \seealso{
@@ -259,11 +262,14 @@ Other helper functions:
 \code{\link{cells_title}()},
 \code{\link{currency}()},
 \code{\link{default_fonts}()},
+\code{\link{define_units}()},
 \code{\link{escape_latex}()},
+\code{\link{from_column}()},
 \code{\link{google_font}()},
 \code{\link{gt_latex_dependencies}()},
 \code{\link{html}()},
 \code{\link{md}()},
+\code{\link{nanoplot_options}()},
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},

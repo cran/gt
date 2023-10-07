@@ -1,3 +1,27 @@
+#------------------------------------------------------------------------------#
+#
+#                /$$
+#               | $$
+#     /$$$$$$  /$$$$$$
+#    /$$__  $$|_  $$_/
+#   | $$  \ $$  | $$
+#   | $$  | $$  | $$ /$$
+#   |  $$$$$$$  |  $$$$/
+#    \____  $$   \___/
+#    /$$  \ $$
+#   |  $$$$$$/
+#    \______/
+#
+#  This file is part of the 'rstudio/gt' project.
+#
+#  Copyright (c) 2018-2023 gt authors
+#
+#  For full copyright and license information, please look at
+#  https://gt.rstudio.com/LICENSE.html
+#
+#------------------------------------------------------------------------------#
+
+
 .dt_col_merge_key <- "_col_merge"
 
 dt_col_merge_get <- function(data) {
@@ -19,9 +43,11 @@ dt_col_merge_add <- function(data, col_merge) {
 
 dt_col_merge_entry <- function(vars, rows, type, pattern = NULL, ...) {
 
-  if (!(type %in% c("merge", "merge_range", "merge_uncert", "merge_n_pct"))) {
-    cli::cli_abort("Invalid `type` provided.")
-  }
+  # Assert type is one of the supported values
+  rlang::arg_match0(
+    type,
+    values = c("merge", "merge_range", "merge_uncert", "merge_n_pct")
+  )
 
   list(
     vars = vars,

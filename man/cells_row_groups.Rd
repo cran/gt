@@ -7,7 +7,15 @@
 cells_row_groups(groups = everything())
 }
 \arguments{
-\item{groups}{The names of the row groups that are to be targeted.}
+\item{groups}{\emph{Specification of row group IDs}
+
+\verb{<row-group-targeting expression>} // \emph{default:} \code{everything()}
+
+The row groups to which targeting operations are constrained. Can either be
+a series of row group ID values provided in \code{\link[=c]{c()}} or a select helper
+function. Examples of select helper functions include \code{\link[=starts_with]{starts_with()}},
+\code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}}, \code{\link[=matches]{matches()}}, \code{\link[=one_of]{one_of()}}, \code{\link[=num_range]{num_range()}}, and
+\code{\link[=everything]{everything()}}.}
 }
 \value{
 A list object with the classes \code{cells_row_groups} and
@@ -76,10 +84,11 @@ can be targeted by enclosing several \verb{cells_*()} helper functions in a
 \section{Examples}{
 
 
-Use \code{\link{pizzaplace}} to create a \strong{gt} table with grouped data. Add a summary
-with the \code{\link[=summary_rows]{summary_rows()}} function and then add a footnote to the
-\code{"peppr_salami"} row group label with \code{\link[=tab_footnote]{tab_footnote()}} and with
-\code{cells_row_groups()} in \code{locations}.
+Let's use a summarized version of the \code{\link{pizzaplace}} dataset to create a
+\strong{gt} table with grouped data. Add a summary with the \code{\link[=summary_rows]{summary_rows()}}
+function and then add a footnote to the \code{"peppr_salami"} row group label with
+\code{\link[=tab_footnote]{tab_footnote()}}; the targeting is done with \code{cells_row_groups()} in the
+\code{locations} argument.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{pizzaplace |>
   dplyr::filter(name \%in\% c("soppressata", "peppr_salami")) |>
@@ -104,7 +113,7 @@ with the \code{\link[=summary_rows]{summary_rows()}} function and then add a foo
 
 \section{Function ID}{
 
-8-10
+8-15
 }
 
 \section{Function Introduced}{
@@ -132,11 +141,14 @@ Other helper functions:
 \code{\link{cells_title}()},
 \code{\link{currency}()},
 \code{\link{default_fonts}()},
+\code{\link{define_units}()},
 \code{\link{escape_latex}()},
+\code{\link{from_column}()},
 \code{\link{google_font}()},
 \code{\link{gt_latex_dependencies}()},
 \code{\link{html}()},
 \code{\link{md}()},
+\code{\link{nanoplot_options}()},
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},

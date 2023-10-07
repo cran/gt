@@ -1,3 +1,27 @@
+#------------------------------------------------------------------------------#
+#
+#                /$$
+#               | $$
+#     /$$$$$$  /$$$$$$
+#    /$$__  $$|_  $$_/
+#   | $$  \ $$  | $$
+#   | $$  | $$  | $$ /$$
+#   |  $$$$$$$  |  $$$$/
+#    \____  $$   \___/
+#    /$$  \ $$
+#   |  $$$$$$/
+#    \______/
+#
+#  This file is part of the 'rstudio/gt' project.
+#
+#  Copyright (c) 2018-2023 gt authors
+#
+#  For full copyright and license information, please look at
+#  https://gt.rstudio.com/LICENSE.html
+#
+#------------------------------------------------------------------------------#
+
+
 .dt_stub_df_key <- "_stub_df"
 
 dt_stub_df_get <- function(data) {
@@ -28,6 +52,13 @@ dt_stub_df_init <- function(
       indent = rep(NA_character_, nrow(data_tbl)),
       built_group_label = rep(NA_character_, nrow(data_tbl))
     )
+
+  # Handle case where table has no columns
+  if (ncol(data_tbl) < 1) {
+
+    data <- dt_stub_df_set(data = data, stub_df = stub_df)
+    return(data)
+  }
 
   #
   # Handle column of data specified as the `rowname_col`
@@ -158,7 +189,7 @@ dt_stub_groupname_has_na <- function(data) {
 
   stub_df <- dt_stub_df_get(data = data)
 
-  any(is.na(stub_df$group_id))
+  anyNA(stub_df$group_id)
 }
 
 dt_stub_components <- function(data) {

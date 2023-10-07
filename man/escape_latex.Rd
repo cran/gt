@@ -7,8 +7,11 @@
 escape_latex(text)
 }
 \arguments{
-\item{text}{A character vector containing the text that is to be
-LaTeX-escaped.}
+\item{text}{\emph{LaTeX text}
+
+\verb{vector<character>} // \strong{required}
+
+A character vector containing the text that is to be LaTeX-escaped.}
 }
 \value{
 A character vector.
@@ -20,7 +23,7 @@ safe to use within LaTeX tables.
 }
 \section{Function ID}{
 
-8-25
+8-28
 }
 
 \section{Function Introduced}{
@@ -49,10 +52,13 @@ Other helper functions:
 \code{\link{cells_title}()},
 \code{\link{currency}()},
 \code{\link{default_fonts}()},
+\code{\link{define_units}()},
+\code{\link{from_column}()},
 \code{\link{google_font}()},
 \code{\link{gt_latex_dependencies}()},
 \code{\link{html}()},
 \code{\link{md}()},
+\code{\link{nanoplot_options}()},
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},

@@ -1,3 +1,29 @@
+#------------------------------------------------------------------------------#
+#
+#                /$$
+#               | $$
+#     /$$$$$$  /$$$$$$
+#    /$$__  $$|_  $$_/
+#   | $$  \ $$  | $$
+#   | $$  | $$  | $$ /$$
+#   |  $$$$$$$  |  $$$$/
+#    \____  $$   \___/
+#    /$$  \ $$
+#   |  $$$$$$/
+#    \______/
+#
+#  This file is part of the 'rstudio/gt' project.
+#
+#  Copyright (c) 2018-2023 gt authors
+#
+#  For full copyright and license information, please look at
+#  https://gt.rstudio.com/LICENSE.html
+#
+#------------------------------------------------------------------------------#
+
+
+#nocov start
+
 #' A **gt** display table render function for use in Shiny
 #'
 #' @description
@@ -13,25 +39,55 @@
 #'
 #' We need to ensure that we have the **shiny** package installed first. This
 #' is easily by using `install.packages("shiny")`. More information on creating
-#' Shiny apps can be found at the \href{https://shiny.rstudio.com}{Shiny Site}.
+#' Shiny apps can be found on the \href{https://shiny.posit.co}{Shiny website}.
 #'
-#' @param expr An expression that creates a **gt** table object. For sake of
-#'   convenience, a data frame or tibble can be used here (it will be
-#'   automatically introduced to [gt()] with its default options).
-#' @param width,height The width and height of the table's container. Either can
-#'   be specified as a single-length character with units of pixels or as a
-#'   percentage. If provided as a single-length numeric vector, it is assumed
-#'   that the value is given in units of pixels. The [px()] and [pct()] helper
-#'   functions can also be used to pass in numeric values and obtain values as
-#'   pixel or percent units.
-#' @param align The alignment of the table in its container. By default, this is
-#'   `"center"`. Other options are `"left"` and `"right"`.
-#' @param env The environment in which to evaluate the `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This is useful
-#'   if you want to save an expression in a variable.
-#' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [gt_output()] when `render_gt()` is used in an interactive R
-#'   Markdown document.
+#' @param expr *Expression*
+#'
+#'   `<expression>|obj:<data.frame>|obj:<tbl_df>`
+#'
+#'   An expression that creates a **gt** table object. For sake of convenience,
+#'   a data frame or tibble can be used here (it will be automatically
+#'   introduced to [gt()] with its default options).
+#'
+#' @param width,height *Dimensions of table container*
+#'
+#'   `scalar<numeric|integer|character>` // *default:* `NULL` (`optional`)
+#'
+#'   The width and height of the table's container. Either can be specified as a
+#'   single-length character vector with units of pixels or as a percentage. If
+#'   provided as a single-length numeric vector, it is assumed that the value is
+#'   given in units of pixels. The [px()] and [pct()] helper functions can also
+#'   be used to pass in numeric values and obtain values as pixel or percent
+#'   units.
+#'
+#' @param align *Table alignment*
+#'
+#'   `scalar<character>` // *default:* `NULL` (`optional`)
+#'
+#'   The alignment of the table in its container. If `NULL`, the table will be
+#'   center-aligned. Valid options for this are: `"center"`, `"left"`, and
+#'   `"right"`.
+#'
+#' @param env *Evaluation environment*
+#'
+#'   `<environment>` // *default:* `parent.frame()`
+#'
+#'   The environment in which to evaluate the `expr`.
+#'
+#' @param quoted *Option to `quote()` `expr`*
+#'
+#'   `scalar<logical>` // *default:* `FALSE`
+#'
+#'   Is `expr` a quoted expression (with `quote()`)? This is useful if you want
+#'   to save an expression in a variable.
+#'
+#' @param outputArgs *Output arguments*
+#'
+#'   `list` // *default:* `list()`
+#'
+#'   A list of arguments to be passed through to the implicit call to
+#'   [gt_output()] when `render_gt()` is used in an interactive R Markdown
+#'   document.
 #'
 #' @return An object of class `shiny.render.function`.
 #'
@@ -89,7 +145,7 @@ render_gt <- function(
 ) {
 
   # Ensure that the shiny package is available
-  check_shiny()
+  rlang::check_installed("shiny", "to use `render_gt()`.")
 
   # Install the expression as a function
   func <-
@@ -156,9 +212,13 @@ render_gt <- function(
 #'
 #' We need to ensure that we have the **shiny** package installed first. This
 #' is easily by using `install.packages("shiny")`. More information on creating
-#' Shiny apps can be found at the \href{https://shiny.rstudio.com}{Shiny Site}.
+#' Shiny apps can be found on the \href{https://shiny.posit.co}{Shiny website}.
 #'
-#' @param outputId An output variable from which to read the table.
+#' @param outputId *Shiny output ID*
+#'
+#'   `scalar<character>` // **required**
+#'
+#'   An output variable from which to read the table.
 #'
 #' @return An object of class `shiny.tag`.
 #'
@@ -208,18 +268,9 @@ render_gt <- function(
 gt_output <- function(outputId) {
 
   # Ensure that the shiny package is available
-  check_shiny()
+  rlang::check_installed("shiny", "to use `gt_output()`.")
 
   shiny::htmlOutput(outputId)
+
 }
-
-check_shiny <- function() {
-
-  if (!requireNamespace("shiny", quietly = TRUE)) {
-
-    cli::cli_abort(c(
-      "Please install the `shiny` package before using this function.",
-      "*" = "It can be installed with `install.packages(\"shiny\")`."
-    ))
-  }
-}
+#nocov end

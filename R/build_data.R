@@ -1,3 +1,27 @@
+#------------------------------------------------------------------------------#
+#
+#                /$$
+#               | $$
+#     /$$$$$$  /$$$$$$
+#    /$$__  $$|_  $$_/
+#   | $$  \ $$  | $$
+#   | $$  | $$  | $$ /$$
+#   |  $$$$$$$  |  $$$$/
+#    \____  $$   \___/
+#    /$$  \ $$
+#   |  $$$$$$/
+#    \______/
+#
+#  This file is part of the 'rstudio/gt' project.
+#
+#  Copyright (c) 2018-2023 gt authors
+#
+#  For full copyright and license information, please look at
+#  https://gt.rstudio.com/LICENSE.html
+#
+#------------------------------------------------------------------------------#
+
+
 # Build common table components from a `gt_tbl` object
 #' @import rlang
 #' @noRd
@@ -5,6 +29,12 @@ build_data <- function(data, context) {
 
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
+
+  # For an empty table, ensure that some basic
+  # messaging is in place
+  if (is_gt_tbl_empty(data = data)) {
+    data <- adjust_gt_tbl_empty(data = data)
+  }
 
   # Create `body` with rendered values; move
   # input data cells to `body` that didn't have
@@ -16,11 +46,12 @@ build_data <- function(data, context) {
   data <- render_substitutions(data = data, context = context)
   data <- migrate_unformatted_to_output(data = data, context = context)
   data <- perform_col_merge(data = data, context = context)
-
   data <- dt_body_reassemble(data = data)
+
   data <- reorder_stub_df(data = data)
   data <- reorder_footnotes(data = data)
   data <- reorder_styles(data = data)
+
   data <- perform_text_transforms(data = data)
 
   # Use `dt_*_build()` methods

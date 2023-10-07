@@ -7,9 +7,12 @@
 cells_title(groups = c("title", "subtitle"))
 }
 \arguments{
-\item{groups}{We can either specify \code{"title"}, \code{"subtitle"}, or both (the
-default) in a vector to target the title element, the subtitle element, or
-both elements.}
+\item{groups}{\emph{Specification of groups}
+
+\verb{mult-kw:[title|subtitle]} // \emph{default:} \code{c("title", "subtitle")}
+
+We can either specify \code{"title"}, \code{"subtitle"}, or both (the default) in a
+vector to target the title element, the subtitle element, or both elements.}
 }
 \value{
 A list object of classes \code{cells_title} and \code{location_cells}.
@@ -67,9 +70,9 @@ can be targeted by enclosing several \verb{cells_*()} helper functions in a
 \section{Examples}{
 
 
-Use \code{\link{sp500}} to create a \strong{gt} table. Add a header with a title, and then
-add a footnote to the title with \code{\link[=tab_footnote]{tab_footnote()}} and \code{cells_title()} (in
-\code{locations}).
+Use a subset of the \code{\link{sp500}} dataset to create a small \strong{gt} table. Add a
+header with a title, and then add a footnote to the title with
+\code{\link[=tab_footnote]{tab_footnote()}} and \code{cells_title()} (in \code{locations}).
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{sp500 |>
   dplyr::filter(date >= "2015-01-05" & date <="2015-01-10") |>
@@ -89,7 +92,7 @@ add a footnote to the title with \code{\link[=tab_footnote]{tab_footnote()}} and
 
 \section{Function ID}{
 
-8-6
+8-11
 }
 
 \section{Function Introduced}{
@@ -117,11 +120,14 @@ Other helper functions:
 \code{\link{cells_summary}()},
 \code{\link{currency}()},
 \code{\link{default_fonts}()},
+\code{\link{define_units}()},
 \code{\link{escape_latex}()},
+\code{\link{from_column}()},
 \code{\link{google_font}()},
 \code{\link{gt_latex_dependencies}()},
 \code{\link{html}()},
 \code{\link{md}()},
+\code{\link{nanoplot_options}()},
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},

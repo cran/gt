@@ -7,7 +7,15 @@
 cells_column_labels(columns = everything())
 }
 \arguments{
-\item{columns}{The names of the column labels that are to be targeted.}
+\item{columns}{\emph{Columns to target}
+
+\verb{<column-targeting expression>} // \emph{default:} \code{everything()}
+
+The columns to which targeting operations are constrained. Can either
+be a series of column names provided in \code{\link[=c]{c()}}, a vector of column indices,
+or a select helper function. Examples of select helper functions include
+\code{\link[=starts_with]{starts_with()}}, \code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}}, \code{\link[=matches]{matches()}}, \code{\link[=one_of]{one_of()}},
+\code{\link[=num_range]{num_range()}}, and \code{\link[=everything]{everything()}}.}
 }
 \value{
 A list object with the classes \code{cells_column_labels} and
@@ -81,8 +89,9 @@ which targets numeric columns that have a maximum value greater than
 \section{Examples}{
 
 
-Use \code{\link{sza}} to create a \strong{gt} table. Add footnotes to the column labels with
-\code{\link[=tab_footnote]{tab_footnote()}} and \code{cells_column_labels()} in \code{locations}.
+Let's use a small portion of the \code{\link{sza}} dataset to create a \strong{gt} table.
+Add footnotes to the column labels with \code{\link[=tab_footnote]{tab_footnote()}} and
+\code{cells_column_labels()} in \code{locations}.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{sza |>
   dplyr::filter(
@@ -112,7 +121,7 @@ Use \code{\link{sza}} to create a \strong{gt} table. Add footnotes to the column
 
 \section{Function ID}{
 
-8-9
+8-14
 }
 
 \section{Function Introduced}{
@@ -140,11 +149,14 @@ Other helper functions:
 \code{\link{cells_title}()},
 \code{\link{currency}()},
 \code{\link{default_fonts}()},
+\code{\link{define_units}()},
 \code{\link{escape_latex}()},
+\code{\link{from_column}()},
 \code{\link{google_font}()},
 \code{\link{gt_latex_dependencies}()},
 \code{\link{html}()},
 \code{\link{md}()},
+\code{\link{nanoplot_options}()},
 \code{\link{pct}()},
 \code{\link{px}()},
 \code{\link{random_id}()},

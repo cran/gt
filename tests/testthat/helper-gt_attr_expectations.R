@@ -67,39 +67,34 @@ expect_tab <- function(tab, df) {
 
   (dt_boxhead_get(data = tab) %>%
     dim())[2] %>%
-    expect_equal(6)
+    expect_equal(8)
 
   dt_stub_df_get(data = tab) %>%
     dim() %>%
     expect_equal(c(nrow(df), 6))
 
   dt_heading_get(data = tab) %>%
-    length() %>%
-    expect_equal(3)
+    expect_length(3)
 
   dt_spanners_get(data = tab) %>%
     dim() %>%
-    expect_equal(c(0, 6))
+    expect_equal(c(0, 8))
 
   dt_stubhead_get(data = tab) %>%
-    length() %>%
-    expect_equal(1)
+    expect_length(1)
 
   dt_footnotes_get(data = tab) %>%
     dim() %>%
     expect_equal(c(0, 8))
 
   dt_source_notes_get(data = tab) %>%
-    length() %>%
-    expect_equal(0)
+    expect_length(0)
 
   dt_formats_get(data = tab) %>%
-    length() %>%
-    expect_equal(0)
+    expect_length(0)
 
   dt_substitutions_get(data = tab) %>%
-    length() %>%
-    expect_equal(0)
+    expect_length(0)
 
   dt_styles_get(data = tab) %>%
     dim() %>%
@@ -107,11 +102,10 @@ expect_tab <- function(tab, df) {
 
   dt_options_get(data = tab) %>%
     dim() %>%
-    expect_equal(c(189, 5))
+    expect_equal(c(190, 5))
 
   dt_transforms_get(data = tab) %>%
-    length() %>%
-    expect_equal(0)
+    expect_length(0)
 
   # Expect that extracted df has the same column
   # names as the original dataset
