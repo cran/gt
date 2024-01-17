@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -321,10 +321,10 @@
 #'
 #' @section Examples:
 #'
-#' Use the [`exibble`] dataset to create a **gt** table. With the `fmt_number()`
-#' function, we'll format the `num` column to have three decimal places (with
-#' `decimals = 3`) and omit the use of digit separators (with `use_seps =
-#' FALSE`).
+#' Let's use the [`exibble`] dataset to create a **gt** table. With the
+#' `fmt_number()` function, we'll format the `num` column to have three decimal
+#' places (with `decimals = 3`) and omit the use of digit separators (with
+#' `use_seps = FALSE`).
 #'
 #' ```r
 #' exibble |>
@@ -788,10 +788,9 @@ fmt_number <- function(
 #'
 #' This formatting function can adapt outputs according to a provided `locale`
 #' value. Examples include `"en"` for English (United States) and `"fr"` for
-#' French (France). The use of a valid locale ID here means separator and
-#' decimal marks will be correct for the given locale. Should any value be
-#' provided in `sep_mark`, it will be overridden by the locale's preferred
-#' values.
+#' French (France). The use of a valid locale ID here means separator marks will
+#' be correct for the given locale. Should any value be provided in `sep_mark`,
+#' it will be overridden by the locale's preferred value.
 #'
 #' Note that a `locale` value provided here will override any global locale
 #' setting performed in [gt()]'s own `locale` argument (it is settable there as
@@ -2189,19 +2188,19 @@ fmt_symbol <- function(
 #'   usually proportional. Setting to `FALSE` signifies that the values are
 #'   already scaled and require only the percent sign when formatted.
 #'
+#' @param placement *Percent sign placement*
+#'
+#'   `singl-kw:[right|left]` // *default:* `"right"`
+#'
+#'   This option governs the placement of the percent sign. This can be either
+#'   be `"right"` (the default) or `"left"`.
+#'
 #' @param incl_space *Include a space between the value and the % sign*
 #'
 #'   `scalar<logical>` // *default:* `FALSE`
 #'
 #'   An option for whether to include a space between the value and the percent
 #'   sign. The default is to not introduce a space character.
-#'
-#' @param placement *Percent sign placement*
-#'
-#'   `scalar<character>` // *default:* `"right"`
-#'
-#'   This option governs the placement of the percent sign. This can be either
-#'   be `right` (the default) or `left`.
 #'
 #' @return An object of class `gt_tbl`.
 #'
@@ -2346,8 +2345,8 @@ fmt_percent <- function(
     sep_mark = ",",
     dec_mark = ".",
     force_sign = FALSE,
-    incl_space = FALSE,
     placement = "right",
+    incl_space = FALSE,
     system = c("intl", "ind"),
     locale = NULL
 ) {
@@ -3219,34 +3218,30 @@ fmt_fraction <- function(
   locale <- normalize_locale(locale = locale)
   locale <- resolve_locale(data = data, locale = locale)
 
-  if (is.null(accuracy)) {
+  # Use "low" as default for accuracy
+  accuracy <- accuracy %||% "low"
 
-    accuracy <- "low"
+  if (is.character(accuracy)) {
 
-  } else {
+    rlang::arg_match0(accuracy, c("low", "med", "high"))
 
-    if (is.character(accuracy)) {
+  } else if (is.numeric(accuracy)) {
 
-      rlang::arg_match0(accuracy, c("low", "med", "high"))
-
-    } else if (is.numeric(accuracy)) {
-
-      if (accuracy < 1) {
-
-        cli::cli_abort(c(
-          "The numeric value supplied for `accuracy` is invalid.",
-          "*" = "Must be an integer value greater than zero."
-        ))
-      }
-
-    } else {
+    if (accuracy < 1) {
 
       cli::cli_abort(c(
-        "The input for `accuracy` is invalid.",
-        "*" = "Must be a keyword \"low\", \"med\", or \"high\", or",
+        "The numeric value supplied for `accuracy` is invalid.",
         "*" = "Must be an integer value greater than zero."
       ))
     }
+
+  } else {
+
+    cli::cli_abort(c(
+      "The input for `accuracy` is invalid.",
+      "*" = "Must be a keyword \"low\", \"med\", or \"high\", or",
+      "*" = "Must be an integer value greater than zero."
+    ))
   }
 
   # In this case where strict mode is being used (with the option
@@ -3622,12 +3617,33 @@ round_gt <- function(x, digits = 0) {
 #'   formatting will produce `"$273.81"`. Removing the subunits (with
 #'   `use_subunits = FALSE`) will give us `"$273"`.
 #'
+#' @param decimals *Number of decimal places*
+#'
+#'   `scalar<numeric|integer>(val>=0)` // *default:* `NULL` (`optional`)
+#'
+#'   The `decimals` values corresponds to the exact number of decimal places to
+#'   use. This value is optional as a currency has an intrinsic number of
+#'   decimal places (i.e., the subunits). A value such as `2.34` can, for
+#'   example, be formatted with `0` decimal places and if the currency used is
+#'   `"USD"` it would result in `"$2"`. With `4` decimal places, the formatted
+#'   value becomes `"$2.3400"`.
+#'
+#' @param drop_trailing_dec_mark *Drop the trailing decimal mark*
+#'
+#'   `scalar<logical>` // *default:* `TRUE`
+#'
+#'   A logical value that determines whether decimal marks should always appear
+#'   even if there are no decimal digits to display after formatting. For
+#'   example, when `use_subunits = FALSE` or `decimals = 0` a formatted value
+#'   such as `"$23"` can be fashioned as `"$23."` by setting
+#'   `drop_trailing_dec_mark = FALSE`.
+#'
 #' @param placement *Currency symbol placement*
 #'
-#'   `scalar<character>` // *default:* `"left"`
+#'   `singl-kw:[left|right]` // *default:* `"left"`
 #'
-#'   The placement of the currency symbol. This can be either be `left` (as
-#'   in `"$450"`) or `right` (which yields `"450$"`).
+#'   The placement of the currency symbol. This can be either be `"left"` (as
+#'   in `"$450"`) or `"right"` (which yields `"450$"`).
 #'
 #' @param incl_space *Include a space between the value and the currency symbol*
 #'
@@ -7136,9 +7152,7 @@ fmt_datetime <- function(
 
             if (is.character(x)) {
 
-              if (is.null(tz)) {
-                tz <- "GMT"
-              }
+              tz <- tz %||% "GMT"
 
               datetime <-
                 tryCatch(
@@ -7162,9 +7176,7 @@ fmt_datetime <- function(
 
           } else {
 
-            if (is.null(tz)) {
-              tz <- "UTC"
-            }
+            tz <- tz %||% "UTC"
 
             dt_str <- strftime(x, format = "%Y-%m-%dT%H:%M:%S%z", tz = tz)
 
@@ -8339,7 +8351,7 @@ format_bins_by_context <- function(x, sep, fmt, context) {
     paste0(x_val_lhs_fmt, sep, x_val_rhs_fmt)
 
   x_str[!is.na(x)] <- x_str_non_missing
-  x_str[is.na(x)] <- as.character(NA_character_)
+  x_str[is.na(x)] <- NA_character_
   x_str
 }
 
@@ -8507,7 +8519,7 @@ format_bins_by_context <- function(x, sep, fmt, context) {
 #' 3-18
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @import rlang
 #' @export
@@ -8588,7 +8600,7 @@ format_units_by_context <- function(x, context = "html") {
     )
 
   x_str[!is.na(x)] <- x_str_non_missing
-  x_str[is.na(x)] <- as.character(NA_character_)
+  x_str[is.na(x)] <- NA_character_
   x_str
 }
 
@@ -9283,16 +9295,18 @@ fmt_url <- function(
 
         x_str_non_missing <-
           paste0(
+            "<span style=\"white-space: pre;\">",
             "<a",
             " href=\"", x_str_non_missing, "\"",
             anchor_attr,
             ">",
             label_str,
-            "</a>"
+            "</a>",
+            "</span>"
           )
 
         x_str[!is.na(x)] <- x_str_non_missing
-        x_str[is.na(x)] <- as.character(NA_character_)
+        x_str[is.na(x)] <- NA_character_
         x_str
       },
       latex = function(x) {
@@ -9688,7 +9702,7 @@ fmt_image <- function(
           )
 
         x_str[!is.na(x)] <- x_str_non_missing
-        x_str[is.na(x)] <- as.character(NA_character_)
+        x_str[is.na(x)] <- NA_character_
         x_str
       },
       latex = function(x) {
@@ -9775,7 +9789,7 @@ fmt_image <- function(
                   filename <- path_expand(filename)
                 }
 
-                if (is.null(height) | is.null(width)) {
+                if (is.null(height) || is.null(width)) {
 
                   hw_ratio <- get_image_hw_ratio(filename)
 
@@ -9804,7 +9818,7 @@ fmt_image <- function(
           )
 
         x_str[!is.na(x)] <- x_str_non_missing
-        x_str[is.na(x)] <- as.character(NA_character_)
+        x_str[is.na(x)] <- NA_character_
 
         x_str
       },
@@ -10280,7 +10294,7 @@ fmt_flag <- function(
           )
 
         x_str[!is.na(x)] <- x_str_non_missing
-        x_str[is.na(x)] <- as.character(NA_character_)
+        x_str[is.na(x)] <- NA_character_
         x_str
       },
       latex = function(x) {
@@ -10640,7 +10654,7 @@ fmt_flag <- function(
 #' 3-22
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @import rlang
 #' @export
@@ -10844,7 +10858,7 @@ fmt_icon <- function(
           )
 
         x_str[!is.na(x)] <- x_str_non_missing
-        x_str[is.na(x)] <- as.character(NA_character_)
+        x_str[is.na(x)] <- NA_character_
         x_str
       },
       latex = function(x) {

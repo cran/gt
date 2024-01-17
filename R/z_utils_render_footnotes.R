@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -353,8 +353,10 @@ resolve_footnotes_styles <- function(data, tbl_type) {
     lookup_tbl <-
       dplyr::filter(tbl, locname != "none") %>%
       dplyr::select(footnotes) %>%
-      dplyr::distinct() %>%
-      tibble::rownames_to_column(var = "fs_id")
+      dplyr::distinct()
+
+    lookup_tbl <- dplyr::mutate(lookup_tbl, fs_id = rownames(lookup_tbl), .before = 1)
+    rownames(lookup_tbl) <- NULL
 
     # Join the lookup table to `tbl`
     tbl <- dplyr::left_join(tbl, lookup_tbl, by = "footnotes")
@@ -487,8 +489,7 @@ set_footnote_marks_columns <- function(data, context = "html") {
         dplyr::group_by(colname) %>%
         dplyr::mutate(fs_id_coalesced = paste(fs_id, collapse = ",")) %>%
         dplyr::ungroup() %>%
-        dplyr::select(colname, fs_id_coalesced) %>%
-        dplyr::distinct()
+        dplyr::distinct(colname, fs_id_coalesced)
 
       for (i in seq(nrow(footnotes_columns_column_marks))) {
 
@@ -507,7 +508,7 @@ set_footnote_marks_columns <- function(data, context = "html") {
             boxh,
             column_label = dplyr::case_when(
               var == footnotes_columns_column_marks$colname[i] ~ list(text),
-              TRUE ~ column_label
+              .default = column_label
             )
           )
 
@@ -540,8 +541,7 @@ set_footnote_marks_stubhead <- function(data, context = "html") {
         dplyr::group_by(grpname) %>%
         dplyr::mutate(fs_id_coalesced = paste(fs_id, collapse = ",")) %>%
         dplyr::ungroup() %>%
-        dplyr::select(grpname, fs_id_coalesced) %>%
-        dplyr::distinct() %>%
+        dplyr::distinct(grpname, fs_id_coalesced) %>%
         dplyr::pull(fs_id_coalesced)
 
 
@@ -591,8 +591,7 @@ apply_footnotes_to_output <- function(data, context = "html") {
       dplyr::group_by(rownum, colnum) %>%
       dplyr::mutate(fs_id_coalesced = paste(fs_id, collapse = ",")) %>%
       dplyr::ungroup() %>%
-      dplyr::select(colname, rownum, locname, placement, fs_id_coalesced) %>%
-      dplyr::distinct()
+      dplyr::distinct(colname, rownum, locname, placement, fs_id_coalesced)
 
     for (i in seq(nrow(footnotes_data_marks))) {
 

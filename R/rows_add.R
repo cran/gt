@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -339,7 +339,7 @@
 #' 6-4
 #'
 #' @section Function Introduced:
-#' `0.9.1` (in development)
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @import rlang
 #' @export

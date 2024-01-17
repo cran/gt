@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -84,9 +84,9 @@
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for cell data color operations. The default
 #'   [everything()] results in all rows in `columns` being formatted.
-#'   Alternatively, we can supply a vector of row captions within [c()], a
-#'   vector of row indices, or a select helper function. Examples of select
-#'   helper functions include [starts_with()], [ends_with()], [contains()],
+#'   Alternatively, we can supply a vector of row IDs within [c()], a vector of
+#'   row indices, or a select helper function. Examples of select helper
+#'   functions include [starts_with()], [ends_with()], [contains()],
 #'   [matches()], [one_of()], [num_range()], and [everything()]. We can also use
 #'   expressions to filter down to the rows we need (e.g., `[colname_1] > 100 &
 #'   [colname_2] < 50`).
@@ -188,9 +188,10 @@
 #'
 #'   `scalar<numeric|integer>(0>=val>=1)` // *default:* `NULL` (`optional`)
 #'
-#'   An optional, fixed alpha transparency value that will be applied to all of
-#'   the `colors` provided (regardless of whether a color palette was directly
-#'   supplied or generated through a color mapping function).
+#'   An optional, fixed alpha transparency value that will be applied to all
+#'   color palette values (regardless of whether a color palette was directly
+#'   supplied in `palette` or generated through a color mapping function via
+#'   `fn`).
 #'
 #' @param reverse *Reverse order of computed colors*
 #'
@@ -723,9 +724,7 @@ data_color <- function(
   contrast_algo <- rlang::arg_match(contrast_algo)
 
   # If no color is provided to `na_color`, use gray as a default
-  if (is.null(na_color)) {
-    na_color <- "#808080"
-  }
+  na_color <- na_color %||% "#808080"
 
   # Defuse any function supplied to `fn`; if a function is supplied to `colors`
   # (previous argument for this purpose) then let that take precedent and
@@ -946,7 +945,7 @@ data_color <- function(
         color_fn <-
           scales::col_numeric(
             palette = palette,
-            domain = if (is.null(domain)) data_vals else domain,
+            domain = domain %||% data_vals,
             na.color = na_color,
             alpha = TRUE,
             reverse = reverse
@@ -969,7 +968,7 @@ data_color <- function(
         color_fn <-
           scales::col_factor(
             palette = palette,
-            domain = if (is.null(domain)) data_vals else domain,
+            domain = domain %||% data_vals,
             levels = levels,
             ordered = ordered,
             na.color = na_color,
@@ -996,7 +995,7 @@ data_color <- function(
       color_fn <-
         scales::col_numeric(
           palette = palette,
-          domain = if (is.null(domain)) data_vals else domain,
+          domain = domain %||% data_vals,
           na.color = na_color,
           alpha = TRUE,
           reverse = reverse
@@ -1010,7 +1009,7 @@ data_color <- function(
       color_fn <-
         scales::col_bin(
           palette = palette,
-          domain = if (is.null(domain)) data_vals else domain,
+          domain = domain %||% data_vals,
           bins = bins,
           pretty = FALSE,
           na.color = na_color,
@@ -1027,7 +1026,7 @@ data_color <- function(
       color_fn <-
         scales::col_quantile(
           palette = palette,
-          domain = if (is.null(domain)) data_vals else domain,
+          domain = domain %||% data_vals,
           n = quantiles,
           na.color = na_color,
           alpha = TRUE,
@@ -1047,7 +1046,7 @@ data_color <- function(
       color_fn <-
         scales::col_factor(
           palette = palette,
-          domain = if (is.null(domain)) data_vals else domain,
+          domain = domain %||% data_vals,
           levels = levels,
           ordered = ordered,
           na.color = na_color,

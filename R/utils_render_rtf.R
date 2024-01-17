@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -44,6 +44,11 @@ twip_factors <-
     `in` = 1440, `pt` = 20, `px` = 15,
     `cm` = 566.9291, `mm` = 56.69291, `tw` = 1
   )
+
+twip_factors_df <- data.frame(
+  unit = names(twip_factors),
+  conv = unname(twip_factors)
+)
 
 rtf_key <- function(word, val = NULL, space = FALSE) {
   rtf_raw(paste0("\\", word, val %||% "", if (space) " "))
@@ -412,7 +417,7 @@ abs_len_to_twips <- function(lengths_df) {
 
   lengths_df %>%
     dplyr::left_join(
-      tibble::enframe(twip_factors, name = "unit", value = "conv"),
+      twip_factors_df,
       by = c("unit" = "unit")
     ) %>%
     dplyr::mutate(

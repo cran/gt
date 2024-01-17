@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -772,7 +772,7 @@ info_google_fonts <- function() {
 #' 11-7
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 info_flags <- function() {
@@ -811,7 +811,7 @@ info_flags <- function() {
 #' 11-8
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 info_icons <- function() {

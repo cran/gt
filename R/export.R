@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -97,7 +97,7 @@
 #'
 #'   All other options passed to the appropriate internal saving function.
 #'
-#' @return Invisibly returns `TRUE` if the export process is successful.
+#' @return The file name (invisibly) if the export process is successful.
 #'
 #' @section Examples:
 #'
@@ -217,8 +217,11 @@ gtsave <- function(
       ))
     }
   )
+  if (!is.null(path)) {
+    filename <- file.path(path, filename)
+  }
 
-  invisible(TRUE)
+  invisible(filename)
 }
 
 #' Saving function for an HTML file
@@ -722,15 +725,19 @@ as_latex <- function(data) {
     latex_packages <- NULL
   }
 
+  table_width_bookends <- derive_table_width_bookends(data = data)
+
   # Compose the LaTeX table
   knitr::asis_output(
     paste0(
+      table_width_bookends[1L],
       table_start,
       heading_component,
       columns_component,
       body_component,
       table_end,
       footer_component,
+      table_width_bookends[2L],
       collapse = ""
     ),
     meta = latex_packages
@@ -1236,7 +1243,7 @@ as_word_tbl_body <- function(
 #' 13-6
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 extract_body <- function(
@@ -1253,55 +1260,37 @@ extract_body <- function(
 
   data <- dt_body_build(data = data)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "init"
-  ) {
+  if (identical(build_stage, "init")) {
     return(data[["_body"]])
   }
 
   data <- render_formats(data = data, context = output)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "fmt_applied"
-  ) {
+  if (identical(build_stage, "fmt_applied")) {
     return(data[["_body"]])
   }
 
   data <- render_substitutions(data = data, context = output)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "sub_applied"
-  ) {
+  if (identical(build_stage, "sub_applied")) {
     return(data[["_body"]])
   }
 
   data <- migrate_unformatted_to_output(data = data, context = output)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "unfmt_included"
-  ) {
+  if (identical(build_stage, "unfmt_included")) {
     return(data[["_body"]])
   }
 
   data <- perform_col_merge(data = data, context = output)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "cols_merged"
-  ) {
+  if (identical(build_stage, "cols_merged")) {
     return(data[["_body"]])
   }
 
   data <- dt_body_reassemble(data = data)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "body_reassembled"
-  ) {
+  if (identical(build_stage, "body_reassembled")) {
     return(data[["_body"]])
   }
 
@@ -1311,10 +1300,7 @@ extract_body <- function(
 
   data <- perform_text_transforms(data = data)
 
-  if (
-    !is.null(build_stage) &&
-    build_stage == "text_transformed"
-  ) {
+  if (identical(build_stage, "text_transformed")) {
     return(data[["_body"]])
   }
 
@@ -1329,13 +1315,7 @@ extract_body <- function(
   data <- resolve_footnotes_styles(data = data, tbl_type = "footnotes")
   data <- apply_footnotes_to_output(data = data, context = output)
 
-  if (
-    (
-      !is.null(build_stage) &&
-      build_stage == "footnotes_attached"
-    ) ||
-    is.null(build_stage)
-  ) {
+  if (is.null(build_stage) || identical(build_stage, "footnotes_attached")) {
     return(data[["_body"]])
   }
 
@@ -1494,11 +1474,11 @@ extract_summary <- function(data) {
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for extraction. The default [everything()] results in all
 #'   rows in `columns` being formatted. Alternatively, we can supply a vector of
-#'   row captions within [c()], a vector of row indices, or a select helper
-#'   function. Examples of select helper functions include [starts_with()],
-#'   [ends_with()], [contains()], [matches()], [one_of()], [num_range()], and
-#'   [everything()]. We can also use expressions to filter down to the rows we
-#'   need (e.g., `[colname_1] > 100 & [colname_2] < 50`).
+#'   row IDs within [c()], a vector of row indices, or a select helper function.
+#'   Examples of select helper functions include [starts_with()], [ends_with()],
+#'   [contains()], [matches()], [one_of()], [num_range()], and [everything()].
+#'   We can also use expressions to filter down to the rows we need (e.g.,
+#'   `[colname_1] > 100 & [colname_2] < 50`).
 #'
 #' @param output *Output format*
 #'

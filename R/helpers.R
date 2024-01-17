@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -393,7 +393,7 @@ pct <- function(x) {
 #' 8-5
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 from_column <- function(
@@ -597,6 +597,14 @@ currency <- function(
 #'   `data_line_stroke_width` option. By default, a value of `4` (as in '4px')
 #'   is used.
 #'
+#' @param data_area_fill_color *Fill color for the data-point-bounded area*
+#'
+#'   `scalar<character>` // *default:* `NULL` (`optional`)
+#'
+#'   The fill color for the area that bounds the data points in line plot. The
+#'   default is `"#FF0000"` (`"red"`) but can be changed by providing a color
+#'   value to `data_area_fill_color`.
+#'
 #' @param data_bar_stroke_color *Color of a data bar's outside line*
 #'
 #'   `scalar<character>` // *default:* `NULL` (`optional`)
@@ -735,6 +743,19 @@ currency <- function(
 #'   nanoplot. This hidden layer is active by default but can be deactivated by
 #'   using `show_y_axis_guide = FALSE`.
 #'
+#' @param interactive_data_values *Should data values be interactively shown?*
+#'
+#'   `scalar<logical>` // *default:* `NULL` (`optional`)
+#'
+#'   By default, numeric data values will be shown only when the user interacts
+#'   with certain regions of a nanoplot. This is because the values may be
+#'   numerous (i.e., clutter the display when all are visible) and it can be
+#'   argued that the values themselves are secondary to the presentation.
+#'   However, for some types of plots (like horizontal bar plots), a persistent
+#'   display of values alongside the plot marks may be desirable. By setting
+#'   `interactive_data_values = FALSE` we can opt for always displaying the data
+#'   values alongside the plot components.
+#'
 #' @param y_val_fmt_fn,y_axis_fmt_fn,y_ref_line_fmt_fn *Custom formatting for y values*
 #'
 #'   `function` // *default:* `NULL` (`optional`)
@@ -763,7 +784,7 @@ currency <- function(
 #' 8-7
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 nanoplot_options <- function(
@@ -774,6 +795,7 @@ nanoplot_options <- function(
     data_line_type = NULL,
     data_line_stroke_color = NULL,
     data_line_stroke_width = NULL,
+    data_area_fill_color = NULL,
     data_bar_stroke_color = NULL,
     data_bar_stroke_width = NULL,
     data_bar_fill_color = NULL,
@@ -791,96 +813,52 @@ nanoplot_options <- function(
     show_reference_area = NULL,
     show_vertical_guides = NULL,
     show_y_axis_guide = NULL,
+    interactive_data_values = NULL,
     y_val_fmt_fn = NULL,
     y_axis_fmt_fn = NULL,
     y_ref_line_fmt_fn = NULL,
     currency = NULL
 ) {
 
-  if (is.null(data_point_radius)) {
-    data_point_radius <- 10
-  }
-  if (is.null(data_point_stroke_color)) {
-    data_point_stroke_color <- "#FFFFFF"
-  }
-  if (is.null(data_point_stroke_width)) {
-    data_point_stroke_width <- 4
-  }
-  if (is.null(data_point_fill_color)) {
-    data_point_fill_color <- "#FF0000"
-  }
-  if (is.null(data_line_type)) {
-    data_line_type <- "curved"
-  }
-  if (is.null(data_line_stroke_color)) {
-    data_line_stroke_color <- "#4682B4"
-  }
-  if (is.null(data_line_stroke_width)) {
-    data_line_stroke_width <- 8
-  }
-  if (is.null(data_bar_stroke_color)) {
-    data_bar_stroke_color <- "#3290CC"
-  }
-  if (is.null(data_bar_stroke_width)) {
-    data_bar_stroke_width <- 4
-  }
-  if (is.null(data_bar_fill_color)) {
-    data_bar_fill_color <- "#3FB5FF"
-  }
-  if (is.null(data_bar_negative_stroke_color)) {
-    data_bar_negative_stroke_color <- "#CC3243"
-  }
-  if (is.null(data_bar_negative_stroke_width)) {
-    data_bar_negative_stroke_width <- 4
-  }
-  if (is.null(data_bar_negative_fill_color)) {
-    data_bar_negative_fill_color <- "#D75A68"
-  }
-  if (is.null(reference_line_color)) {
-    reference_line_color <- "#75A8B0"
-  }
-  if (is.null(reference_area_fill_color)) {
-    reference_area_fill_color <- "#A6E6F2"
-  }
-  if (is.null(vertical_guide_stroke_color)) {
-    vertical_guide_stroke_color <- "#911EB4"
-  }
-  if (is.null(vertical_guide_stroke_width)) {
-    vertical_guide_stroke_width <- 12
-  }
-  if (is.null(show_data_points)) {
-    show_data_points <- TRUE
-  }
-  if (is.null(show_data_line)) {
-    show_data_line <- TRUE
-  }
-  if (is.null(show_data_area)) {
-    show_data_area <- TRUE
-  }
-  if (is.null(show_reference_line)) {
-    show_reference_line <- TRUE
-  }
-  if (is.null(show_reference_area)) {
-    show_reference_area <- TRUE
-  }
-  if (is.null(show_vertical_guides)) {
-    show_vertical_guides <- TRUE
-  }
-  if (is.null(show_y_axis_guide)) {
-    show_y_axis_guide <- TRUE
-  }
-  if (is.null(y_val_fmt_fn)) {
-    y_val_fmt_fn <- NULL
-  }
-  if (is.null(y_axis_fmt_fn)) {
-    y_axis_fmt_fn <- NULL
-  }
-  if (is.null(y_ref_line_fmt_fn)) {
-    y_ref_line_fmt_fn <- NULL
-  }
-  if (is.null(currency)) {
-    currency <- NULL
-  }
+  data_point_radius <- data_point_radius %||% 10
+  data_point_stroke_color <- data_point_stroke_color %||% "#FFFFFF"
+  data_point_stroke_width <- data_point_stroke_width %||% 4
+  data_point_fill_color <- data_point_fill_color %||% "#FF0000"
+
+  data_line_type <- data_line_type %||% "curved"
+  data_line_stroke_color <- data_line_stroke_color %||% "#4682B4"
+  data_line_stroke_width <- data_line_stroke_width %||% 8
+
+  data_area_fill_color <- data_area_fill_color %||% "#FF0000"
+
+  data_bar_stroke_color <- data_bar_stroke_color %||% "#3290CC"
+  data_bar_stroke_width <- data_bar_stroke_width %||% 4
+  data_bar_fill_color <- data_bar_fill_color %||% "#3FB5FF"
+
+  data_bar_negative_stroke_color <- data_bar_negative_stroke_color %||% "#CC3243"
+  data_bar_negative_stroke_width <- data_bar_negative_stroke_width %||% 4
+  data_bar_negative_fill_color <- data_bar_negative_fill_color %||% "#D75A68"
+
+  reference_line_color <- reference_line_color %||% "#75A8B0"
+  reference_area_fill_color <- reference_area_fill_color %||% "#A6E6F2"
+
+  vertical_guide_stroke_color <- vertical_guide_stroke_color %||% "#911EB4"
+  vertical_guide_stroke_width <- vertical_guide_stroke_width %||% 12
+
+  show_data_points <- show_data_points %||% TRUE
+  show_data_line <- show_data_line %||% TRUE
+  show_data_area <- show_data_area %||% TRUE
+  show_reference_line <- show_reference_line %||% TRUE
+  show_reference_area <- show_reference_area %||% TRUE
+  show_vertical_guides <- show_vertical_guides %||% TRUE
+  show_y_axis_guide <- show_y_axis_guide %||% TRUE
+
+  interactive_data_values <- interactive_data_values %||% TRUE
+
+  # y_val_fmt_fn, y_axis_fmt_fn, and y_ref_line_fmt_fn
+  # are not assigned to a default value
+
+  # currency is also not assigned a default value.
 
   nanoplot_options_list <-
     list(
@@ -891,6 +869,7 @@ nanoplot_options <- function(
       data_line_type = data_line_type,
       data_line_stroke_color = data_line_stroke_color,
       data_line_stroke_width = data_line_stroke_width,
+      data_area_fill_color = data_area_fill_color,
       data_bar_stroke_color = data_bar_stroke_color,
       data_bar_stroke_width = data_bar_stroke_width,
       data_bar_fill_color = data_bar_fill_color,
@@ -908,6 +887,7 @@ nanoplot_options <- function(
       show_reference_area = show_reference_area,
       show_vertical_guides = show_vertical_guides,
       show_y_axis_guide = show_y_axis_guide,
+      interactive_data_values = interactive_data_values,
       y_val_fmt_fn = y_val_fmt_fn,
       y_axis_fmt_fn = y_axis_fmt_fn,
       y_ref_line_fmt_fn = y_ref_line_fmt_fn,
@@ -1104,7 +1084,7 @@ adjust_luminance <- function(
 #' 8-9
 #'
 #' @section Function Introduced:
-#' *In Development*
+#' `v0.10.0` (October 7, 2023)
 #'
 #' @export
 define_units <- function(units_notation) {
@@ -1940,9 +1920,9 @@ cells_group <- function(groups = everything()) {
 #'
 #'   The rows to which targeting operations are constrained. The default
 #'   [everything()] results in all rows in `columns` being formatted.
-#'   Alternatively, we can supply a vector of row captions within [c()], a
-#'   vector of row indices, or a select helper function. Examples of select
-#'   helper functions include [starts_with()], [ends_with()], [contains()],
+#'   Alternatively, we can supply a vector of row IDs within [c()], a vector of
+#'   row indices, or a select helper function. Examples of select helper
+#'   functions include [starts_with()], [ends_with()], [contains()],
 #'   [matches()], [one_of()], [num_range()], and [everything()]. We can also use
 #'   expressions to filter down to the rows we need (e.g., `[colname_1] > 100 &
 #'   [colname_2] < 50`).
@@ -2067,7 +2047,7 @@ cells_stub <- function(rows = everything()) {
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for targeting operations. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
-#'   supply a vector of row captions within [c()], a vector of row indices, or a
+#'   supply a vector of row IDs within [c()], a vector of row indices, or a
 #'   select helper function. Examples of select helper functions include
 #'   [starts_with()], [ends_with()], [contains()], [matches()], [one_of()],
 #'   [num_range()], and [everything()]. We can also use expressions to filter
@@ -2237,7 +2217,7 @@ cells_body <- function(
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for targeting operations. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
-#'   supply a vector of row captions within [c()], a vector of row indices, or a
+#'   supply a vector of row IDs within [c()], a vector of row indices, or a
 #'   select helper function. Examples of select helper functions include
 #'   [starts_with()], [ends_with()], [contains()], [matches()], [one_of()],
 #'   [num_range()], and [everything()]. We can also use expressions to filter
@@ -2428,7 +2408,7 @@ cells_summary <- function(
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for targeting operations. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
-#'   supply a vector of row captions within [c()], a vector of row indices, or a
+#'   supply a vector of row IDs within [c()], a vector of row indices, or a
 #'   select helper function. Examples of select helper functions include
 #'   [starts_with()], [ends_with()], [contains()], [matches()], [one_of()],
 #'   [num_range()], and [everything()]. We can also use expressions to filter
@@ -2594,7 +2574,7 @@ cells_grand_summary <- function(
 #'   In conjunction with `groups`, we can specify which of their rows should
 #'   form a constraint for targeting operations. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
-#'   supply a vector of row captions within [c()], a vector of row indices, or a
+#'   supply a vector of row IDs within [c()], a vector of row indices, or a
 #'   select helper function. Examples of select helper functions include
 #'   [starts_with()], [ends_with()], [contains()], [matches()], [one_of()],
 #'   [num_range()], and [everything()]. We can also use expressions to filter
@@ -2750,7 +2730,7 @@ cells_stub_summary <- function(
 #'
 #'   We can specify which rows should be targeted. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
-#'   supply a vector of row captions within [c()], a vector of row indices, or a
+#'   supply a vector of row IDs within [c()], a vector of row indices, or a
 #'   select helper function. Examples of select helper functions include
 #'   [starts_with()], [ends_with()], [contains()], [matches()], [one_of()],
 #'   [num_range()], and [everything()]. We can also use expressions to filter
@@ -3106,10 +3086,24 @@ cells_source_notes <- function() {
 #'   `scalar<numeric|integer|character>` // *default:* `NULL` (`optional`)
 #'
 #'   The size of the font. Can be provided as a number that is assumed to
-#'   represent `px` values (or could be wrapped in the [px()]) helper function.
+#'   represent `px` values (or could be wrapped in the [px()] helper function).
 #'   We can also use one of the following absolute size keywords: `"xx-small"`,
 #'   `"x-small"`, `"small"`, `"medium"`, `"large"`, `"x-large"`, or
 #'   `"xx-large"`.
+#'
+#' @param align *Text alignment*
+#'
+#'   `scalar<character>` // *default:* `NULL` (`optional`)
+#'
+#'   The text in a cell can be horizontally aligned though one of the following
+#'   options: `"center"`, `"left"`, `"right"`, or `"justify"`.
+#'
+#' @param v_align *Vertical alignment*
+#'
+#'   `scalar<character>` // *default:* `NULL` (`optional`)
+#'
+#'   The vertical alignment of the text in the cell can be modified through the
+#'   options `"middle"`, `"top"`, or `"bottom"`.
 #'
 #' @param style *Text style*
 #'
@@ -3125,20 +3119,6 @@ cells_source_notes <- function() {
 #'   `"normal"`, `"bold"`, `"lighter"`, `"bolder"`, or, a numeric value between
 #'   `1` and `1000`, inclusive. Note that only variable fonts may support the
 #'   numeric mapping of weight.
-#'
-#' @param align *Text alignment*
-#'
-#'   `scalar<character>` // *default:* `NULL` (`optional`)
-#'
-#'   The text in a cell can be aligned though one of the following options:
-#'   `"center"`, `"left"`, `"right"`, or `"justify"`.
-#'
-#' @param v_align *Vertical alignment*
-#'
-#'   `scalar<character>` // *default:* `NULL` (`optional`)
-#'
-#'   The vertical alignment of the text in the cell can be modified through the
-#'   options `"middle"`, `"top"`, or `"bottom"`.
 #'
 #' @param stretch *Stretch text*
 #'
@@ -3181,7 +3161,7 @@ cells_source_notes <- function() {
 #'   `scalar<numeric|integer|character>` // *default:* `NULL` (`optional`)
 #'
 #'   The indentation of the text. Can be provided as a number that is assumed to
-#'   represent `px` values (or could be wrapped in the [px()]) helper function.
+#'   represent `px` values (or could be wrapped in the [px()] helper function).
 #'   Alternatively, this can be given as a percentage (easily constructed with
 #'   [pct()]).
 #'
@@ -3471,34 +3451,34 @@ cell_style_to_html.cell_fill <- function(style) {
 #' The `cell_borders()` helper function is to be used with the [tab_style()]
 #' function, which itself allows for the setting of custom styles to one or more
 #' cells. Specifically, the call to `cell_borders()` should be bound to the
-#' `styles` argument of [tab_style()]. The `selection` argument is where we
-#' define which borders should be modified (e.g., `"left"`, `"right"`, etc.).
-#' With that selection, the `color`, `style`, and `weight` of the selected
-#' borders can then be modified.
+#' `styles` argument of [tab_style()]. The `sides` argument is where we define
+#' which borders should be modified (e.g., `"left"`, `"right"`, etc.). With that
+#' selection, the `color`, `style`, and `weight` of the selected borders can
+#' then be modified.
 #'
 #' @param sides *Border sides*
 #'
 #'   `vector<character>` // *default:* `"all"`
 #'
-#'   The border sides to be modified. Options include `"left"`,
-#'   `"right"`, `"top"`, and `"bottom"`. For all borders surrounding the
-#'   selected cells, we can use the `"all"` option.
+#'   The border sides to be modified. Options include `"left"`, `"right"`,
+#'   `"top"`, and `"bottom"`. For all borders surrounding the selected cells, we
+#'   can use the `"all"` option.
 #'
 #' @param color *Border color*
 #'
 #'   `scalar<character>|NULL` // *default:* `"#000000"`
 #'
 #'   The border `color` can be defined with a color name or with a hexadecimal
-#'   color code. The default `color` value is `"#000000"` (black). Borders for any
-#'   defined `sides` can be removed by supplying `NULL` here.
+#'   color code. The default `color` value is `"#000000"` (black). Borders for
+#'   any defined `sides` can be removed by supplying `NULL` here.
 #'
 #' @param style *Border line style*
 #'
 #'   `scalar<character>|NULL` // *default:* `"solid"`
 #'
 #'   The border `style` can be one of either `"solid"` (the default),
-#'   `"dashed"`, `"dotted"`, `"hidden"`, or `"double"`. Borders for any
-#'   defined `sides` can be removed by supplying `NULL` here.
+#'   `"dashed"`, `"dotted"`, `"hidden"`, or `"double"`. Borders for any defined
+#'   `sides` can be removed by supplying `NULL` here.
 #'
 #' @param weight *Border weight*
 #'
@@ -3588,17 +3568,9 @@ cell_borders <- function(
     weight = px(1)
 ) {
 
-  if (is.null(weight)) {
-    weight <- "0"
-  }
-
-  if (is.null(style)) {
-    style <- "hidden"
-  }
-
-  if (is.null(color)) {
-    color <- "transparent"
-  }
+  weight <- weight %||% "0"
+  style <- style %||% "hidden"
+  color <- color %||% "transparent"
 
   validate_length_one(weight, "weight")
   validate_length_one(style, "style")

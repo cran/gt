@@ -25,8 +25,8 @@ This is the \strong{gt} table object that is commonly created through use of the
 
 \verb{scalar<character>} // \strong{required}
 
-The delimiter to use to split an input column name. This should be a single
-character (e.g., \code{"_"}, \code{"."}, etc.).}
+The delimiter text to use to split one of more column names (i.e., those
+that are targeted via the \code{columns} argument).}
 
 \item{columns}{\emph{Columns to target}
 
@@ -36,8 +36,7 @@ The columns to consider for the splitting, relabeling, and spanner setting
 operations. Can either be a series of column names provided in \code{\link[=c]{c()}}, a
 vector of column indices, or a select helper function. Examples of select
 helper functions include \code{\link[=starts_with]{starts_with()}}, \code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}},
-\code{\link[=matches]{matches()}}, \code{\link[=one_of]{one_of()}}, \code{\link[=num_range]{num_range()}}, and \code{\link[=everything]{everything()}}. This argument
-works in tandem with the \code{spanners} argument.}
+\code{\link[=matches]{matches()}}, \code{\link[=one_of]{one_of()}}, \code{\link[=num_range]{num_range()}}, and \code{\link[=everything]{everything()}}.}
 
 \item{split}{\emph{Splitting side}
 
@@ -73,29 +72,29 @@ Should the order of split names be reversed? By default, this is \code{FALSE}.}
 An object of class \code{gt_tbl}.
 }
 \description{
-The \code{cols_spanner_delim()} function can take specially-crafted column names
-and generate one or more spanners (along with relabeling the
-column labels). This is done by splitting the column name by a specified
-delimiter character (this is the \code{delim}) and placing the fragments from top
-to bottom (i.e., higher-level spanners to the column labels). Furthermore,
-the neighboring text fragments on different spanner levels will be coalesced
-together to put the span back into spanner. For instance, having the three
-side-by-side column names \code{rating_1}, \code{rating_2}, and \code{rating_3} will (in the
-default case at least) result in a spanner with the label \code{"rating"} above
-columns with the labels \code{"1"}, \code{"2"}, and \code{"3"}. There are many options in
+The \code{tab_spanner_delim()} function can take specially-crafted column names
+and generate one or more spanners (and revise column labels at the same
+time). This is done by splitting the column name by the specified delimiter
+text (\code{delim}) and placing the fragments from top to bottom (i.e.,
+higher-level spanners to the column labels) or vice versa. Furthermore,
+neighboring text fragments on different spanner levels that have the same
+text will be coalesced together. For instance, having the three side-by-side
+column names \code{rating_1}, \code{rating_2}, and \code{rating_3} will (in the default case
+at least) result in a spanner with the label \code{"rating"} above columns with
+the labels \code{"1"}, \code{"2"}, and \code{"3"}. There are many options in
 \code{cols_spanner_delim()} to slice and dice delimited column names in different
 ways:
 \itemize{
-\item the delimiter: choose which delimiter to use for the fragmentation of
+\item delimiter text: choose the delimiter text to use for the fragmentation of
 column names into spanners with the \code{delim} argument
 \item direction and amount of splitting: we can choose to split \emph{n} times
 according to a \code{limit} argument, and, we get to specify from which side of
-the column name the splitting should occur
+the column name the splitting should commence
 \item reversal of fragments: we can reverse the order the fragments we get from
-the splitting procedure
-\item column constraints: define which columns in a \strong{gt} table that should
-participate in spanner creation using vectors or \strong{tidyselect}-style
-expressions
+the splitting procedure with the \code{reverse} argument
+\item column constraints: it's possible to constrain which columns in a \strong{gt}
+table should participate in spanner creation using vectors or
+\strong{tidyselect}-style expressions
 }
 }
 \section{Details on column splitting}{

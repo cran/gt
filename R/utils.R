@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2023 gt authors
+#  Copyright (c) 2018-2024 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -86,10 +86,12 @@ is_nonempty_string <- function(x) {
 #' @param data The input `data` object that is to be validated.
 #'
 #' @noRd
-stop_if_not_gt_tbl <- function(data) {
+# Use rlang::caller_env() to inform user of the precise location of failure.
+stop_if_not_gt_tbl <- function(data, call = caller_env()) {
   if (!is_gt_tbl(data = data)) {
     cli::cli_abort(
-      "The `data` provided is not a `gt_tbl` object."
+      "`data` must be a `gt_tbl` object, not {.obj_type_friendly {data}}.",
+      call = call
     )
   }
 }
@@ -99,10 +101,11 @@ stop_if_not_gt_tbl <- function(data) {
 #' @param data The input `data` object that is to be validated.
 #'
 #' @noRd
-stop_if_not_gt_group <- function(data) {
+stop_if_not_gt_group <- function(data, call = caller_env()) {
   if (!is_gt_group(data = data)) {
     cli::cli_abort(
-      "The `data` provided is not a `gt_group` object."
+      "`data` must be a `gt_group` object, not {.obj_type_friendly {data}}.",
+      call = call
     )
   }
 }
@@ -112,10 +115,11 @@ stop_if_not_gt_group <- function(data) {
 #' @param data The input `data` object that is to be validated.
 #'
 #' @noRd
-stop_if_not_gt_tbl_or_group <- function(data) {
+stop_if_not_gt_tbl_or_group <- function(data, call = caller_env()) {
   if (!is_gt_tbl(data = data) && !is_gt_group(data = data)) {
     cli::cli_abort(
-      "The `data` provided is neither a `gt_tbl` nor a `gt_group` object."
+      "`data` must either be a `gt_tbl` or a `gt_group`, not {.obj_type_friendly {data}}.",
+      call = error_call
     )
   }
 }
@@ -567,14 +571,9 @@ get_markdown_engine_fn <- function(
 #' @noRd
 process_text <- function(text, context = "html") {
 
-  # When processing text globally (outside of the `fmt_markdown()`
-  # function) we will use the 'markdown' package if it is available,
-  # otherwise the 'commonmark' package
-  if (utils::packageVersion("markdown") >= "1.5") {
-    md_engine <- "markdown"
-  } else {
-    md_engine <- "commonmark"
-  }
+  # `markdown` is used to process text globally outside of `fmt_markdown()`
+  # Previously, `commonmark` was used.
+  md_engine <- "markdown"
 
   # If text is marked `AsIs` (by using `I()`) then just
   # return the text unchanged
@@ -681,7 +680,7 @@ process_text <- function(text, context = "html") {
     if (inherits(text, "from_markdown")) {
 
       text <- markdown_to_xml(text)
-    }else{
+    } else {
       text <- as.character(text)
     }
 
@@ -925,7 +924,7 @@ cmark_rules_xml <- list(
     ) %>% as.character()
   },
 
-  image = function(x, process, ...){
+  image = function(x, process, ...) {
     xml_r(
       xml_rPr(),
       xml_image(
@@ -1054,7 +1053,7 @@ cmark_rules_xml <- list(
   code_block = function(x, process, ...) {
     ##split text up by new line
     text <- strsplit(xml2::xml_text(x),split = "\n")[[1]]
-    code_text <- lapply(text, function(line){
+    code_text <- lapply(text, function(line) {
       xml_t(line, xml_space = "preserve")
     })
     xml_p(xml_pPr(xml_pStyle(val = "Macro Text")),
@@ -1128,7 +1127,7 @@ cmark_rules_xml <- list(
     return(rtf_raw(""))
   },
 
-  html_block = function(x, process, ...){
+  html_block = function(x, process, ...) {
     xml_p(
       xml_pPr(),
       xml_r(xml_rPr(),
@@ -1719,7 +1718,7 @@ normalize_suffixing_inputs <- function(
     system
 ) {
 
-  if (is_false(suffixing)) {
+  if (isFALSE(suffixing)) {
 
     # If `suffixing` is FALSE, then return `NULL`;
     # this will be used to signal there is nothing
