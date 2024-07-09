@@ -36,12 +36,12 @@ dt_styles_init <- function(data) {
 
   styles_tbl <-
     dplyr::tibble(
-      locname = character(0),
-      grpname = character(0),
-      colname = character(0),
-      locnum = numeric(0),
-      rownum = integer(0),
-      colnum = integer(0),
+      locname = character(0L),
+      grpname = character(0L),
+      colname = character(0L),
+      locnum = numeric(0L),
+      rownum = integer(0L),
+      colnum = integer(0L),
       styles = list()
     )
 
@@ -79,7 +79,7 @@ dt_styles_add <- function(
 
   dt_styles_set(
     data = data,
-    styles = dplyr::bind_rows(dt_styles_get(data = data), result)
+    styles = vctrs::vec_rbind(dt_styles_get(data = data), result)
   )
 }
 

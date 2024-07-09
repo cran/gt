@@ -47,7 +47,7 @@ test_that("A caption can be added/removed with `tab_caption()`/`rm_caption()`", 
   # Expect that the caption is rendered correctly
   expect_equal(
     as.character(create_caption_component_h(data = tbl_2)),
-    "<!--/html_preserve--><caption class='gt_caption'>A <em>caption</em>.</caption><!--html_preserve-->"
+    "<!--/html_preserve--><caption class='gt_caption'><span class='gt_from_md'>A <em>caption</em>.</span></caption><!--html_preserve-->"
   )
 
   # Create a table, add a caption in `gt()`, overwrite with `tab_caption()`
@@ -124,28 +124,28 @@ test_that("A caption can be added/removed with `tab_caption()`/`rm_caption()`", 
   #
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble, caption = "cap") %>% rm_caption())),
-    character(0)
+    character(0L)
   )
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble) %>% tab_caption(caption = "cap") %>% rm_caption())),
-    character(0)
+    character(0L)
   )
 
   # Expect that a caption removal can also happen when using `tab_caption(caption = NA)`
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble) %>% tab_caption(caption = "cap") %>% tab_caption(caption = NA))),
-    character(0)
+    character(0L)
   )
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble) %>% tab_caption(caption = "cap") %>% tab_caption(caption = NA_character_))),
-    character(0)
+    character(0L)
   )
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble) %>% tab_caption(caption = "cap") %>% tab_caption(caption = NA_real_))),
-    character(0)
+    character(0L)
   )
   expect_equal(
     as.character(create_caption_component_h(data = gt(exibble) %>% tab_caption(caption = "cap") %>% tab_caption(caption = NA_integer_))),
-    character(0)
+    character(0L)
   )
 })

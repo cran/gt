@@ -32,12 +32,7 @@
 #' smaller tables across multiple pages (in RTF and Word outputs, primarily via
 #' [gtsave()]), or, with breaks between them when the output context is HTML.
 #'
-#' @param data *The gt table data object*
-#'
-#'   `obj:<gt_tbl>` // **required**
-#'
-#'   This is the **gt** table object that is commonly created through use of the
-#'   [gt()] function.
+#' @inheritParams fmt_number
 #'
 #' @param row_every_n *Split at every n rows*
 #'
@@ -59,10 +54,9 @@
 #'
 #'   Any columns where vertical splitting across should occur. The splits occur
 #'   to the right of the resolved column names. Can either be a series of column
-#'   names provided in [c()], a vector of column indices, or a select helper
-#'   function. Examples of select helper functions include [starts_with()],
-#'   [ends_with()], [contains()], [matches()], [one_of()], [num_range()], and
-#'   [everything()].
+#'   names provided in `c()`, a vector of column indices, or a select helper
+#'   function (e.g. [starts_with()], [ends_with()], [contains()], [matches()],
+#'   [num_range()], and [everything()]).
 #'
 #' @return An object of class `gt_group`.
 #'
@@ -142,14 +136,14 @@ gt_split <- function(
   # Get row count for table (data rows)
   n_rows_data <- nrow(gt_tbl_built[["_stub_df"]])
 
-  row_slice_vec <- rep(1L, n_rows_data)
+  row_slice_vec <- rep.int(1L, n_rows_data)
 
-  row_every_n_idx <- c()
+  row_every_n_idx <- NULL
   if (!is.null(row_every_n)) {
     row_every_n_idx <- seq_len(n_rows_data)[seq(0, n_rows_data, row_every_n)]
   }
 
-  row_slice_i_idx <- c()
+  row_slice_i_idx <- NULL
   if (!is.null(row_slice_i)) {
     row_slice_i_idx <- row_slice_i
   }
@@ -190,7 +184,7 @@ gt_split <- function(
       visible_col_vars <- dt_boxhead_get_vars_default(data = data)
 
       # Stop function if any of the columns to split at aren't visible columns
-      if (any(!(col_slice_at %in% visible_col_vars))) {
+      if (!all(col_slice_at %in% visible_col_vars)) {
         cli::cli_abort(
           "All values provided in `col_slice_at` must correspond to visible columns."
         )
@@ -199,7 +193,7 @@ gt_split <- function(
       # Obtain all of the column indices for vertical splitting
       col_idx <- which(visible_col_vars %in% col_slice_at)
 
-      col_slice_vec <- rep(1L, length(visible_col_vars))
+      col_slice_vec <- rep.int(1L, length(visible_col_vars))
 
       group_j <- 0L
 
@@ -214,7 +208,7 @@ gt_split <- function(
 
       col_range_list <-
         split(
-          seq_len(length(visible_col_vars)),
+          seq_along(visible_col_vars),
           col_slice_vec
         )
 

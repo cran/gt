@@ -29,7 +29,7 @@ generate_nanoplot <- function(
     x_vals = NULL,
     expand_x = NULL,
     expand_y = NULL,
-    missing_vals = c("gap", "zero", "remove"),
+    missing_vals = c("gap", "marker", "zero", "remove"),
     all_y_vals = NULL,
     all_single_y_vals = NULL,
     plot_type = c("line", "bar"),
@@ -168,7 +168,7 @@ generate_nanoplot <- function(
 
   # If the number of y_vals is `1` and we requested a 'bar' plot, then
   # reset several parameters
-  if (num_y_vals == 1 && grepl("bar", plot_type)) {
+  if (num_y_vals == 1 && grepl("bar", plot_type, fixed = TRUE)) {
 
     single_horizontal_bar <- TRUE
     show_data_points <- FALSE
@@ -754,13 +754,9 @@ generate_nanoplot <- function(
 
   #
   # Ensure that certain options have their lengths checked and
-  # expanded to length `num_y_vals`
+  # expanded to length `num_y_vals`; these are: (1) all `data_point_*`
+  # options, and (2) three `data_bar_*` options
   #
-
-  # - `data_point_radius`
-  # - `data_point_stroke_color`
-  # - `data_point_stroke_width `
-  # - `data_point_fill_color`
 
   data_point_radius <- normalize_option_vector(data_point_radius, num_y_vals)
   data_point_stroke_color <- normalize_option_vector(data_point_stroke_color, num_y_vals)
@@ -788,7 +784,7 @@ generate_nanoplot <- function(
   start_data_y_points <- start_data_y_points[is_non_na]
   end_data_y_points <- end_data_y_points[is_non_na]
 
-  is_not_length_one <- !(start_data_y_points == end_data_y_points)
+  is_not_length_one <- start_data_y_points != end_data_y_points
 
   start_data_y_points <- start_data_y_points[is_not_length_one]
   end_data_y_points <- end_data_y_points[is_not_length_one]
@@ -895,7 +891,7 @@ generate_nanoplot <- function(
 
       if (is.na(data_y_points[i])) {
 
-        if (missing_vals == "gap") {
+        if (missing_vals == "marker") {
 
           # Create a symbol that should denote that a
           # missing value is present
@@ -905,7 +901,7 @@ generate_nanoplot <- function(
               "cx=\"", data_x_points[i], "\" ",
               "cy=\"", safe_y_d + (data_y_height / 2), "\" ",
               "r=\"", data_point_radius_i + (data_point_radius_i / 2), "\" ",
-              "stroke=\"red\" ",
+              "stroke=\"", "red", "\" ",
               "stroke-width=\"", data_point_stroke_width_i, "\" ",
               "fill=\"white\" ",
               ">",
@@ -956,7 +952,7 @@ generate_nanoplot <- function(
 
       if (is.na(data_y_points[i])) {
 
-        if (missing_vals == "gap") {
+        if (missing_vals == "marker") {
 
           # Create a symbol that should denote that a
           # missing value is present
@@ -1215,26 +1211,40 @@ generate_nanoplot <- function(
     box_thickness <- data_point_radius[1] * 6
 
     # Calculate statistics for boxplot
-    stat_p05 = unname(stats::quantile(y_vals, probs = 0.05, na.rm = TRUE))
-    stat_q_1 = unname(stats::quantile(y_vals, probs = 0.25, na.rm = TRUE))
-    stat_med = unname(stats::quantile(y_vals, probs = 0.50, na.rm = TRUE))
-    stat_q_3 = unname(stats::quantile(y_vals, probs = 0.75, na.rm = TRUE))
-    stat_p95 = unname(stats::quantile(y_vals, probs = 0.95, na.rm = TRUE))
+    stat_q_1 <- unname(stats::quantile(y_vals, probs = 0.25, na.rm = TRUE))
+    stat_med <- unname(stats::quantile(y_vals, probs = 0.50, na.rm = TRUE))
+    stat_q_3 <- unname(stats::quantile(y_vals, probs = 0.75, na.rm = TRUE))
+    stat_iqr <- stats::IQR(y_vals, na.rm = TRUE)
 
-    if (length(y_vals) > 25) {
+    low_outliers <- y_vals[y_vals < stat_q_1 - (1.5 * stat_iqr)]
+    high_outliers <- y_vals[y_vals > stat_q_3 + (1.5 * stat_iqr)]
+
+    stat_min_excl_low_outliers <-
+      min(base::setdiff(y_vals, low_outliers), na.rm = TRUE)
+
+    stat_max_excl_high_outliers <-
+      max(base::setdiff(y_vals, high_outliers), na.rm = TRUE)
+
+    plot_only_outliers <- length(y_vals) >= 20
+
+    if (plot_only_outliers) {
 
       # Plot only outliers since the number of data values is sufficiently high
-      y_vals_plot <- y_vals[y_vals < stat_p05 | y_vals > stat_p95]
+      y_vals_plot <- c(low_outliers, high_outliers)
 
       data_point_radius <- 4
       data_point_stroke_width <- 2
-      data_point_stroke_color <- adjust_luminance(data_bar_stroke_color[1], steps = 0.75)
-      data_point_fill_color <- adjust_luminance(data_point_stroke_color[1], steps = 1.75)
+
+      data_point_stroke_color <-
+        adjust_luminance(data_bar_stroke_color[1], steps = 0.75)
+
+      data_point_fill_color <-
+        adjust_luminance(data_point_stroke_color[1], steps = 1.75)
 
     } else {
 
       # Plot all data values but diminish the visibility of the data points
-      # as the number approaches 25
+      # as the number approaches 20
       y_vals_plot <- y_vals
 
       if (length(y_vals) < 10) {
@@ -1245,7 +1255,9 @@ generate_nanoplot <- function(
         data_point_stroke_width <- 2
       }
 
-      data_point_stroke_color <- adjust_luminance("black", steps = length(y_vals) / 25)
+      data_point_stroke_color <-
+        adjust_luminance("black", steps = length(y_vals) / 25)
+
       data_point_fill_color <- "transparent"
     }
 
@@ -1255,42 +1267,53 @@ generate_nanoplot <- function(
         vals = y_vals,
         all_vals = all_y_vals,
         y_vals_plot = y_vals_plot,
-        stat_low = stat_p05,
+        stat_min = stat_min_excl_low_outliers,
         stat_qlow = stat_q_1,
         stat_med = stat_med,
         stat_qup = stat_q_3,
-        stat_high = stat_p95
+        stat_max = stat_max_excl_high_outliers
       )
 
     y_proportions <- y_proportions_list[["vals"]]
     y_proportions_plot <- y_proportions_list[["y_vals_plot"]]
-    y_stat_p05 <- y_proportions_list[["stat_low"]]
+    y_stat_min <- y_proportions_list[["stat_min"]]
     y_stat_q_1 <- y_proportions_list[["stat_qlow"]]
     y_stat_med <- y_proportions_list[["stat_med"]]
     y_stat_q_3 <- y_proportions_list[["stat_qup"]]
-    y_stat_p95 <- y_proportions_list[["stat_high"]]
+    y_stat_max <- y_proportions_list[["stat_max"]]
 
     # Calculate boxplot x values
-    fence_start <- y_stat_p05 * data_x_width
+    fence_start <- y_stat_min * data_x_width
     box_start <- y_stat_q_1 * data_x_width
     median_x <- y_stat_med * data_x_width
     box_end <- y_stat_q_3 * data_x_width
-    fence_end <- y_stat_p95 * data_x_width
+    fence_end <- y_stat_max * data_x_width
     box_width <- (y_stat_q_3 - y_stat_q_1) * data_x_width
 
     # Establish positions for plottable x and y values
     plotted_x_vals <- y_proportions_plot * data_x_width
 
     if (length(y_vals) == 1) {
+
       plotted_y_vals <- bottom_y / 2
+
     } else {
-      plotted_y_vals <- jitter(rep(bottom_y / 2, length(plotted_x_vals)), factor = 10)
+
+      if (plot_only_outliers) {
+
+        plotted_y_vals <- rep(bottom_y / 2, length(plotted_x_vals))
+
+      } else {
+
+        plotted_y_vals <-
+          jitter(rep(bottom_y / 2, length(plotted_x_vals)), factor = 10)
+      }
     }
 
     # Format numbers compactly
-    stat_p05_value <-
+    stat_min_value <-
       format_number_compactly(
-        val = stat_p05,
+        val = stat_min_excl_low_outliers,
         currency = currency,
         fn = y_val_fmt_fn
       )
@@ -1312,9 +1335,9 @@ generate_nanoplot <- function(
         currency = currency,
         fn = y_val_fmt_fn
       )
-    stat_p95_value <-
+    stat_max_value <-
       format_number_compactly(
-        val = stat_p95,
+        val = stat_max_excl_high_outliers,
         currency = currency,
         fn = y_val_fmt_fn
       )
@@ -1362,7 +1385,7 @@ generate_nanoplot <- function(
           "font-size=\"30px\" ",
           "text-anchor=\"end\"",
           ">",
-          stat_p05_value,
+          stat_min_value,
           "</text>",
           "<text ",
           "x=\"", box_start - 6, "\" ",
@@ -1400,7 +1423,7 @@ generate_nanoplot <- function(
           "stroke=\"transparent\" ",
           "font-size=\"30px\"",
           ">",
-          stat_p95_value,
+          stat_max_value,
           "</text>"
         )
     }
@@ -1886,7 +1909,7 @@ generate_nanoplot <- function(
       area_x <- data_x_points[start_data_y_points[i]:end_data_y_points[i]]
       area_y <- data_y_points[start_data_y_points[i]:end_data_y_points[i]]
 
-      area_path_string <- c()
+      area_path_string <- NULL # same as c()
 
       for (j in seq_along(area_x)) {
 
@@ -1898,7 +1921,7 @@ generate_nanoplot <- function(
         c(
           area_path_string,
           paste0(area_x[length(area_x)], ",", bottom_y - safe_y_d + data_point_radius),
-          paste0(area_x[1], ",", bottom_y - safe_y_d + data_point_radius)
+          paste0(area_x[1L], ",", bottom_y - safe_y_d + data_point_radius)
         )
 
       area_path_i <- paste0("M", paste(area_path_i, collapse = ","), "Z")
@@ -1971,11 +1994,11 @@ reference_line_keywords <- function() {
 
 normalize_option_vector <- function(vec, num_y_vals) {
 
-  if (length(vec) != 1 && length(vec) != num_y_vals) {
+  if (length(vec) != 1L && length(vec) != num_y_vals) {
     cli::cli_abort("Every option must have either length 1 or `length(y_vals)`.")
   }
 
-  if (length(vec) == 1) vec <- rep(vec, num_y_vals)
+  if (length(vec) == 1L) vec <- rep(vec, num_y_vals)
   vec
 }
 
@@ -2006,7 +2029,7 @@ normalize_to_list <- function(...) {
   value_list_unique_nm <- names(value_list)
   value_list_vec <- unlist(value_list)
 
-  if (length(unique(value_list_vec)) == 1) {
+  if (length(unique(value_list_vec)) == 1L) {
     value_list_vec <- jitter(value_list_vec, amount = 1 / 100000)
   }
 
@@ -2270,7 +2293,7 @@ process_number_stream <- function(number_stream) {
 process_time_stream <- function(time_stream) {
 
   time_stream <- unlist(strsplit(time_stream, split = "\\s*[;,]\\s*"))
-  time_stream <- gsub("T", " ", time_stream)
+  time_stream <- gsub("T", " ", time_stream, fixed = TRUE)
 
   time_stream_vals <- as.POSIXct(time_stream, tz = "UTC")
   time_stream_vals <- as.numeric(time_stream_vals)

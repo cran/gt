@@ -31,11 +31,11 @@ name in \code{.data}. Name-value pairs, in the form of
 exists in the table. Two-sided formulas with column-resolving expressions
 (e.g, \verb{<expr> ~ <value vector>}) can also be used, where the left-hand side
 corresponds to selections of columns. Column names should be enclosed in
-\code{\link[=c]{c()}} and select helpers like \code{\link[=starts_with]{starts_with()}}, \code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}},
-\code{\link[=matches]{matches()}}, \code{\link[=one_of]{one_of()}}, and \code{\link[=everything]{everything()}} can be used in the LHS. The
-length of the longest vector in \verb{<value vector>} determines how many new
-rows will be added. Single values in \verb{<value vector>} will be repeated down
-in cases where there are multiple rows to be added.}
+\code{c()} and select helpers like \code{\link[=starts_with]{starts_with()}}, \code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}},
+\code{\link[=matches]{matches()}}, and \code{\link[=everything]{everything()}} can be used in the LHS. The length of the
+longest vector in \verb{<value vector>} determines how many new rows will be added.
+Single values in \verb{<value vector>} will be repeated down in cases where
+there are multiple rows to be added.}
 
 \item{.list}{\emph{Alternative to \code{...}}
 
@@ -72,9 +72,9 @@ An object of class \code{gt_tbl}.
 It's possible to add new rows to your table with \code{rows_add()} by supplying
 the new row data through name-value pairs or two-sided formula expressions.
 The new rows are added to the bottom of the table by default but can be added
-internally though by using either the \code{.before} or \code{.after} arguments. If
-entirely empty rows need to be added, the \code{.n_empty} option provides a means
-to specify the number of blank (i.e., all \code{NA}) rows to be inserted into the
+internally by using either the \code{.before} or \code{.after} arguments. If entirely
+empty rows need to be added, the \code{.n_empty} option provides a means to
+specify the number of blank (i.e., all \code{NA}) rows to be inserted into the
 table.
 }
 \section{Targeting the row for insertion with \code{.before} or \code{.after}}{
@@ -194,22 +194,22 @@ of each row group:
 }}
 
 All missing values were substituted with an empty string (\code{""}), and that was
-done by using the \code{\link[=sub_missing]{sub_missing()}} function. We removed the top border of the
+done by using \code{\link[=sub_missing]{sub_missing()}}. We removed the top border of the
 new rows with a call to \code{\link[=tab_style]{tab_style()}}, targeting those rows where the row
 labels end with \code{"end"}. Finally, we get rid of the row labels with the use
-of the \code{\link[=text_case_when]{text_case_when()}} function, using a similar strategy of targeting the
+of \code{\link[=text_case_when]{text_case_when()}}, using a similar strategy of targeting the
 name of the row label.
 
 Another application is starting from nothing (really just the definition of
 columns) and building up a table using several invocations of \code{rows_add()}.
 This might be useful in interactive or programmatic applications. Here's an
-example where two columns are defined with \strong{dplyr}'s \code{tibble()} function
+example where two columns are defined with \code{dplyr::tibble()}
 (and no rows are present initially); with two calls of \code{rows_add()}, two
 separate rows are added.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{dplyr::tibble(
   time = lubridate::POSIXct(),
-  event = character(0)
+  event = character(0L)
 ) |>
   gt() |>
   rows_add(
@@ -298,9 +298,9 @@ actual rows. With this type of multi-column, zero-row table, one needs to use
 a subset of the columns when generating new rows through \code{rows_add()}.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{dplyr::tibble(
-  msrp = numeric(0),
-  item = character(0),
-  type = character(0)
+  msrp = numeric(0L),
+  item = character(0L),
+  type = character(0L)
 ) |>
   gt() |>
   rows_add(
