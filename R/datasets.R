@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
-#' Yearly populations of countries from 1960 to 2022
+#' Yearly populations of countries from 1960 to 2023
 #'
 #' @description
 #'
@@ -30,10 +30,11 @@
 #' population is based on counts of all residents regardless of legal status or
 #' citizenship. Country identifiers include the English-language country names,
 #' and the 2- and 3-letter ISO 3166-1 country codes. Each row contains a
-#' `population` value for a given `year` (from 1960 to 2022). Any `NA` values
-#' for `populations` indicate the non-existence of the entity during that year.
+#' `population` value for a given `year` (from 1960 to 2023). Any `NA` values
+#' within `population` indicate the non-existence of the entity during that
+#' year.
 #'
-#' @format A tibble with 13,545 rows and 5 variables:
+#' @format A tibble with 13,760 rows and 5 variables:
 #' \describe{
 #' \item{country_name}{The name of the country.}
 #' \item{country_code_2, country_code_3}{The 2- and 3-letter ISO 3166-1 country
@@ -43,14 +44,6 @@
 #' }
 #'
 #' @source <https://data.worldbank.org/indicator/SP.POP.TOTL>
-#'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `countrypops`.
-#'
-#' ```{r}
-#' dplyr::glimpse(countrypops)
-#' ```
 #'
 #' @family datasets
 #' @section Dataset ID and Badge:
@@ -104,14 +97,6 @@
 #' Photochemistry Applications (Peterson, 1976), available at:
 #' <https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=9100JA26.txt>.
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `sza`.
-#'
-#' ```{r}
-#' dplyr::glimpse(sza)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-2
@@ -123,6 +108,8 @@
 #' @section Dataset Introduced:
 #' `v0.2.0.5` (March 31, 2020)
 #'
+#' @examples
+#' dplyr::glimpse(sza)
 "sza"
 
 #' Deluxe automobiles from the 2014-2017 period
@@ -168,14 +155,6 @@
 #' \item{msrp}{Manufacturer's suggested retail price in U.S. dollars (USD).}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `gtcars`.
-#'
-#' ```{r}
-#' dplyr::glimpse(gtcars)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-3
@@ -187,6 +166,8 @@
 #' @section Dataset Introduced:
 #' `v0.2.0.5` (March 31, 2020)
 #'
+#' @examples
+#' dplyr::glimpse(gtcars)
 "gtcars"
 
 #' Daily S&P 500 Index data from 1950 to 2015
@@ -207,14 +188,6 @@
 #' \item{adj_close}{The close price adjusted for both dividends and splits.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `sp500`.
-#'
-#' ```{r}
-#' dplyr::glimpse(sp500)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-4
@@ -226,6 +199,8 @@
 #' @section Dataset Introduced:
 #' `v0.2.0.5` (March 31, 2020)
 #'
+#' @examples
+#' dplyr::glimpse(sp500)
 "sp500"
 
 #' A year of pizza sales from a pizza place
@@ -345,14 +320,6 @@
 #' USD).}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the pizza data available in `pizzaplace`.
-#'
-#' ```{r}
-#' dplyr::glimpse(pizzaplace)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-5
@@ -364,6 +331,8 @@
 #' @section Dataset Introduced:
 #' `v0.2.0.5` (March 31, 2020)
 #'
+#' @examples
+#' dplyr::glimpse(pizzaplace)
 "pizzaplace"
 
 #' A toy example tibble for testing with gt: exibble
@@ -395,14 +364,6 @@
 #' values which can be useful for testing tables that contain row groups.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is the entirety of the `exibble` table.
-#'
-#' ```{r}
-#' exibble
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-6
@@ -414,6 +375,8 @@
 #' @section Dataset Introduced:
 #' `v0.2.0.5` (March 31, 2020)
 #'
+#' @examples
+#' exibble
 "exibble"
 
 #' Populations of all municipalities in Ontario from 1996 to 2021
@@ -469,14 +432,6 @@
 #' 2021.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `towny`.
-#'
-#' ```{r}
-#' dplyr::glimpse(towny)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-7
@@ -488,6 +443,8 @@
 #' @section Dataset Introduced:
 #' `v0.9.0` (Mar 31, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(towny)
 "towny"
 
 #' A table of personal information for people all over the world
@@ -536,8 +493,10 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(peeps)
 "peeps"
 
 
@@ -573,14 +532,6 @@
 #' Database (IMDB).}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `films`.
-#'
-#' ```{r}
-#' dplyr::glimpse(films)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-9
@@ -590,15 +541,17 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(films)
 "films"
 
 #' The stations of the Paris Metro
 #'
 #' @description
 #'
-#' A dataset with information on all 314 Paris Metro stations as of June 2024.
+#' A dataset with information on all 320 Paris Metro stations as of June 2024.
 #' Each record represents a station, describing which Metro lines are serviced
 #' by the station, which other connections are available, and annual passenger
 #' volumes. Basic location information is provided for each station in terms
@@ -619,7 +572,7 @@
 #' to the Transilien rail network, tramway stations, several major train
 #' stations (e.g., Gare du Nord, Gare de l'Est, etc.), and many bus lines.
 #'
-#' @format A tibble with 314 rows and 11 variables:
+#' @format A tibble with 320 rows and 11 variables:
 #' \describe{
 #' \item{name}{The name of the station.}
 #' \item{caption}{In some cases, a station will have a caption that might
@@ -659,6 +612,8 @@
 #' @section Dataset Introduced:
 #' `v0.9.0` (Mar 31, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(metro)
 "metro"
 
 #' Weather conditions in Gibraltar, May 2023
@@ -686,14 +641,6 @@
 #' \item{condition}{The weather condition.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `gibraltar`.
-#'
-#' ```{r}
-#' dplyr::glimpse(gibraltar)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-11
@@ -703,8 +650,10 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(gibraltar)
 "gibraltar"
 
 #' The fundamental physical constants
@@ -735,14 +684,6 @@
 #' \item{units}{The units associated with the constant.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `constants`.
-#'
-#' ```{r}
-#' dplyr::glimpse(constants)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-12
@@ -754,6 +695,8 @@
 #' @section Dataset Introduced:
 #' `v0.10.0` (October 7, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(constants)
 "constants"
 
 #' Lab tests for one suffering from an illness
@@ -828,14 +771,6 @@
 #' with the test.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `illness`.
-#'
-#' ```{r}
-#' dplyr::glimpse(illness)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-13
@@ -847,6 +782,8 @@
 #' @section Dataset Introduced:
 #' `v0.10.0` (October 7, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(illness)
 "illness"
 
 #' Reaction rates for gas-phase atmospheric reactions of organic compounds
@@ -932,14 +869,6 @@
 #' of K) for which the `Cl_a`, `Cl_b`, and `Cl_n` parameters are valid.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `reactions`.
-#'
-#' ```{r}
-#' dplyr::glimpse(reactions)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-14
@@ -949,8 +878,10 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(reactions)
 "reactions"
 
 #' Data on photolysis rates for gas-phase organic compounds
@@ -991,14 +922,6 @@
 #' and they are in units of `cm^2 molecule^-1`.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `photolysis`.
-#'
-#' ```{r}
-#' dplyr::glimpse(photolysis)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-15
@@ -1008,8 +931,10 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(photolysis)
 "photolysis"
 
 #' Nuclide data
@@ -1052,14 +977,6 @@
 #' uncertainty. In units of keV.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `nuclides`.
-#'
-#' ```{r}
-#' dplyr::glimpse(nuclides)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-16
@@ -1069,8 +986,10 @@
 #' }}
 #'
 #' @section Dataset Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
+#' @examples
+#' dplyr::glimpse(nuclides)
 "nuclides"
 
 #' An ADSL-flavored clinical trial toy dataset
@@ -1122,14 +1041,6 @@
 #' if the subject had the event) or `"N"`.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `rx_adsl`.
-#'
-#' ```{r}
-#' dplyr::glimpse(rx_adsl)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-17
@@ -1141,6 +1052,8 @@
 #' @section Dataset Introduced:
 #' `v0.9.0` (Mar 31, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(rx_adsl)
 "rx_adsl"
 
 #' An ADDV-flavored clinical trial toy dataset
@@ -1195,14 +1108,6 @@
 #' indicating whether PD is related to COVID-19 or not.}
 #' }
 #'
-#' @section Examples:
-#'
-#' Here is a glimpse at the data available in `rx_addv`.
-#'
-#' ```{r}
-#' dplyr::glimpse(rx_addv)
-#' ```
-#'
 #' @family datasets
 #' @section Dataset ID and Badge:
 #' DATA-18
@@ -1214,4 +1119,6 @@
 #' @section Dataset Introduced:
 #' `v0.9.0` (Mar 31, 2023)
 #'
+#' @examples
+#' dplyr::glimpse(rx_addv)
 "rx_addv"

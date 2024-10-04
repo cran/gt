@@ -755,7 +755,7 @@ footnote_mark_to_xml <- function(
     xml_r(
       xml_rPr(
         xml_baseline_adj(
-          v_align = if (grepl("\\^", spec)) "superscript" else "baseline"
+          v_align = if (grepl("^", spec, fixed = TRUE)) "superscript" else "baseline"
         ),
         if (grepl("i", spec, fixed = TRUE)) xml_i(active = TRUE) else NULL,
         if (grepl("b", spec, fixed = TRUE)) xml_b(active = TRUE) else NULL
@@ -1188,8 +1188,7 @@ create_table_props_component_xml <- function(data, align = c("center", "start", 
     )
 
   # table_cols <- xml_tblGrid(
-  #   lapply(widths,xml_gridcol) %>%
-  #     vapply(as.character, as.character(0L))
+  #     vapply(lapply(widths,xml_gridcol), as.character, as.character(0L))
   # )
 
   # htmltools::tagList(c(table_properties, table_cols))
@@ -1245,7 +1244,7 @@ create_table_caption_component_xml <- function(
     footnote_title_marks <-
       footnote_mark_to_xml(
         data = data,
-        mark = footnote_title_marks$fs_id_c
+        mark = footnote_title_marks
       )
     footnote_title_marks <- as_xml_node(footnote_title_marks)[[1L]]
 
@@ -1302,7 +1301,8 @@ create_table_caption_component_xml <- function(
       footnote_subtitle_marks <-
         footnote_mark_to_xml(
           data = data,
-          mark = footnote_subtitle_marks$fs_id_c)
+          mark = footnote_subtitle_marks
+        )
       footnote_subtitle_marks <- as_xml_node(footnote_subtitle_marks)[[1]]
 
       xml_add_child(
@@ -1397,7 +1397,7 @@ create_heading_component_xml <- function(
     footnote_title_marks <-
       footnote_mark_to_xml(
         data = data,
-        mark = footnote_title_marks$fs_id_c
+        mark = footnote_title_marks
       )
     footnote_title_marks <- as_xml_node(footnote_title_marks)[[1L]]
 
@@ -1427,7 +1427,7 @@ create_heading_component_xml <- function(
       footnote_subtitle_marks <-
         footnote_mark_to_xml(
           data = data,
-          mark = footnote_subtitle_marks$fs_id_c
+          mark = footnote_subtitle_marks
         )
       footnote_subtitle_marks <- as_xml_node(footnote_subtitle_marks)[[1L]]
 
@@ -1530,10 +1530,10 @@ create_columns_component_xml <- function(
   spanners_present <- dt_spanners_exists(data = data)
 
   # Get the column alignments for all visible columns
-  col_alignment <- dplyr::pull(subset(boxh, type == "default"), column_align)
+  col_alignment <- vctrs::vec_slice(boxh$column_align, boxh$type == "default")
 
   # Get the column headings
-  headings_vars <- dplyr::pull(subset(boxh, type == "default"), var)
+  headings_vars <- vctrs::vec_slice(boxh$var, boxh$type == "default")
   headings_labels <- dt_boxhead_get_vars_labels_default(data = data)
 
   # Determine the finalized number of spanner rows
@@ -1629,11 +1629,11 @@ create_columns_component_xml <- function(
   for (i in seq_len(length(headings_vars) - stub_available)) {
 
     cell_style <-
-      dplyr::filter(
+      vctrs::vec_slice(
         styles_tbl,
-        locname %in% c("columns_columns"),
-        rownum == -1,
-        colnum == i
+        styles_tbl$locname %in% c("columns_columns") &
+        styles_tbl$rownum == -1 &
+        styles_tbl$colnum == i
       )
     cell_style <- cell_style$styles[1][[1]]
 
@@ -1780,10 +1780,10 @@ create_columns_component_xml <- function(
           if (colspans[i] > 0) {
 
             cell_style <-
-              dplyr::filter(
+              vctrs::vec_slice(
                 styles_tbl,
-                locname %in% c("columns_groups"),
-                grpname %in% spanner_row_ids[i]
+                styles_tbl$locname %in% c("columns_groups") &
+                styles_tbl$grpname %in% spanner_row_ids[i]
               )
             cell_style <- cell_style$styles[1][[1]]
 
@@ -1869,7 +1869,7 @@ create_body_component_xml <- function(
 
   # Get the column alignments for the data columns (this
   # doesn't include the stub alignment)
-  col_alignment <- boxh[boxh$type == "default", ][["column_align"]]
+  col_alignment <- vctrs::vec_slice(boxh$column_align, boxh$type == "default")
 
   # Determine whether the stub is available through analysis
   # of the `stub_components`
@@ -1944,10 +1944,10 @@ create_body_component_xml <- function(
             ][[1]]
 
           cell_style <-
-            dplyr::filter(
+            vctrs::vec_slice(
               styles_tbl,
-              locname == "row_groups",
-              rownum == (i - 0.1)
+              styles_tbl$locname == "row_groups" &
+                styles_tbl$rownum == (i - 0.1)
             )
           cell_style <- cell_style$styles[1][[1]]
 
@@ -1998,11 +1998,11 @@ create_body_component_xml <- function(
           style_col_idx <- ifelse(stub_available, y - 1, y)
 
           cell_style <-
-            dplyr::filter(
+            vctrs::vec_slice(
               styles_tbl,
-              locname %in% c("data","stub"),
-              rownum == i,
-              colnum == style_col_idx
+              styles_tbl$locname %in% c("data","stub") &
+              styles_tbl$rownum == i &
+              styles_tbl$colnum == style_col_idx
             )
           cell_style <- cell_style$styles[1][[1]]
 
@@ -2061,12 +2061,12 @@ create_body_component_xml <- function(
           if (i == group_row_add_row_loc) {
 
             summary_styles <-
-              styles_tbl %>%
-              dplyr::filter(
-                locname %in% c("summary_cells"),
-                grpname %in% group_info[["group_id"]]
-              ) %>%
-              dplyr::mutate(rownum = ceiling(rownum * 100 - i * 100))
+              vctrs::vec_slice(
+                styles_tbl,
+                styles_tbl$locname %in% c("summary_cells") &
+                styles_tbl$grpname %in% group_info[["group_id"]]
+              )
+            summary_styles$rownum <- ceiling(summary_styles$rownum * 100 - i * 100)
 
             summary_section <-
               summary_rows_xml(
@@ -2109,10 +2109,11 @@ create_body_component_xml <- function(
   if (summaries_present &&
       grand_summary_col %in% names(list_of_summaries$summary_df_display_list)) {
 
-    summary_styles <- styles_tbl %>%
-      dplyr::filter(
-        locname %in% "grand_summary_cells",
-        grpname %in% c("::GRAND_SUMMARY")
+    summary_styles <-
+      vctrs::vec_slice(
+        styles_tbl,
+        styles_tbl$locname %in% "grand_summary_cells" &
+          styles_tbl$grpname %in% c("::GRAND_SUMMARY")
       )
 
     grand_summary_section <-
@@ -2249,8 +2250,7 @@ create_footnotes_component_xml <- function(
   }
 
   footnotes_tbl <-
-    footnotes_tbl %>%
-    dplyr::distinct(fs_id, footnotes)
+    dplyr::distinct(footnotes_tbl, fs_id, footnotes)
 
   # Get the footnote separator option
   separator <- dt_options_get_value(data = data, option = "footnotes_sep")
@@ -2273,14 +2273,13 @@ create_footnotes_component_xml <- function(
             data = data,
             mark = footnote_ids[x],
             location = "ftr"
-            ) %>%
-            as_xml_node()
-
-          footnote_text_xml %>%
-            xml_add_child(
-              footnote_id_xml,
-              .where = 1
             )
+
+          xml_add_child(
+            footnote_text_xml,
+            as_xml_node(footnote_id_xml),
+            .where = 1
+          )
         }
 
         footnote_content <-
@@ -2583,15 +2582,13 @@ xml_table_cell <- function(
 
 process_cell_content <- function(x, ...) {
 
-  x %>%
-    parse_to_xml() %>%
-    process_cell_content_ooxml_t(...) %>%
-    process_cell_content_ooxml_r(...) %>%
-    process_cell_content_ooxml_p(...) %>%
-    process_white_space_br_in_xml(...) %>%
-    process_drop_empty_styling_nodes() %>%
-    as.character() %>%
-    paste0(collapse = "")
+  processed <- parse_to_xml(x)
+  processed <- process_cell_content_ooxml_t(processed, ...)
+  processed <- process_cell_content_ooxml_r(processed, ...)
+  processed <- process_cell_content_ooxml_p(processed, ...)
+  processed <- process_white_space_br_in_xml(processed, ...)
+  processed <- process_drop_empty_styling_nodes(processed)
+  paste0(as.character(processed), collapse = "")
 }
 
 process_cell_content_ooxml_t <- function(
@@ -2609,7 +2606,7 @@ process_cell_content_ooxml_t <- function(
 
     # If it's already set to preserve, respect preservation
 
-    if (!text_tag_attr == "preserve") {
+    if (text_tag_attr != "preserve") {
       xml_text(txt) <- white_space_in_text(x = text_tag_content, whitespace = whitespace)
       xml_attr(txt, attr = "xml:space") <- white_space_to_t_xml_space(whitespace)
     }
@@ -2731,10 +2728,8 @@ process_cell_content_ooxml_p <- function(
 
   if (length(paragraph_tags) == 0L) {
 
-    x <-
-      xml_p(xml_pPr()) %>%
-      as_xml_node() %>%
-      xml_add_child(x)
+    p_node <- as_xml_node(xml_p(xml_pPr()))
+    x <- xml_add_child(p_node, x)
 
     paragraph_tags <- xml_find_all(x, "//w:p")
   }
@@ -2792,7 +2787,7 @@ process_white_space_br_in_xml <- function(x, ..., whitespace = NULL) {
           break_tag <- paragraph_children[[break_tag_loc]]
 
           ## if the br is between two runs, replace with space
-          if (any(run_tags_locs > break_tag_loc) & any(run_tags_locs < break_tag_loc)) {
+          if (any(run_tags_locs > break_tag_loc) && any(run_tags_locs < break_tag_loc)) {
 
             replacement_br <-
               xml_r(xml_rPr(), xml_t(" ", xml_space = "preserve"))
@@ -2896,10 +2891,9 @@ parse_to_xml <- function(x, ...) {
 
     if (all(grepl("^<md_container>.*</md_container>$", x))) {
 
-      x <-
-        gsub("^<md_container>(.*)</md_container>$", "\\1", x) %>%
-        paste0(collapse = "") %>%
-        paste0("<md_container>",.,"</md_container>")
+      x <- gsub("^<md_container>(.*)</md_container>$", "\\1", x)
+      x <- paste0(x, collapse = "")
+      x <- paste0("<md_container>", x, "</md_container>")
 
     } else {
       x <- paste0(x, collapse = "")
@@ -2925,12 +2919,9 @@ parse_to_xml <- function(x, ...) {
 
   ## add namespace for later processing
   parsed_xml_contents <-
-    add_ns(x) %>%
-    read_xml() %>%
-    suppressWarnings()
+    suppressWarnings(read_xml(add_ns(x)))
 
-  parsed_xml_contents %>%
-    xml_children()
+  xml_children(parsed_xml_contents)
 }
 
 as_xml_node <- function(x, create_ns = FALSE) {
@@ -2945,9 +2936,7 @@ as_xml_node <- function(x, create_ns = FALSE) {
     x <- add_ns(x)
   }
 
-    as_xml_document(x) %>%
-    xml_children() %>%
-    suppressWarnings()
+  suppressWarnings(xml_children(as_xml_document(x)))
 }
 
 add_ns <- function(x) {
@@ -3082,12 +3071,12 @@ create_doc_settings <- function() {
 
 update_hyperlink_node_id <- function(docx, rels) {
 
-  rels_relationships <- rels %>% xml_children()
-  rels_ids <- rels_relationships %>% xml_attr("Id")
+  rels_relationships <- xml_children(rels)
+  rels_ids <- xml_attr(rels_relationships, "Id")
   max_id <- max(as.numeric(gsub("rId", "", rels_ids, fixed = TRUE)))
 
   # Get all hyperlink nodes
-  hyperlink_nodes <- docx %>% xml_find_all("//w:hyperlink[@r:id]")
+  hyperlink_nodes <- xml_find_all(docx, "//w:hyperlink[@r:id]")
 
   # Identify nodes needing updating
   hyperlink_nodes <-
@@ -3111,13 +3100,14 @@ update_hyperlink_node_id <- function(docx, rels) {
 update_blip_node_id <- function(docx, rels, content_types, tmp_word_dir) {
 
   ## get relationships
-  rels_relationships <- rels %>% xml_children()
-  rels_ids <- rels_relationships %>% xml_attr("Id")
+  rels_relationships <- xml_children(rels)
+  rels_ids <- xml_attr(rels_relationships, "Id")
   max_id <- max(as.numeric(gsub("rId", "", rels_ids, fixed = TRUE)))
 
   ## get all blip nodes (binary li)
   blip_nodes <-
-    docx %>% xml_find_all(
+    xml_find_all(
+      docx,
       "//a:blip[@r:embed]",
       ns = c(
         a = "http://schemas.openxmlformats.org/drawingml/2006/main",
@@ -3193,8 +3183,8 @@ ensure_sect_end <- function(docx) {
       " xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"",
       " xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\">",
       "<w:type w:val=\"continuous\"/></w:sectPr>"
-    ) %>%
-    as_xml_document()
+    )
+  new_last_node <- as_xml_document(new_last_node)
 
   if (xml_name(last_body_node) != "sectPr") {
 
@@ -3260,12 +3250,12 @@ xml_relationship <- function(id, target, type = c("hyperlink", "image"), target_
 
   varArgs <- varArgs[!sapply(varArgs, is.na)]
 
-  htmltools::tag(
+  tag <- htmltools::tag(
     `_tag_name` = "Relationship",
     varArgs = varArgs
-  ) %>%
-    as.character() %>%
-    read_xml()
+  )
+
+  read_xml(as.character(tag))
 }
 
 create_xml_contents <- function() {
@@ -3349,26 +3339,24 @@ create_xml_contents <- function() {
 
 xml_content_type_ext <- function(Extension, ContentType) {
 
-  htmltools::tag(
+  tag <- htmltools::tag(
     `_tag_name` = "Default",
     varArgs = list(
       Extension = Extension,
       ContentType = ContentType
     )
-  ) %>%
-    as.character() %>%
-    read_xml()
+  )
+  read_xml(as.character(tag))
 }
 
 xml_content_type_override <- function(PartName, ContentType) {
 
-  htmltools::tag(
+  tag <- htmltools::tag(
     `_tag_name` = "Override",
     varArgs = list(
       PartName = PartName,
       ContentType = ContentType
     )
-  ) %>%
-    as.character() %>%
-    read_xml()
+  )
+  read_xml(as.character(tag))
 }

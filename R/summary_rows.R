@@ -22,6 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
+# summary_rows() ---------------------------------------------------------------
 #' Add group-wise summary rows using aggregation functions
 #'
 #' @description
@@ -41,8 +42,9 @@
 #'   The row groups to which targeting operations are constrained. Can either be
 #'   a series of row group ID values provided in `c()` or a select helper
 #'   function (e.g. [starts_with()], [ends_with()], [contains()], [matches()],
-#'   [num_range()], and [everything()]). By default this is set to [everything()],
-#'   which means that all available groups will obtain summary rows.
+#'   [num_range()], and [everything()]). By default this is set to
+#'   [everything()], which means that all available groups will obtain summary
+#'   rows.
 #'
 #' @param columns *Columns to target*
 #'
@@ -120,7 +122,7 @@
 #' **tidyselect**-style expressions. This can be as basic as supplying a select
 #' helper like `starts_with()`, or, providing a more complex incantation like
 #'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
+#' `where(~ is.numeric(.x) & max(.x, na.rm = TRUE) > 1E6)`
 #'
 #' which targets numeric columns that have a maximum value greater than
 #' 1,000,000 (excluding any `NA`s from consideration).
@@ -325,7 +327,7 @@
 #'   gt(rowname_col = "country_name") |>
 #'   tab_row_group(
 #'     label = md("*BRIC*"),
-#'     rows = c("Brazil", "Russian Federation", "India", "China"),
+#'     rows = c("Brazil", "Russia", "India", "China"),
 #'     id = "bric"
 #'   ) |>
 #'   tab_row_group(
@@ -377,7 +379,7 @@ summary_rows <- function(
   stop_if_not_gt_tbl(data = data)
 
   # Get the correct `side` value
-  side <- rlang::arg_match(side)
+  side <- rlang::arg_match0(side, values = c("bottom", "top"))
 
   # Collect all provided formatting options in a list
   formatter_options <- list(...)
@@ -391,7 +393,8 @@ summary_rows <- function(
   groups_rows_tbl <- dt_groups_rows_get(data = data_built)
 
   # Pull a character vector of available groups from `groups_rows_tbl`
-  available_groups <- dplyr::pull(groups_rows_tbl, group_id)
+  available_groups <- groups_rows_tbl$group_id
+  check_character(available_groups)
 
   # Resolve the group names
   groups <-
@@ -527,6 +530,7 @@ summary_rows <- function(
   )
 }
 
+# grand_summary_rows() ---------------------------------------------------------
 #' Add grand summary rows using aggregation functions
 #'
 #' @description
@@ -557,7 +561,7 @@ summary_rows <- function(
 #' **tidyselect**-style expressions. This can be as basic as supplying a select
 #' helper like `starts_with()`, or, providing a more complex incantation like
 #'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
+#' `where(~ is.numeric(.x) & max(.x, na.rm = TRUE) > 1E6)`
 #'
 #' which targets numeric columns that have a maximum value greater than
 #' 1,000,000 (excluding any `NA`s from consideration).
@@ -772,7 +776,7 @@ grand_summary_rows <- function(
   stop_if_not_gt_tbl(data = data)
 
   # Get the correct `side` value
-  side <- rlang::arg_match(side)
+  side <- rlang::arg_match0(side, values = c("bottom", "top"))
 
   summary_rows(
     data = data,
@@ -787,6 +791,7 @@ grand_summary_rows <- function(
   )
 }
 
+# Summary rows helpers --------------------------------------------------------
 # Normalize `fns` input in `summary_rows` and `grand_summary_rows`
 #
 # Returns a normalized list of summary functions
@@ -803,7 +808,13 @@ normalize_summary_fns <- function(fns) {
   summary_fns <- list()
 
   if (rlang::is_formula(fns)) {
-    fns <- list(rlang::new_formula(lhs = rlang::f_lhs(fns), rhs = rlang::f_rhs(fns)))
+    fns <-
+      list(
+        rlang::new_formula(
+          lhs = rlang::f_lhs(fns),
+          rhs = rlang::f_rhs(fns)
+        )
+      )
   }
 
   # Upgrade `fns` to a list if it's a vector
@@ -1018,12 +1029,18 @@ normalize_summary_fns <- function(fns) {
 
 normalize_fmt_fns <- function(fmt) {
 
-  if (is.null(fmt) || length(fmt) < 1) {
+  if (length(fmt) == 0) {
     return(NULL)
   }
 
   if (rlang::is_formula(fmt)) {
-    fmt <- list(rlang::new_formula(lhs = rlang::f_lhs(fmt), rhs = rlang::f_rhs(fmt)))
+    fmt <-
+      list(
+        rlang::new_formula(
+          lhs = rlang::f_lhs(fmt),
+          rhs = rlang::f_rhs(fmt)
+        )
+      )
   }
 
   fmt

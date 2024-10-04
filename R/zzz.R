@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------------------#
 
+
 utils::globalVariables(
   c(
     ".",
@@ -137,6 +138,8 @@ utils::globalVariables(
 #'
 #' **gt** uses the following [options()] to configure behavior:
 #'
+#' - `gt.locale`: A [locale][info_locales()] to yse by default in
+#'  the [gt()] function.
 #' - `gt.row_group.sep`: A separator between groups for the row group label. By
 #' default this is `" - "`.
 #' - `gt.html_tag_check`: A logical scalar indicating whether or not to print a
@@ -158,7 +161,11 @@ gt_default_options <-
   list(
     gt.row_group.sep = " - ",
     gt.html_tag_check = TRUE,
-    gt.latex_packages = c("booktabs", "caption", "longtable", "colortbl", "array", "anyfontsize", "multirow")
+    gt.latex_packages = c(
+      "booktabs", "caption", "longtable",
+      "colortbl", "array", "anyfontsize",
+      "multirow"
+    )
   )
 
 .onLoad <- function(libname, pkgname, ...) {

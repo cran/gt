@@ -22,22 +22,16 @@
 #------------------------------------------------------------------------------#
 
 
+# text_replace() ---------------------------------------------------------------
 #' Perform highly targeted text replacement with a regex pattern
 #'
 #' @description
 #'
-#' `text_replace()` provides a specialized interface for replacing text fragments
-#' in table cells with literal text. You need to ensure that you're targeting
-#' the appropriate cells with the `locations` argument. Once that is done, the
-#' remaining two values to supply are for the regex pattern (`pattern`) and the
-#' replacement for all matched text (`replacement`).
-#'
-#' @param data *The gt table data object*
-#'
-#'   `obj:<gt_tbl>` // **required**
-#'
-#'   This is the **gt** table object that is commonly created through use of the
-#'   [gt()] function.
+#' `text_replace()` provides a specialized interface for replacing text
+#' fragments in table cells with literal text. You need to ensure that you're
+#' targeting the appropriate cells with the `locations` argument. Once that is
+#' done, the remaining two values to supply are the regex pattern (`pattern`)
+#' and the replacement for all matched text (`replacement`).
 #'
 #' @param pattern *Regex pattern to match with*
 #'
@@ -66,9 +60,9 @@
 #' (1) make that text italicized, and (2) introduce a line break before the text
 #' in parentheses. We can do this with `text_replace()`. The `pattern` value of
 #' `"\\((.*?)\\)"` will match on text between parentheses, and the inner
-#' `"(.*?)"` is a capture group. The `replacement` value of `"<br>(<em>\\1</em>)"`
-#' puts the capture group text `"\\1"` within `<em>` tags, wraps literal
-#' parentheses around it, and prepends a line break tag.
+#' `"(.*?)"` is a capture group. The `replacement` value of
+#' `"<br>(<em>\\1</em>)"` puts the capture group text `"\\1"` within `<em>`
+#' tags, wraps literal parentheses around it, and prepends a line break tag.
 #'
 #' ```r
 #' metro |>
@@ -108,15 +102,20 @@ text_replace <- function(
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
 
-  text_transform(
+  # Validate input
+  check_string(pattern, allow_empty = FALSE, allow_na = TRUE)
+  check_string(replacement, allow_empty = TRUE, allow_na = FALSE)
+
+  text_transform_impl(
     data = data,
     locations = locations,
     fn = function(x) {
-      str_complete_replace(x, pattern = pattern, replacement = replacement)
+      gsub(pattern = pattern, replacement = replacement, x, perl = TRUE)
     }
   )
 }
 
+# text_case_when() -------------------------------------------------------------
 #' Perform whole text replacements using a 'case-when'-expression approach
 #'
 #' @description
@@ -129,13 +128,6 @@ text_replace <- function(
 #' be a predicate statement that evaluates to a logical vector of length one
 #' (i.e., either `TRUE` or `FALSE`). To refer to the values undergoing
 #' transformation, you need to use the `x` variable.
-#'
-#' @param .data *The gt table data object*
-#'
-#'   `obj:<gt_tbl>` // **required**
-#'
-#'   This is the **gt** table object that is commonly created through use of the
-#'   [gt()] function.
 #'
 #' @param ... *Matching expressions*
 #'
@@ -217,7 +209,7 @@ text_case_when <- function(
   # TODO: check that the modernized version of the `case_when()`
   # function is available in the user's version of dplyr
 
-  text_transform(
+  text_transform_impl(
     data = .data,
     locations = .locations,
     fn = function(x) {
@@ -251,17 +243,19 @@ text_case_when <- function(
   )
 }
 
+# text_case_match() ------------------------------------------------------------
 #' Perform whole or partial text replacements with a 'switch'-like approach
 #'
 #' @description
 #'
 #' `text_case_match()` provides a useful interface for a approach to replacing
-#' table cells that behaves much like a switch statement. The targeting of cell for transformation happens with the `.locations` argument.
-#' Once overall targeting is handled, you need to supply a sequence of two-sided
-#' formulas matching of the general form: `<vector_old_text> ~ <new_text>`. In
-#' the left hand side (LHS) there should be a character vector containing
-#' strings to match on. The right hand side (RHS) should contain a single string
-#' (or something coercible to a length one character vector). There's also the
+#' table cells that behaves much like a switch statement. The targeting of cell
+#' for transformation happens with the `.locations` argument. Once overall
+#' targeting is handled, you need to supply a sequence of two-sided formulas
+#' matching of the general form: `<vector_old_text> ~ <new_text>`. In the left
+#' hand side (LHS) there should be a character vector containing strings to
+#' match on. The right hand side (RHS) should contain a single string (or
+#' something coercible to a length one character vector). There's also the
 #' `.replace` argument that changes the matching and replacing behavior. By
 #' default, `text_case_match()` will try to match on entire strings and replace
 #' those strings. This can be changed to a partial matching and replacement
@@ -376,17 +370,16 @@ text_case_match <- function(
   stop_if_not_gt_tbl(data = .data)
 
   # Ensure that arguments are matched
-  .replace <- rlang::arg_match(.replace)
+  .replace <- rlang::arg_match0(.replace, values = c("all", "partial"))
 
   x_list <- list(...)
 
   # TODO: perform some basic checking of `...` and stop function
   # should issues arise
 
-  # TODO: check that the `case_match()` function is available in
-  # the user's version of dplyr
+  # We rely on dplyr 1.1 (where `case_match()` was introduced)
 
-  text_transform(
+  text_transform_impl(
     data = .data,
     locations = .locations,
     fn = function(x) {
@@ -418,7 +411,7 @@ text_case_match <- function(
 
       if (.replace == "all") {
 
-        x <- dplyr::case_match(.x = x, !!!x_list, .default = .default)
+        x <- dplyr::case_match(.x = unlist(x), !!!x_list, .default = unlist(.default))
 
       } else {
 
@@ -444,19 +437,20 @@ text_case_match <- function(
   )
 }
 
+# text_transform() -------------------------------------------------------------
 #' Perform text transformations with a custom function
 #'
 #' @description
 #'
 #' Text transforming in **gt** is the act of modifying formatted strings in
-#' targeted cells. `text_transform()` provides the most flexibility
-#' of all the `text_*()` functions in their family of functions. With it, you
-#' target the cells to undergo modification in the `locations` argument while
-#' also supplying a function to the `fn` argument. The function given to `fn`
-#' should ideally at the very least take `x` as an input (it stands for the
-#' character vector that is essentially the targeted cells) and return a
-#' character vector of the same length as the input. Using the construction
-#' `function(x) { .. }` for the function is recommended.
+#' targeted cells. `text_transform()` provides the most flexibility of all the
+#' `text_*()` functions in their family of functions. With it, you target the
+#' cells to undergo modification in the `locations` argument while also
+#' supplying a function to the `fn` argument. The function given to `fn` should
+#' ideally at the very least take `x` as an input (it stands for the character
+#' vector that is essentially the targeted cells) and return a character vector
+#' of the same length as the input. Using the construction `function(x) { .. }`
+#' for the function is recommended.
 #'
 #' @inheritParams fmt_number
 #'
@@ -603,6 +597,17 @@ text_transform <- function(
 
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
+  rlang::check_required(fn)
+
+  text_transform_impl(
+    data,
+    fn,
+    locations
+  )
+}
+
+# Helper function to create text_*()
+text_transform_impl <- function(data, fn, locations, call = rlang::caller_env()) {
 
   # Resolve into a list of locations
   locations <- as_locations(locations = locations)
@@ -610,7 +615,12 @@ text_transform <- function(
   # For all of the resolved locations, store the transforms
   # for later execution
   for (loc in locations) {
-    data <- dt_transforms_add(data = data, loc = loc, fn = fn)
+    withCallingHandlers(
+      # Personalize call if text_case_match() or other.
+      data <- dt_transforms_add(data = data, loc = loc, fn = fn),
+      error = function(e) {
+        cli::cli_abort("Failed to resolve location.", parent = e, call = call)
+      })
   }
 
   data
@@ -691,9 +701,10 @@ text_transform_at_location.cells_column_labels <- function(
   for (col in loc$colnames) {
 
     if (col %in% boxh$var) {
-
-      column_label_edited <-
-        fn(dplyr::filter(boxh, var == .env$col)[1, "column_label", drop = TRUE])
+      # Retrieve the original column label
+      original_col_label <-
+        vctrs::vec_slice(boxh$column_label, boxh$var == col)[[1]]
+      column_label_edited <- fn(original_col_label)
 
       data <-
         dt_boxhead_edit(

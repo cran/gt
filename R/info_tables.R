@@ -22,6 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
+# info_date_style() ------------------------------------------------------------
 #' View a table with info on date styles
 #'
 #' @description
@@ -40,7 +41,7 @@
 #'   English (United States) and `"fr"` for French (France). We can call
 #'   [info_locales()] for a useful reference for all of the locales that are
 #'   supported.
-
+#'
 #' @return An object of class `gt_tbl`.
 #'
 #' @section Examples:
@@ -204,6 +205,7 @@ info_date_style <- function(locale = NULL) {
   gt_tbl
 }
 
+# info_time_style() ------------------------------------------------------------
 #' View a table with info on time styles
 #'
 #' @description
@@ -401,6 +403,7 @@ info_time_style <- function(locale = NULL) {
   gt_tbl
 }
 
+# info_currencies() ------------------------------------------------------------
 #' View a table with info on supported currencies
 #'
 #' @description
@@ -479,7 +482,7 @@ info_currencies <- function(
 ) {
 
   # Get the correct `type` value
-  type <- rlang::arg_match(type)
+  type <- rlang::arg_match0(type, values = c("code", "symbol"))
 
   if (type == "code") {
 
@@ -677,6 +680,7 @@ info_currencies <- function(
   gt_tbl
 }
 
+# info_locales() ------------------------------------------------------------
 #' View a table with info on supported locales
 #'
 #' @description
@@ -735,7 +739,8 @@ info_locales <- function(begins_with = NULL) {
   if (!is.null(begins_with)) {
 
     starting <- tolower(substr(begins_with, 1, 1))
-    loc <- dplyr::filter(locales, grepl(paste0("^", starting, ".*"), locale))
+    regex_starting <- paste0("^", starting, ".*")
+    loc <- vctrs::vec_slice(locales, grepl(regex_starting, locales$locale))
 
   } else {
     loc <- locales
@@ -743,35 +748,29 @@ info_locales <- function(begins_with = NULL) {
 
   tab_1 <-
     dplyr::select(
-      loc, locale, lang_desc, script_desc,
-      territory_desc, variant_desc, group, decimal
+      loc, "locale", "lang_desc", "script_desc",
+      "territory_desc", "variant_desc", "group", "decimal"
     )
 
-  tab_1 <-
-    dplyr::mutate(
-      tab_1,
-      display_name = paste0(
-        lang_desc,
-          paste0(
-            " (",
-            territory_desc, ", ",
-            script_desc, ", ",
-            variant_desc,
-            ")"
-          )
-      )
+  tab_1$display_name <- paste0(
+    tab_1$lang_desc,
+    paste0(
+      " (",
+      tab_1$territory_desc, ", ",
+      tab_1$script_desc, ", ",
+      tab_1$variant_desc,
+      ")"
+    )
+  )
+
+  tab_1$group <-
+    dplyr::case_match(
+      tab_1$group,
+      c("\u00a0", "\u202f") ~ "space",
+      .default = tab_1$group
     )
 
-  tab_1 <-
-    dplyr::mutate(
-      tab_1,
-      group = dplyr::case_when(
-        group %in% c("\u00a0", "\u202f") ~ "space",
-        .default = group
-      )
-    )
-
-  tab_1 <- dplyr::select(tab_1, "locale", "display_name", "group", "decimal")
+  tab_1 <- tab_1[c("locale", "display_name", "group", "decimal")]
   tab_1$display_name <- gsub(" (NA, NA, NA)", "", tab_1$display_name, fixed = TRUE)
   tab_1$display_name <- gsub(", NA, NA", "", tab_1$display_name, fixed = TRUE)
   tab_1$display_name <- gsub("NA, ", "", tab_1$display_name, fixed = TRUE)
@@ -789,7 +788,7 @@ info_locales <- function(begins_with = NULL) {
     ) %>%
     text_transform(
       fn = function(x) sub("space", "\U02420", x),
-      locations = cells_body(columns = group)
+      locations = cells_body(columns = "group")
     ) %>%
     cols_merge(
       columns = c("locale", "display_name"),
@@ -845,6 +844,7 @@ info_locales <- function(begins_with = NULL) {
     )
 }
 
+# info_paletteer() -------------------------------------------------------------
 #' View a table with info on color palettes
 #'
 #' @description
@@ -855,7 +855,8 @@ info_locales <- function(begins_with = NULL) {
 #' much easier in two ways: (1) by using the **paletteer** package, which makes
 #' a wide range of palettes from various R packages readily available, and (2)
 #' calling `info_paletteer()` to give us an information table that serves as a
-#' quick reference for all of the discrete color palettes available in **paletteer**.
+#' quick reference for all of the discrete color palettes available in
+#' **paletteer**.
 #'
 #' @details
 #'
@@ -937,7 +938,7 @@ info_paletteer <- function(color_pkgs = NULL) {
   palettes_strips <- palettes_strips_df$colors
 
   palettes_strips_df %>%
-    dplyr::select(package, palette, length) %>%
+    dplyr::select("package", "palette", "length") %>%
     dplyr::mutate(`Color Count and Palette` = NA) %>%
     gt(groupname_col = "package", rowname_col = "palette") %>%
     text_transform(
@@ -989,6 +990,7 @@ info_paletteer <- function(color_pkgs = NULL) {
     )
 }
 
+# info_google_fonts() ----------------------------------------------------------
 #' View a table on recommended Google Fonts
 #'
 #' @description
@@ -1030,6 +1032,7 @@ info_google_fonts <- function() {
   readRDS(system_file("gt_tables/info_google_fonts.rds"))
 }
 
+# info_flags() -----------------------------------------------------------------
 #' View a table with all available flags for `fmt_flag()`
 #'
 #' @description
@@ -1065,6 +1068,7 @@ info_flags <- function() {
   readRDS(system_file("gt_tables/info_flags.rds"))
 }
 
+# info_icons() -----------------------------------------------------------------
 #' View a table with all available Font Awesome icons for `fmt_icon()`
 #'
 #' @description
@@ -1105,6 +1109,7 @@ info_icons <- function() {
   readRDS(system_file("gt_tables/info_icons.rds"))
 }
 
+# info_unit_conversions() ------------------------------------------------------
 #' View a table with all units that can be converted by `unit_conversion()`
 #'
 #' @description
@@ -1136,7 +1141,7 @@ info_icons <- function() {
 #' 11-9
 #'
 #' @section Function Introduced:
-#' `v0.11.0`
+#' `v0.11.0` (July 9, 2024)
 #'
 #' @export
 info_unit_conversions <- function() {

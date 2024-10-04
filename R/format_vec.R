@@ -21,7 +21,9 @@
 #
 #------------------------------------------------------------------------------#
 
+output_types <- c("auto", "plain", "html", "latex", "rtf", "word")
 
+# vec_fmt_number() -------------------------------------------------------------
 #' Format a vector as numeric values
 #'
 #' @description
@@ -176,7 +178,7 @@ vec_fmt_number <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -205,6 +207,7 @@ vec_fmt_number <- function(
   )
 }
 
+# vec_fmt_integer() ------------------------------------------------------------
 #' Format a vector as integer values
 #'
 #' @description
@@ -335,6 +338,7 @@ vec_fmt_integer <- function(
   )
 }
 
+# vec_fmt_scientific() ---------------------------------------------------------
 #' Format a vector as values in scientific notation
 #'
 #' @description
@@ -466,7 +470,7 @@ vec_fmt_scientific <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -494,6 +498,7 @@ vec_fmt_scientific <- function(
   )
 }
 
+# vec_fmt_engineering() --------------------------------------------------------
 #' Format a vector as values in engineering notation
 #'
 #' @description
@@ -622,7 +627,7 @@ vec_fmt_engineering <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -649,6 +654,7 @@ vec_fmt_engineering <- function(
   )
 }
 
+# vec_fmt_percent() ------------------------------------------------------------
 #' Format a vector as percentage values
 #'
 #' @description
@@ -792,7 +798,7 @@ vec_fmt_percent <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -821,6 +827,7 @@ vec_fmt_percent <- function(
   )
 }
 
+# vec_fmt_partsper() -----------------------------------------------------------
 #' Format a vector as parts-per quantities
 #'
 #' @description
@@ -970,10 +977,14 @@ vec_fmt_partsper <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `to_units` is matched correctly to one option
-  to_units <- rlang::arg_match(to_units)
+  to_units <- 
+    rlang::arg_match0(
+      to_units,
+      values = c("per-mille", "per-myriad", "pcm", "ppm", "ppb", "ppt", "ppq")
+    )
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1002,6 +1013,7 @@ vec_fmt_partsper <- function(
   )
 }
 
+# vec_fmt_fraction() -----------------------------------------------------------
 #' Format a vector as mixed fractions
 #'
 #' @description
@@ -1108,10 +1120,10 @@ vec_fmt_fraction <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `layout` is matched correctly to one option
-  layout <- rlang::arg_match(layout)
+  layout <- rlang::arg_match0(layout, values = c("inline", "diagonal"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1134,6 +1146,7 @@ vec_fmt_fraction <- function(
   )
 }
 
+# vec_fmt_currency() -----------------------------------------------------------
 #' Format a vector as currency values
 #'
 #' @description
@@ -1301,7 +1314,7 @@ vec_fmt_currency <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1332,6 +1345,7 @@ vec_fmt_currency <- function(
   )
 }
 
+# vec_fmt_roman() --------------------------------------------------------------
 #' Format a vector as Roman numerals
 #'
 #' @description
@@ -1412,8 +1426,8 @@ vec_fmt_roman <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `case` and `output` are matched correctly to one option
-  case <- rlang::arg_match(case)
-  output <- rlang::arg_match(output)
+  case <- rlang::arg_match0(case, values = c("upper", "lower"))
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1431,6 +1445,7 @@ vec_fmt_roman <- function(
   )
 }
 
+# vec_fmt_index() --------------------------------------------------------------
 #' Format a vector as indexed characters
 #'
 #' @description
@@ -1533,9 +1548,9 @@ vec_fmt_index <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `case`, `index_algo` and `output` are matched correctly to one option
-  case <- rlang::arg_match(case)
-  index_algo <- rlang::arg_match(index_algo)
-  output <- rlang::arg_match(output)
+  case <- rlang::arg_match0(case, values = c("upper", "lower"))
+  index_algo <- rlang::arg_match0(index_algo, values = c("repeat", "excel"))
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1555,6 +1570,7 @@ vec_fmt_index <- function(
   )
 }
 
+# vec_fmt_spelled_num() --------------------------------------------------------
 #' Format a vector as spelled-out numbers
 #'
 #' @description
@@ -1671,7 +1687,7 @@ vec_fmt_spelled_num <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1689,6 +1705,7 @@ vec_fmt_spelled_num <- function(
   )
 }
 
+# vec_fmt_bytes() --------------------------------------------------------------
 #' Format a vector as values in terms of bytes
 #'
 #' @description
@@ -1820,8 +1837,8 @@ vec_fmt_bytes <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer"))
 
   # Ensure that `standard` and `output` are matched correctly to one option
-  standard <- rlang::arg_match(standard)
-  output <- rlang::arg_match(output)
+  standard <- rlang::arg_match0(standard, values = c("decimal", "binary"))
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -1849,6 +1866,7 @@ vec_fmt_bytes <- function(
   )
 }
 
+# vec_fmt_date() ---------------------------------------------------------------
 #' Format a vector as date values
 #'
 #' @description
@@ -2012,7 +2030,7 @@ vec_fmt_date <- function(
   check_vector_valid(x, valid_classes = c("Date", "POSIXt", "character"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -2031,6 +2049,7 @@ vec_fmt_date <- function(
   )
 }
 
+# vec_fmt_time() ---------------------------------------------------------------
 #' Format a vector as time values
 #'
 #' @description
@@ -2183,7 +2202,7 @@ vec_fmt_time <- function(
   check_vector_valid(x, valid_classes = c("Date", "POSIXt", "character"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -2202,6 +2221,7 @@ vec_fmt_time <- function(
   )
 }
 
+# vec_fmt_datetime() -----------------------------------------------------------
 #' Format a vector as datetime values
 #'
 #' @description
@@ -3003,7 +3023,7 @@ vec_fmt_datetime <- function(
   check_vector_valid(x, valid_classes = c("Date", "POSIXct", "character"))
 
   # Ensure that `output` is matched correctly to one option
-  output <- rlang::arg_match(output)
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -3026,6 +3046,7 @@ vec_fmt_datetime <- function(
   )
 }
 
+# vec_fmt_duration() -----------------------------------------------------------
 #' Format a vector of numeric or duration values as styled time duration strings
 #'
 #' @description
@@ -3199,8 +3220,12 @@ vec_fmt_duration <- function(
   check_vector_valid(x, valid_classes = c("numeric", "integer", "difftime"))
 
   # Ensure that `duration_style` and `ouput` are matched correctly to one option
-  duration_style <- rlang::arg_match(duration_style)
-  output <- rlang::arg_match(output)
+  duration_style <- 
+    rlang::arg_match0(
+      duration_style,
+      values = c("narrow", "wide", "colon-sep", "iso")
+    )
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
@@ -3226,6 +3251,7 @@ vec_fmt_duration <- function(
   )
 }
 
+# vec_fmt_markdown() -----------------------------------------------------------
 #' Format a vector containing Markdown text
 #'
 #' @description
@@ -3293,13 +3319,27 @@ vec_fmt_markdown <- function(
   check_vector_valid(x)
 
   # Ensure that arguments are matched
-  md_engine <- rlang::arg_match(md_engine)
-  output <- rlang::arg_match(output)
+  md_engine <- 
+    rlang::arg_match0(
+      md_engine,
+      values = c("markdown", "commonmark")
+    )
+  output <- rlang::arg_match0(output, values = output_types)
 
   if (output == "auto") {
     output <- determine_output_format()
   }
-
+  # Avoid modifying the output to base64enc in Quarto
+  if (check_quarto() && output == "html") {
+    # Similar to withr::local_envvar 
+    current_envvar <- Sys.getenv("QUARTO_BIN_PATH")
+    Sys.unsetenv("QUARTO_BIN_PATH")
+    on.exit(
+      Sys.setenv(QUARTO_BIN_PATH = current_envvar),
+      add = TRUE,
+      after = TRUE
+    )
+  }
   vec_fmt_out <-
     render_as_vector(
       fmt_markdown(
@@ -3320,7 +3360,7 @@ vec_fmt_markdown <- function(
 }
 
 gt_one_col <- function(x) {
-  gt(dplyr::tibble(x = x), auto_align = FALSE, process_md = FALSE)
+  gt(vctrs::data_frame(x = x), auto_align = FALSE, process_md = FALSE, groupname_col = NULL)
 }
 
 # Similar as `stop_if_not_vector()` if `valid_classes` is not supplied.
@@ -3337,14 +3377,17 @@ check_vector_valid <- function(x, valid_classes = NULL, call = rlang::caller_env
   invisible()
 }
 
-# In the case where strict mode is being used (options("gt.strict_column_fmt" = TRUE),
-# stop the function if any of the resolved columns have data that is incompatible
-# with the formatter
-check_columns_valid_if_strict <- function(data,
-                                          columns,
-                                          valid_classes,
-                                          extra_msg = NULL,
-                                          call = rlang::caller_env()) {
+# In the case where strict mode is being used
+# (options("gt.strict_column_fmt" = TRUE)), stop the function if any of the
+# resolved columns have data that is incompatible with the formatter
+check_columns_valid_if_strict <- function(
+    data,
+    columns,
+    valid_classes,
+    extra_msg = NULL,
+    call = rlang::caller_env()
+) {
+
   # Don't check if strict mode is not enabled
   # strict mode is opt-in, not the default
   if (!isTRUE(getOption("gt.strict_column_fmt", FALSE))) {
@@ -3370,7 +3413,7 @@ check_columns_valid_if_strict <- function(data,
 }
 
 render_as_vector <- function(data, output) {
-  dt_body_get(build_data(data, context = output))[["x"]]
+  dt_body_get(build_data_body(data, context = output))[["x"]]
 }
 
 determine_output_format <- function() {

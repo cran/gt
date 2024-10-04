@@ -35,7 +35,7 @@ dt_spanners_set <- function(data, spanners) {
 dt_spanners_init <- function(data) {
 
   spanners <-
-    dplyr::tibble(
+    vctrs::data_frame(
       # Column names that are part of the spanner
       vars = list(),
       # The spanner label
@@ -85,8 +85,8 @@ dt_spanners_add <- function(
       "x" = "Can't create the {.val {spanner_id}} spanner.",
       "!" = "Column{?s} {.code {error_vars}} belong{?s/} to an existing spanner.",
       "i" = "Specify {.arg columns} appropriately by using other variable names."
-      ),
-      call = call
+    ),
+    call = call
     )
   }
 

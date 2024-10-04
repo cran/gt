@@ -23,7 +23,7 @@
 
 
 # Define the contexts
-all_contexts <- c("html", "latex", "rtf", "word", "default")
+all_contexts <- c("html", "grid", "latex", "rtf", "word", "default")
 
 missing_val_token <- "::missing_val::"
 
@@ -81,7 +81,7 @@ rownum_translation <- function(body, rownum_start) {
 #' Render any formatting directives available in the `formats` list
 #'
 #' @noRd
-render_formats <- function(data, context) {
+render_formats <- function(data, skip_compat_check = FALSE, context) {
 
   body <- dt_body_get(data = data)
   data_tbl <- dt_data_get(data = data)
@@ -108,13 +108,17 @@ render_formats <- function(data, context) {
     for (col in fmt[["cols"]]) {
 
       # Perform rendering but only do so if the column is present
+      # Or if we are confident that we have a compatible formatter and no rows /cols are hidden
       if (
-        col %in% colnames(data_tbl) &&
-        is_compatible_formatter(
-          table = data_tbl,
-          column = col,
-          rows = rows,
-          compat = compat
+        skip_compat_check ||
+        (
+          col %in% colnames(data_tbl) &&
+          is_compatible_formatter(
+            table = data_tbl,
+            column = col,
+            rows = rows,
+            compat = compat
+          )
         )
       ) {
 
@@ -126,7 +130,7 @@ render_formats <- function(data, context) {
         # If any of the resulting output is `NA`, that means we want
         # to NOT make changes to those particular cells' output
         # (i.e. inherit the results of the previous formatter).
-        body[[col]][rows][!is.na(result)] <- stats::na.omit(result)
+        body[[col]][rows][!is.na(result)] <- omit_na(result)
       }
     }
   }
@@ -179,7 +183,7 @@ render_substitutions <- function(
         # means we want to NOT make changes to those
         # particular cells' output (i.e. inherit the
         # results of the previous substitution).
-        body[[col]][subst$rows][!is.na(result)] <- stats::na.omit(result)
+        body[[col]][subst$rows][!is.na(result)] <- omit_na(result)
       }
     }
   }
@@ -415,12 +419,14 @@ resolve_secondary_pattern <- function(x) {
 perform_col_merge <- function(data, context) {
 
   col_merge <- dt_col_merge_get(data = data)
-  body <- dt_body_get(data = data)
-  data_tbl <- dt_data_get(data = data)
 
   if (length(col_merge) == 0) {
     return(data)
   }
+
+  mutated_cols <- dt_col_merge_get_vars(data = data)
+  body <- dt_body_get(data = data)
+  data_tbl <- dt_data_get(data = data)
 
   for (i in seq_along(col_merge)) {
 
@@ -437,7 +443,7 @@ perform_col_merge <- function(data, context) {
       # The `cols_merge()` formatting case
       #
 
-      mutated_column <- col_merge[[i]]$vars[1]
+      mutated_column <- mutated_cols[[i]]
 
       columns <- col_merge[[i]][["vars"]]
       rows <- col_merge[[i]][["rows"]]
@@ -469,8 +475,18 @@ perform_col_merge <- function(data, context) {
           }
         )
 
-      glue_src_data <- stats::setNames(glue_src_data, seq_len(length(glue_src_data)))
-
+      glue_src_data <- stats::setNames(glue_src_data, seq_along(glue_src_data))
+      
+      which_cols <- unique(unlist(str_complete_extract(pattern, "\\{\\d+\\}")))
+      which_cols <- gsub("\\{|\\}", "", which_cols)
+      if (!all(which_cols %in% names(glue_src_data))) {
+        missing <- base::setdiff(which_cols, names(glue_src_data))
+        cli::cli_abort(c(
+          "Can't perform column merging",
+          "Can't find reference {missing}.",
+          "i" = 'Review {.arg pattern} provided to {.fn cols_merge}.'
+        ))
+      }
       glued_cols <- as.character(glue_gt(glue_src_data, pattern))
 
       if (grepl("<<.*?>>", pattern)) {
@@ -496,7 +512,7 @@ perform_col_merge <- function(data, context) {
       # The `cols_merge_n_pct()` formatting case
       #
 
-      mutated_column <- col_merge[[i]][["vars"]][1]
+      mutated_column <- mutated_cols[[i]]
       second_column <- col_merge[[i]][["vars"]][2]
       rows <- col_merge[[i]][["rows"]]
 
@@ -536,7 +552,7 @@ perform_col_merge <- function(data, context) {
       # were provided as input columns
       #
 
-      mutated_column <- col_merge[[i]][["vars"]][1]
+      mutated_column <- mutated_cols[[i]]
       lu_column <- col_merge[[i]][["vars"]][2]
       uu_column <- col_merge[[i]][["vars"]][3]
       rows <- col_merge[[i]][["rows"]]
@@ -619,7 +635,7 @@ perform_col_merge <- function(data, context) {
       # uncertainties) formatting cases
       #
 
-      mutated_column <- col_merge[[i]][["vars"]][1]
+      mutated_column <- mutated_cols[[i]]
       second_column <- col_merge[[i]][["vars"]][2]
       rows <- col_merge[[i]][["rows"]]
 
@@ -742,13 +758,7 @@ get_number_of_visible_data_columns <- function(data) {
 get_effective_number_of_columns <- function(data) {
 
   # Check if the table has been built, return an error if that's not the case
-  if (!dt_has_built(data = data)) {
-
-    cli::cli_abort(
-      "The `get_effective_number_of_columns()` function can only be used on
-      gt objects that have tables 'built'."
-    )
-  }
+  dt_has_built_assert(data = data)
 
   # Obtain the number of visible columns in the built table
   n_data_cols <- get_number_of_visible_data_columns(data = data)

@@ -44,12 +44,12 @@ is_gt_group <- function(data) {
 #' [gt_group()] functions.
 #' @noRd
 is_gt_tbl_or_group <- function(data) {
-  inherits(data, "gt_tbl") || inherits(data, "gt_group")
+  inherits(data, c("gt_tbl", "gt_group"))
 }
 
 is_gt_tbl_empty <- function(data) {
   data_tbl <- dt_data_get(data = data)
-  ncol(data_tbl) == 0 && nrow(data_tbl) == 0
+  identical(dim(data_tbl), c(0L, 0L))
 }
 
 is_gt_tbl_empty_w_cols <- function(data) {
@@ -116,7 +116,7 @@ stop_if_not_gt_group <- function(data, call = rlang::caller_env()) {
 #'
 #' @noRd
 stop_if_not_gt_tbl_or_group <- function(data, call = rlang::caller_env()) {
-  if (!is_gt_tbl(data = data) && !is_gt_group(data = data)) {
+  if (!is_gt_tbl_or_group(data)) {
     cli::cli_abort(
       "`data` must either be a `gt_tbl` or a `gt_group`, not {.obj_type_friendly {data}}.",
       call = call
@@ -226,9 +226,9 @@ tf_formats <- function() {
 
   dplyr::tribble(
     ~format_number,  ~format_name,    ~characters,              ~idx,
-    "1",	           "true-false",    NA,                       1:2,
-    "2",	           "yes-no",        NA,                       3:4,
-    "3",	           "up-down",       NA,                       5:6,
+    "1",	           "true-false",    NA_character_,            1:2,
+    "2",	           "yes-no",        NA_character_,            3:4,
+    "3",	           "up-down",       NA_character_,            5:6,
     "4",             "check-mark",    c("\U02714", "\U02718"),  NA,
     "5",             "circles",       c("\U025CF", "\U02B58"),  NA,
     "6",             "squares",       c("\U025A0", "\U025A1"),  NA,
@@ -240,7 +240,7 @@ tf_formats <- function() {
 }
 
 tf_formats_icons <- function() {
-  as.character(stats::na.omit(tf_formats()[, "characters"][[1]]))
+  as.character(omit_na(tf_formats()[, "characters"][[1]]))
 }
 
 tf_formats_text <- function() {
@@ -471,36 +471,48 @@ get_currency_str <- function(
     fallback_to_code = FALSE
 ) {
 
-  # Create bindings for specific variables
-  curr_symbol <- symbol <- curr_code <- curr_number <- NULL
-
   if (currency[1] %in% currency_symbols$curr_symbol) {
 
-    return(dplyr::filter(currency_symbols, curr_symbol == currency)$symbol)
+    currency_symbol <-
+      vctrs::vec_slice(
+        currency_symbols$symbol,
+        currency_symbols$curr_symbol == currency
+      )
 
   } else if (currency[1] %in% currencies$curr_code) {
 
-    currency_symbol <- dplyr::filter(currencies, curr_code == currency)$symbol
+    found_currency <-
+      vctrs::vec_slice(
+        currencies,
+        currencies$curr_code == currency
+      )
 
-    if (fallback_to_code && grepl("&#", currency_symbol)) {
-      currency_symbol <- dplyr::filter(currencies, curr_code == currency)$curr_code
+    if (fallback_to_code && grepl("&#", found_currency$symbol)) {
+      currency_symbol <- found_currency$curr_code
+    } else {
+      currency_symbol <- found_currency$symbol
     }
-
-    return(currency_symbol)
 
   } else if (currency[1] %in% currencies$curr_number) {
 
-    currency_symbol <- dplyr::filter(currencies, curr_number == currency)$symbol
+    found_currency <-
+      vctrs::vec_slice(
+        currencies,
+        # currencies$curr_number has NA value for IMP.
+        !is.na(currencies$curr_number) & currencies$curr_number == currency
+      )
 
-    if (fallback_to_code && grepl("&#", currency_symbol)) {
-      currency_symbol <- dplyr::filter(currencies, curr_number == currency)$curr_code
+    if (fallback_to_code && grepl("&#", found_currency$symbol)) {
+      currency_symbol <- found_currency$curr_code
+    } else {
+      currency_symbol <- found_currency$symbol
     }
 
-    return(currency_symbol)
-
   } else {
-    return(currency)
+    currency_symbol <- currency
   }
+
+  currency_symbol
 }
 
 resolve_footnote_placement <- function(
@@ -624,16 +636,23 @@ get_alignment_at_body_cell <- function(
 #' @noRd
 get_currency_exponent <- function(currency) {
 
-  # Create bindings for specific variables
-  curr_code <- curr_number <- NULL
-
   if (currency[1] %in% currencies$curr_code) {
 
-    exponent <- dplyr::filter(currencies, curr_code == currency)$exponent
+    exponent <-
+      vctrs::vec_slice(
+        currencies$exponent,
+        # curr_code has no NAs
+        currencies$curr_code == currency
+      )
 
   } else if (currency[1] %in% currencies$curr_number) {
 
-    exponent <- dplyr::filter(currencies, curr_number == currency)$exponent
+    # curr_number has some NAs
+    exponent <-
+      vctrs::vec_slice(
+        currencies$exponent,
+        !is.na(currencies$curr_number) & currencies$curr_number == currency
+      )
   }
 
   if (is.na(exponent)) {
@@ -710,44 +729,8 @@ process_text <- function(text, context = "html") {
       # Markdown text handling for Quarto
       #
       if (in_quarto) {
-
-        non_na_text <- text[!is.na(text)]
-
-        non_na_text_processed <-
-          vapply(
-            as.character(text[!is.na(text)]),
-            FUN.VALUE = character(1L),
-            USE.NAMES = FALSE,
-            FUN = function(text) {
-              md_engine_fn[[1]](text = text)
-            }
-          )
-
-        # Use base64 encoding to avoid issues with escaping internal double
-        # quotes; used in conjunction with the 'data-qmd-base64' attribute
-        # that is recognized by Quarto
-        non_na_text <-
-          vapply(
-            non_na_text,
-            FUN.VALUE = character(1L),
-            USE.NAMES = FALSE,
-            FUN = function(text) {
-              base64enc::base64encode(charToRaw(as.character(text)))
-            }
-          )
-
-        # Tweak start and end of non_na_text
-        non_na_text <- paste0("<div data-qmd-base64=\"", non_na_text, "\">")
-
-        non_na_text <-
-          paste0(
-            non_na_text, "<div class='gt_from_md'>",
-            non_na_text_processed, "</div></div>"
-          )
-
-        text[!is.na(text)] <- non_na_text
-
-        return(text)
+        processed_text <- process_md_quarto(text, md_engine_fn)
+        return(processed_text)
       }
 
       #
@@ -1000,7 +983,15 @@ process_text <- function(text, context = "html") {
     return(text)
 
   } else if (context == "grid") {
-    # Skip any formatting
+    # Skip any formatting (unless wrapped in from_md)
+    if (inherits(text, "from_markdown")) {
+      text <- unescape_html(text)
+      return(markdown_to_text(text))
+    }
+    if (is_html(text)) {
+      text <- unescape_html(text)
+      return(markdown_to_text(text))
+    }
     return(as.character(text))
   } else {
 
@@ -1037,6 +1028,9 @@ unescape_html <- function(text) {
   text <- gsub("&lt;", "<", text, fixed = TRUE)
   text <- gsub("&gt;", ">", text, fixed = TRUE)
   text <- gsub("&amp;", "&", text, fixed = TRUE)
+  text <- gsub("&mdash;", "---", text, fixed = TRUE)
+  # universal linebreak
+  text <- gsub("<br>", "\n", text, fixed = TRUE)
   text
 }
 
@@ -1761,7 +1755,7 @@ markdown_to_text <- function(text) {
 
           }
 
-          gsub("\\n$", "", commonmark::markdown_text(x))
+          sub("\n$", "", commonmark::markdown_text(x))
         }
       )
     )
@@ -1801,9 +1795,11 @@ non_na_index <- function(
     default_value = NA
 ) {
 
-  stopifnot(is.integer(index) || is.numeric(index))
-  stopifnot(all(index >= 1 | is.na(index)))
-  stopifnot(all(length(values) >= index | is.na(index)))
+  stopifnot(
+    is.numeric(index),
+    index >= 1 | is.na(index),
+    length(values) >= index | is.na(index)
+  )
 
   # Get a vector of suffixes, which may include NA values
   res <- values[index]
@@ -1870,9 +1866,10 @@ num_suffix <- function(
     }
 
     return(
-      dplyr::tibble(
-        scale_by = rep_len(scale_by, length(x)),
-        suffix = rep_len("", length(x))
+      vctrs::data_frame(
+        scale_by = scale_by,
+        suffix = "",
+        .size = length(x)
       )
     )
   }
@@ -1923,7 +1920,7 @@ num_suffix <- function(
 
   # Create and return a tibble with `scale_by`
   # and `suffix` values
-  dplyr::tibble(
+  vctrs::data_frame(
     scale_by = 1 / base^suffix_index,
     suffix = suffix_labels
   )
@@ -1951,9 +1948,10 @@ num_suffix_ind <- function(
     }
 
     return(
-      dplyr::tibble(
-        scale_by = rep_len(scale_by, length(x)),
-        suffix = rep_len("", length(x))
+      vctrs::data_frame(
+        scale_by = scale_by,
+        suffix = "",
+        .size = length(x)
       )
     )
   }
@@ -2007,7 +2005,7 @@ num_suffix_ind <- function(
 
   # Create and return a tibble with `scale_by`
   # and `suffix` values
-  dplyr::tibble(
+  vctrs::data_frame(
     scale_by = 10^(-ifelse(suffix_index == 0, 0, (suffix_index * 2) + 1)),
     suffix = suffix_labels
   )
@@ -2326,6 +2324,10 @@ flatten_list <- function(x) {
   unlist(x, recursive = FALSE)
 }
 
+omit_na <- function(x) {
+  x[!is.na(x)]
+}
+
 #' Prepend a vector
 #'
 #' @inheritParams append
@@ -2382,7 +2384,8 @@ column_classes_are_valid <- function(data, columns, valid_classes, call = rlang:
     )
 
   table_data <- dt_data_get(data = data)
-  table_data <- dplyr::select(table_data, dplyr::all_of(resolved))
+  # select all resolved columns
+  table_data <- table_data[resolved]
 
   all(
     vapply(

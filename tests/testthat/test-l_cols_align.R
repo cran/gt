@@ -1,9 +1,3 @@
-# Create a data frame based on the internal `sp500.csv`
-sp500 <-
-  read.csv(
-    system.file("extdata", "sp500.csv", package = "gt"),
-    stringsAsFactors = FALSE)
-
 test_that("cols_align() works correctly", {
 
   # Create a `tbl_latex` object with `gt()`; the `mpg`,
@@ -11,6 +5,7 @@ test_that("cols_align() works correctly", {
   tbl_latex <-
     gt(mtcars_short) %>%
     cols_align(align = "left", columns = c(mpg, cyl, drat)) %>%
+    tab_options(latex.use_longtable = TRUE) %>%
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern
@@ -22,6 +17,7 @@ test_that("cols_align() works correctly", {
   tbl_latex <-
     gt(mtcars_short) %>%
     cols_align(align = "left", columns = 1:3) %>%
+    tab_options(latex.use_longtable = TRUE) %>%
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern
@@ -33,6 +29,7 @@ test_that("cols_align() works correctly", {
   tbl_latex <-
     gt(mtcars_short) %>%
     cols_align(align = "left") %>%
+    tab_options(latex.use_longtable = TRUE) %>%
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern
@@ -44,17 +41,24 @@ test_that("cols_align() works correctly", {
   tbl_latex <-
     gt(mtcars_short) %>%
     cols_align(align = "left", columns = everything()) %>%
+    tab_options(latex.use_longtable = TRUE) %>%
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern
   expect_length(tbl_latex, 1)
   expect_match(tbl_latex, ".*begin\\{longtable\\}\\{lllllllllll\\}.*")
+  # Create a data frame based on the internal `sp500.csv`
+  sp500 <-
+    read.csv(
+      system.file("extdata", "sp500.csv", package = "gt"),
+      stringsAsFactors = FALSE)
 
   # Create a `tbl_latex` object with the `sp500` data
   # frame and `auto`-align all columns
   tbl_latex <-
     gt(sp500) %>%
     cols_align(align = "auto") %>%
+    tab_options(latex.use_longtable = TRUE) %>%
     as_latex() %>% as.character()
 
   # Expect a characteristic pattern

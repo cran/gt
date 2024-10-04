@@ -1,3 +1,27 @@
+#------------------------------------------------------------------------------#
+#
+#                /$$
+#               | $$
+#     /$$$$$$  /$$$$$$
+#    /$$__  $$|_  $$_/
+#   | $$  \ $$  | $$
+#   | $$  | $$  | $$ /$$
+#   |  $$$$$$$  |  $$$$/
+#    \____  $$   \___/
+#    /$$  \ $$
+#   |  $$$$$$/
+#    \______/
+#
+#  This file is part of the 'rstudio/gt' project.
+#
+#  Copyright (c) 2018-2024 gt authors
+#
+#  For full copyright and license information, please look at
+#  https://gt.rstudio.com/LICENSE.html
+#
+#------------------------------------------------------------------------------#
+
+
 # Layout ------------------------------------------------------------------
 
 # For grid, the `create_*_component_g` functions are used to get a long-format
@@ -80,7 +104,7 @@ create_heading_component_g <- function(data) {
 
   title_styles <- NA_character_
   if ("title" %in% styles_tbl$locname) {
-    title_style_rows <- dplyr::filter(styles_tbl, locname == "title")
+    title_style_rows <- vctrs::vec_slice(styles_tbl, styles_tbl$locname == "title")
     if (nrow(title_style_rows) > 0) {
       title_styles <- title_style_rows$html_style
     }
@@ -88,7 +112,7 @@ create_heading_component_g <- function(data) {
 
   subtitle_styles <- NA_character_
   if (subtitle_defined && "subtitle" %in% styles_tbl$locname) {
-    subtitle_style_rows <- dplyr::filter(styles_tbl, locname == "subtitle")
+    subtitle_style_rows <- vctrs::vec_slice(styles_tbl, styles_tbl$locname == "subtitle")
     if (nrow(subtitle_style_rows) > 0) {
       subtitle_styles <- subtitle_style_rows$html_style
     }
@@ -105,7 +129,7 @@ create_heading_component_g <- function(data) {
     footnote_title_marks <-
       footnote_mark_to_html(
         data = data,
-        mark = footnote_title_marks$fs_id_c
+        mark = footnote_title_marks
       )
   }
   footnote_subtitle_marks <- ""
@@ -118,7 +142,7 @@ create_heading_component_g <- function(data) {
     footnote_subtitle_marks <-
       footnote_mark_to_html(
         data = data,
-        mark = footnote_subtitle_marks$fs_id_c
+        mark = footnote_subtitle_marks
       )
   }
 
@@ -518,7 +542,7 @@ body_cells_g <- function(data) {
   )
 
   if (has_two_col_stub) {
-    # Set stub row group
+    # Set stub row group(s)
     group_cell <- which(cell_rows %in% groups$row_start & cell_cols == 1)
     group <- match(cell_rows[group_cell], groups$row_start)
     extra_rows <- (groups$row_end - groups$row_start + 1)[group]
@@ -538,8 +562,13 @@ body_cells_g <- function(data) {
 
     # Delete empty cells
     delete <- which(!(cell_rows %in% groups$row_start) & cell_cols == 1)
-    layout <- vctrs::vec_slice(layout, -delete)
-    cell_rows <- vctrs::vec_slice(cell_rows, -delete)
+
+    if (rlang::has_length(delete)) {
+      # don't attempt delete doesn't have length
+      # will likely occur in the case of all groups of length 1 #1803
+      layout <- vctrs::vec_slice(layout, -delete)
+      cell_rows <- vctrs::vec_slice(cell_rows, -delete)
+    }
   }
 
   # Split by row
@@ -733,7 +762,7 @@ create_source_notes_component_g <- function(data) {
 
   style <- NA
   if ("source_notes" %in% styles_tbl$locname) {
-    source_notes_style <- dplyr::filter(styles_tbl, locname == "source_notes")
+    source_notes_style <- vctrs::vec_slice(styles_tbl, styles_tbl$locname == "source_notes")
     if (nrow(source_notes_style)) {
       style <- source_notes_style$html_style
     }
@@ -775,7 +804,7 @@ create_footnotes_component_g <- function(data) {
 
   style <- NA
   if ("footnotes" %in% styles_tbl$locname) {
-    footnotes_style <- dplyr::filter(styles_tbl, locname == "footnotes")
+    footnotes_style <- vctrs::vec_slice(styles_tbl, styles_tbl$locname == "footnotes")
     if (nrow(footnotes_style) > 0) {
       style <- footnotes_style$html_style
     }
@@ -788,7 +817,7 @@ create_footnotes_component_g <- function(data) {
 
   marks <- vapply(
     footnote_ids,
-    FUN = footnote_mark_to_html,
+    FUN = footnote_mark_to_grid,
     FUN.VALUE = character(1L),
     USE.NAMES = FALSE,
     data = data,
@@ -800,7 +829,7 @@ create_footnotes_component_g <- function(data) {
     FUN = process_text,
     FUN.VALUE = character(1L),
     USE.NAMES = FALSE,
-    context = "html"
+    context = "grid"
   )
   text <- paste0(marks, text)
 
@@ -823,6 +852,61 @@ create_footnotes_component_g <- function(data) {
     name    = "footnotes"
   )
 }
+
+#' Transform a footnote mark to a grid representation
+#'
+#' @noRd
+footnote_mark_to_grid <- function(
+    data,
+    mark,
+    location = c("ref", "ftr")
+) {
+
+  location <- match.arg(location)
+
+  if (is.na(mark)) {
+    return("")
+  }
+
+  spec <- get_footnote_spec_by_location(data = data, location = location)
+
+  if (is.null(spec)) {
+    spec <- "^i"
+  }
+
+  # Generate the CSS classes needed on the basis of whether the
+  # mark is one or more asterisk characters or anything else
+  if (!grepl("^[\\*]+?$", mark)) {
+    sup_class <- "gt_footnote_marks"
+  } else {
+    sup_class <- "gt_footnote_marks gt_asterisk"
+  }
+
+  is_sup <- grepl("^", spec, fixed = TRUE)
+
+  if (grepl(".", spec, fixed = TRUE)) mark <- paste0(mark, ".")
+  if (grepl("(", spec, fixed = TRUE)) mark <- paste0("(", mark)
+  if (grepl("[", spec, fixed = TRUE)) mark <- paste0("[", mark)
+  if (grepl(")", spec, fixed = TRUE)) mark <- paste0(mark, ")")
+  if (grepl("]", spec, fixed = TRUE)) mark <- paste0(mark, "]")
+
+  # Not supported in grid
+  if (grepl("i", spec, fixed = TRUE)) {
+    font_style <- "italic"
+  } else {
+    font_style <- "normal"
+  }
+
+  if (grepl("b", spec, fixed = TRUE)) {
+    font_weight <- "bold"
+  } else {
+    font_weight <- "normal"
+  }
+
+  # return mark as plain text (all styling is ignored)
+  mark
+}
+
 
 # Cells -------------------------------------------------------------------
 
@@ -920,16 +1004,21 @@ render_grid_svg <- function(label, style, margin) {
 
   # Try if any height is declared in style attribute
   if (any(grepl("^height:", svg_style))) {
-    height <- gsub("^height:", "", svg_style[grep("^height:", svg_style)]) %>%
-      parse_fontsize(style$text_gp$fontsize) %>%
-      grid::unit(.grid_unit)
+    height <- gsub("^height:", "", svg_style[grep("^height:", svg_style)])
+    height <-
+      grid::unit(
+        parse_fontsize(height, style$text_gp$fontsize),
+        .grid_unit
+      )
   }
 
   # Try if any width is declared in style attribute
   if (any(grepl("^width:", svg_style))) {
-    width <- gsub("^width:", "", svg_style[grep("^width:", svg_style)]) %>%
-      parse_fontsize(style$text_gp$fontsize) %>%
-      grid::unit(.grid_unit)
+    width <- sub("^width:", "", svg_style[grep("^width:", svg_style)])
+    width <- grid::unit(
+      parse_fontsize(width, style$text_gp$fontsize),
+      .grid_unit
+    )
   }
 
   if (is.null(width) || is.null(height)) {
@@ -993,8 +1082,8 @@ render_grid_svg <- function(label, style, margin) {
 
   raster <- try_fetch(
     {
-      svg_string %>%
-        charToRaw() %>%
+        # charToRaw("") return character(0)
+        charToRaw(svg_string) %>%
         rsvg::rsvg_nativeraster(width = w) %>%
         grid::rasterGrob(
           width = width, height = height,
@@ -1351,7 +1440,7 @@ parse_css <- function(data) {
   # Find first and last line of definitions
   start <- grep("\\{$", css)
   end   <- which(css == "}")
-  if (!length(start) == length(end)) {
+  if (length(start) != length(end)) {
     cli::cli_abort("Formatting in {.fn compile_css} is unexpected.")
   }
 
@@ -1378,7 +1467,7 @@ parse_css <- function(data) {
   classes <- Map(`:`, start + 1, end - 1)
   names(classes) <- names
   classes <- lapply(classes, function(x) unlist(split[x], FALSE))
-  classes <- classes[grepl("^gt_", names(classes))]
+  classes <- classes[startsWith(names(classes), "gt_")]
 
   # There are two entries for gt_table that we merge here
   is_table <- which(names(classes) == "gt_table")

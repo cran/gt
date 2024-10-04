@@ -22,6 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
+# opt_stylize() ----------------------------------------------------------------
 #' Stylize your table with a colorful look
 #'
 #' @description
@@ -182,18 +183,16 @@ get_colorized_params <- function(
     color
 ) {
 
-  style_filter <- style
-  color_filter <- color
-
-  as.list(
-    dplyr::filter(
+  res <-
+    vctrs::vec_slice(
       styles_colors_params,
-      style == style_filter,
-      color == color_filter
+      styles_colors_params$style == style &
+        styles_colors_params$color == color
     )
-  )
+  as.list(res)
 }
 
+# opt_interactive() ------------------------------------------------------------
 #' Option to put interactive elements in an HTML table
 #'
 #' @description
@@ -425,7 +424,8 @@ opt_interactive <- function(
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
 
-  pagination_type <- rlang::arg_match(pagination_type)
+  pagination_type <- 
+    rlang::arg_match0(pagination_type, values = c("numbers", "jump", "simple"))
 
   tab_options(
     data = data,
@@ -447,6 +447,7 @@ opt_interactive <- function(
   )
 }
 
+# opt_footnote_marks() ---------------------------------------------------------
 #' Option to modify the set of footnote marks
 #'
 #' @description
@@ -569,6 +570,7 @@ opt_footnote_marks <- function(
   tab_options(data = data, footnotes.marks = marks)
 }
 
+# opt_footnote_spec() ----------------------------------------------------------
 #' Option to specify the formatting of footnote marks
 #'
 #' @description
@@ -685,6 +687,7 @@ opt_footnote_spec <- function(
   data
 }
 
+# opt_row_striping() -----------------------------------------------------------
 #' Option to add or remove row striping
 #'
 #' @description
@@ -762,6 +765,7 @@ opt_row_striping <- function(
   )
 }
 
+# opt_align_table_header() -----------------------------------------------------
 #' Option to align the table header
 #'
 #' @description
@@ -835,7 +839,7 @@ opt_align_table_header <- function(
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
 
-  align <- rlang::arg_match(align)
+  align <- rlang::arg_match0(align, values = c("left", "center", "right"))
 
   tab_options(
     data = data,
@@ -843,6 +847,7 @@ opt_align_table_header <- function(
   )
 }
 
+# opt_vertical_padding() -------------------------------------------------------
 #' Option to expand or contract vertical padding
 #'
 #' @description
@@ -935,6 +940,7 @@ opt_vertical_padding <- function(
   )
 }
 
+# opt_horizontal_padding() -----------------------------------------------------
 #' Option to expand or contract horizontal padding
 #'
 #' @description
@@ -1036,19 +1042,23 @@ get_padding_option_value_list <- function(scale, type) {
   # Get the padding parameters from `dt_options_tbl` that relate
   # to the `type` (either vertical or horizontal padding)
   padding_params <-
-    dplyr::filter(dt_options_tbl, grepl(paste0(pattern, "$"), parameter))
-  padding_params <- padding_params$parameter
-
-  padding_options <- dplyr::filter(dt_options_tbl, parameter %in% padding_params)
-  padding_options <- dplyr::select(padding_options, "parameter", "value")
-  padding_options <-
-    dplyr::mutate(
-      padding_options,
-      parameter = gsub(pattern, gsub("_", ".", pattern, fixed = TRUE), parameter, fixed = TRUE)
+    vctrs::vec_slice(
+      dt_options_tbl$parameter,
+      endsWith(dt_options_tbl$parameter, pattern)
     )
-  padding_options <- dplyr::mutate(padding_options, value = unlist(value))
-  padding_options <- dplyr::mutate(padding_options, px = as.numeric(gsub("px", "", value, fixed = TRUE)))
-  padding_options <- dplyr::mutate(padding_options, px = px * scale)
+
+  padding_options <-
+    vctrs::vec_slice(
+      dt_options_tbl[, c("parameter", "value")],
+      dt_options_tbl$parameter %in% padding_params
+    )
+
+  replacement <- gsub("_", ".", pattern, fixed = TRUE)
+
+  padding_options$parameter <- gsub(pattern, replacement, padding_options$parameter, fixed = TRUE)
+  padding_options$value <- unlist(padding_options$value)
+  padding_options$px <- as.numeric(gsub("px", "", padding_options$value, fixed = TRUE))
+  padding_options$px <- padding_options$px * scale
 
   create_option_value_list(
     padding_options$parameter,
@@ -1056,6 +1066,7 @@ get_padding_option_value_list <- function(scale, type) {
   )
 }
 
+# opt_all_caps() ---------------------------------------------------------------
 #' Option to use all caps in select table locations
 #'
 #' @description
@@ -1163,9 +1174,9 @@ opt_all_caps <- function(
 
     values_vec <-
       dplyr::case_when(
-        grepl("\\.font\\.size$", options_vec) ~ "80%",
-        grepl("\\.font\\.weight$", options_vec) ~ "bolder",
-        grepl("\\.text_transform$", options_vec) ~ "uppercase"
+        endsWith(options_vec, ".font.size") ~ "80%",
+        endsWith(options_vec, ".font.weight") ~ "bolder",
+        endsWith(options_vec, ".text_transform") ~ "uppercase"
       )
 
     option_value_list <- create_option_value_list(options_vec, values_vec)
@@ -1179,6 +1190,7 @@ opt_all_caps <- function(
   )
 }
 
+# opt_table_lines() ------------------------------------------------------------
 #' Option to set table lines to different extents
 #'
 #' @description
@@ -1253,13 +1265,15 @@ opt_table_lines <- function(
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
 
-  extent <- rlang::arg_match(extent)
+  extent <- rlang::arg_match0(extent, values = c("all", "none", "default"))
 
   # Normalize `extent` values to property values
   values_vec <- if (extent == "all") "solid" else extent
 
   # Get vector of `tab_options()` arg names for all table line styles
   options_vec <- get_tab_options_arg_vec(pattern = "\\.style$")
+  # Remove font.style from affected options
+  options_vec <- grep("font", options_vec, value = TRUE, invert = TRUE)
 
   if (values_vec %in% c("solid", "none")) {
     option_value_list <- create_option_value_list(options_vec, values_vec)
@@ -1273,6 +1287,7 @@ opt_table_lines <- function(
   )
 }
 
+# opt_table_outline() ----------------------------------------------------------
 #' Option to wrap an outline around the entire table
 #'
 #' @description
@@ -1409,6 +1424,7 @@ opt_table_outline <- function(
   )
 }
 
+# opt_table_font() -------------------------------------------------------------
 #' Options to define font choices for the entire table
 #'
 #' @description
@@ -1441,6 +1457,17 @@ opt_table_outline <- function(
 #'   A name that is representative of a font stack (obtained via internally via
 #'   the [system_fonts()] helper function). If provided, this new stack will
 #'   replace any defined fonts and any `font` values will be prepended.
+#' 
+#' @param size *Text size*
+#' 
+#'   `scalar<character|numeric|integer>` // *default:* `NULL` (`optional`)
+#' 
+#'   The text size for the entire table can be set by providing a `size` value.
+#'   Can be specified as a single-length character vector with units of pixels
+#'   (e.g., `12px`) or as a percentage (e.g., `80%`). If provided as a
+#'   single-length numeric vector, it is assumed that the value is given in
+#'   units of pixels. The [px()] and [pct()] helper functions can also be used
+#'   to pass in numeric values and obtain values as pixel or percentage units.
 #'
 #' @param style *Text style*
 #'
@@ -1457,6 +1484,13 @@ opt_table_outline <- function(
 #'   `"normal"`, `"bold"`, `"lighter"`, `"bolder"`, or, a numeric value between
 #'   `1` and `1000`, inclusive. Please note that typefaces have varying support
 #'   for the numeric mapping of weight.
+#' 
+#' @param color *Text color*
+#' 
+#'   `scalar<character>` // *default:* `NULL` (`optional`)
+#' 
+#'   The `color` option defines the text color used throughout the table. A
+#'   color name or a hexadecimal color code should be provided.
 #'
 #' @param add *Add to existing fonts*
 #'
@@ -1507,9 +1541,8 @@ opt_table_outline <- function(
 #'
 #' Use a subset of the [`sp500`] dataset to create a small **gt** table. We'll
 #' use [fmt_currency()] to display a dollar sign for the first row of monetary
-#' values. Then, set a larger font size for the table and use the
-#' `"Merriweather"` font (from *Google Fonts*, via [google_font()]) with two
-#' system font fallbacks (`"Cochin"` and the generic `"serif"`).
+#' values. The `"Merriweather"` font (from *Google Fonts*, via [google_font()])
+#' with two system font fallbacks (`"Cochin"` and the generic `"serif"`).
 #'
 #' ```r
 #' sp500 |>
@@ -1567,8 +1600,10 @@ opt_table_font <- function(
     data,
     font = NULL,
     stack = NULL,
+    size = NULL,
     weight = NULL,
     style = NULL,
+    color = NULL,
     add = TRUE
 ) {
 
@@ -1618,9 +1653,21 @@ opt_table_font <- function(
       )
   }
 
+  if (!is.null(size)) {
+
+    data <-
+      tab_options(
+        data = data,
+        table.font.size = size
+      )
+
+  }
+
   if (!is.null(weight)) {
 
-    if (is.numeric(weight)) weight <- as.character(weight)
+    if (is.numeric(weight)) {
+      weight <- as.character(weight)
+    }
 
     data <-
       tab_options(
@@ -1644,9 +1691,19 @@ opt_table_font <- function(
       )
   }
 
+  if (!is.null(color)) {
+
+    data <-
+      tab_options(
+        data = data,
+        table.font.color = color
+      )
+  }
+
   data
 }
 
+# opt_css() --------------------------------------------------------------------
 #' Option to add custom CSS for the table
 #'
 #' @description
@@ -1755,89 +1812,4 @@ opt_css <- function(
     data = data,
     table.additional_css = additional_css
   )
-}
-
-normalize_font_input <- function(font_input, call = rlang::caller_env()) {
-
-  if (!inherits(font_input, c("character", "list", "font_css"))) {
-    cli::cli_abort(
-      "{.arg font} must be a list or a character vector, not {.obj_type_friendly {font_input}}.",
-      call = call
-    )
-  }
-
-  if (inherits(font_input, "character")) {
-    font_input <- list(font_input)
-  }
-
-  # Unlist a list of lists; this normalizes the value for `font_input`
-  # in the cases where multiple fonts were provided in `c()` and `list()`
-  if (any(vapply(font_input, is.list, FUN.VALUE = logical(1)))) {
-    font_input <- unlist(font_input, recursive = FALSE)
-  }
-
-  if (is.null(names(font_input))) {
-    font_names <- unlist(font_input)
-    import_stmts <- ""
-  } else {
-    font_names <- unique(unname(unlist(font_input[names(font_input) %in% c("name", "")])))
-    import_stmts <- unique(unname(unlist(font_input[names(font_input) %in% "import_stmt"])))
-  }
-
-  font_list <-
-    list(
-      name = font_names,
-      import_stmt = import_stmts
-    )
-
-  class(font_list) <- "font_css"
-  font_list
-}
-
-# Create an option-value list with a vector of arg names from the
-# `tab_options()` function and either one value or n-length values
-# corresponding to those options
-create_option_value_list <- function(tab_options_args, values) {
-
-  # Validate the length of the `values` vector
-  if (length(values) == 1) {
-
-    values <- rep_len(values, length(tab_options_args))
-
-  } else if (length(values) != length(tab_options_args)) {
-
-    cli::cli_abort(
-      "The length of the `values` vector must be `1` or the length of
-      `tab_options_args`."
-    )
-  }
-
-  as.list(stats::setNames(object = values, tab_options_args))
-}
-
-create_default_option_value_list <- function(tab_options_args) {
-
-  lapply(
-    stats::setNames(, tab_options_args),
-    FUN = function(x) {
-      dt_options_get_default_value(gsub(".", "_", x, fixed = TRUE))
-    }
-  )
-}
-
-# Validate any vector of `tab_options()` argument names
-validate_tab_options_args <- function(tab_options_args) {
-
-  if (!all(tab_options_args %in% tab_options_arg_names)) {
-    cli::cli_abort("All `tab_options_args` must be valid names.")
-  }
-}
-
-# Do multiple calls of `tab_options()` with an option-value list (`options`)
-tab_options_multi <- function(data, options) {
-
-  # Validate the names of the `options`
-  validate_tab_options_args(names(options))
-
-  do.call(tab_options, c(list(data = data), options))
 }

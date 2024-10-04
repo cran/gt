@@ -51,7 +51,7 @@ footnote_mark_to_html <- function(
     sup_class <- "gt_footnote_marks gt_asterisk"
   }
 
-  is_sup <- grepl("\\^", spec)
+  is_sup <- grepl("^", spec, fixed = TRUE)
 
   if (grepl(".", spec, fixed = TRUE)) mark <- paste0(mark, ".")
   if (grepl("(", spec, fixed = TRUE)) mark <- paste0("(", mark)
@@ -71,25 +71,24 @@ footnote_mark_to_html <- function(
     font_weight <- "normal"
   }
 
-  paste0(
-    "<span ",
+  htmltools::tags$span(
     if (is_sup) {
-      paste0("class=\"", sup_class, "\" ")
-    } else {
-      NULL
-    },
-    "style=\"",
-    "white-space:nowrap;",
-    "font-style:", font_style, ";",
-    "font-weight:", font_weight, ";",
-    "line-height: 0;",
-    "\">",
-    if (is_sup) {
-      paste0("<sup>", mark, "</sup>")
+      htmltools::tags$sup(mark, .noWS = "before")
     } else {
       mark
     },
-    "</span>"
+    class = if (is_sup) {
+      sup_class
+    } else {
+      NULL
+    },
+    style = htmltools::css(
+      `white-space` = "nowrap",
+      `font-style` = font_style,
+      `font-weight` = font_weight,
+      `line-height` = 0
+    ),
+    .noWS = "before-end"
   )
 }
 
@@ -237,8 +236,8 @@ coalesce_marks <- function(
     locname,
     delimiter = ","
 ) {
-  filtered_tbl <- dplyr::filter(fn_tbl, locname == !!locname)
-  dplyr::summarize(filtered_tbl, fs_id_c = paste(fs_id, collapse = delimiter))
+  fs_ids <- vctrs::vec_slice(fn_tbl$fs_id, fn_tbl$locname == locname)
+  paste(fs_ids, collapse = delimiter)
 }
 
 # Get the attributes for the table tag
@@ -246,36 +245,20 @@ get_table_defs <- function(data) {
 
   boxh <- dt_boxhead_get(data = data)
 
-  # Get the `table-layout` value, which is set in `_options`
-  table_style <-
-    paste0(
-      "table-layout: ",
-      dt_options_get_value(
-        data = data,
-        option = "table_layout"
-      ),
-      ";"
-    )
-
   # In the case that column widths are not set for any columns,
   # there should not be a `<colgroup>` tag requirement
   if (length(unlist(boxh$column_width)) < 1) {
     return(list(table_style = NULL, table_colgroups = NULL))
   }
 
+  # Get the `table-layout` value, which is set in `_options`
+  table_layout <- dt_options_get_value(data = data, option = "table_layout")
+
   # Get the table's width (which or may not have been set)
-  table_width <-
-    dt_options_get_value(
-      data = data,
-      option = "table_width"
-    )
+  table_width <- dt_options_get_value(data = data, option = "table_width")
 
   # Determine whether the row group is placed in the stub
-  row_group_as_column <-
-    dt_options_get_value(
-      data = data,
-      option = "row_group_as_column"
-    )
+  row_group_as_column <- dt_options_get_value(data = data, option = "row_group_as_column")
 
   types <- c("default", "stub", if (row_group_as_column) "row_group" else NULL)
 
@@ -287,13 +270,13 @@ get_table_defs <- function(data) {
   if ("stub" %in% widths[["type"]]) {
     stub_idx <- which(widths$type == "stub")
     othr_idx <- base::setdiff(seq_len(nrow(widths)), stub_idx)
-    widths <- dplyr::slice(widths, stub_idx, othr_idx)
+    widths <- vctrs::vec_slice(widths, c(stub_idx, othr_idx))
   }
 
   if ("row_group" %in% widths[["type"]] && row_group_as_column) {
     row_group_idx <- which(widths$type == "row_group")
     othr_idx <- base::setdiff(seq_len(nrow(widths)), row_group_idx)
-    widths <- dplyr::slice(widths, row_group_idx, othr_idx)
+    widths <- vctrs::vec_slice(widths, c(row_group_idx, othr_idx))
   }
 
   widths <- widths[seq_len(nrow(widths)), "column_width", drop = TRUE]
@@ -309,6 +292,7 @@ get_table_defs <- function(data) {
   if (table_width == "auto") {
 
     if (all(grepl("px", widths, fixed = TRUE))) {
+      # FIXME sometimes ends up being 0? #1532 and quarto-dev/quarto-cli#8233
       table_width <- "0px"
     } else if (all(grepl("%", widths, fixed = TRUE))) {
       table_width <- "100%"
@@ -316,7 +300,15 @@ get_table_defs <- function(data) {
   }
 
   if (table_width != "auto") {
-    table_style <- paste(table_style, paste0("width: ", table_width), sep = "; ")
+    table_style <- htmltools::css(
+      `table-layout` = table_layout,
+      width = table_width
+    )
+  } else {
+    table_style <-
+      htmltools::css(
+        `table-layout` = table_layout
+      )
   }
 
   # Create the `<colgroup>` tag
@@ -415,7 +407,7 @@ create_heading_component_h <- function(data) {
     footnote_title_marks <-
       footnote_mark_to_html(
         data = data,
-        mark = footnote_title_marks$fs_id_c
+        mark = footnote_title_marks
       )
 
   } else {
@@ -449,7 +441,7 @@ create_heading_component_h <- function(data) {
     footnote_subtitle_marks <-
       footnote_mark_to_html(
         data = data,
-        mark = footnote_subtitle_marks$fs_id_c
+        mark = footnote_subtitle_marks
       )
 
   } else {
@@ -594,6 +586,8 @@ create_columns_component_h <- function(data) {
     headings_vars <- prepend_vec(headings_vars, "::stub")
   }
 
+  headings_ids <- valid_html_id(headings_vars)
+
   stubhead_label_alignment <- "left"
 
   table_col_headings <- list()
@@ -623,11 +617,12 @@ create_columns_component_h <- function(data) {
           colspan = length(stub_layout),
           style = stubhead_style,
           scope = ifelse(length(stub_layout) > 1, "colgroup", "col"),
-          id = headings_labels[1],
+          id = headings_ids[1],
           htmltools::HTML(headings_labels[1])
         )
 
       headings_vars <- headings_vars[-1]
+      headings_ids <- headings_ids[-1]
       headings_labels <- headings_labels[-1]
     }
 
@@ -655,7 +650,7 @@ create_columns_component_h <- function(data) {
           colspan = 1,
           style = column_style,
           scope = "col",
-          id = headings_labels[i],
+          id = headings_ids[i],
           htmltools::HTML(headings_labels[i])
         )
     }
@@ -711,10 +706,11 @@ create_columns_component_h <- function(data) {
           colspan = length(stub_layout),
           style = stubhead_style,
           scope = ifelse(length(stub_layout) > 1, "colgroup", "col"),
-          id = headings_labels[1],
+          id = headings_ids[1],
           htmltools::HTML(headings_labels[1])
         )
 
+      headings_ids <- headings_ids[-1]
       headings_vars <- headings_vars[-1]
       headings_labels <- headings_labels[-1]
     }
@@ -773,7 +769,7 @@ create_columns_component_h <- function(data) {
             colspan = 1,
             style = heading_style,
             scope = "col",
-            id = headings_labels[i],
+            id = headings_ids[i],
             htmltools::HTML(headings_labels[i])
           )
 
@@ -810,8 +806,8 @@ create_columns_component_h <- function(data) {
               colspan = colspans[i],
               style = spanner_style,
               scope = ifelse(colspans[i] > 1, "colgroup", "col"),
-              id = spanners[level_1_index, ][i],
-              htmltools::tags$span(
+              id = spanner_ids[level_1_index, ][i],
+              htmltools::tags$div(
                 class = "gt_column_spanner",
                 htmltools::HTML(spanners[level_1_index, ][i])
               )
@@ -821,26 +817,29 @@ create_columns_component_h <- function(data) {
     }
 
     solo_headings <- headings_vars[is.na(spanner_ids[level_1_index, ])]
-    remaining_headings <- headings_vars[!(headings_vars %in% solo_headings)]
-
+    remaining_headings_vars <- headings_vars[!(headings_vars %in% solo_headings)]
     remaining_headings_labels <- dt_boxhead_get(data = data)
     remaining_headings_labels <-
-      dplyr::filter(remaining_headings_labels, var %in% remaining_headings)
+      vctrs::vec_slice(
+        remaining_headings_labels$column_label,
+        remaining_headings_labels$var %in% remaining_headings_vars
+      )
     remaining_headings_labels <-
-      unlist(dplyr::pull(remaining_headings_labels, column_label))
+      unlist(remaining_headings_labels)
+    remaining_headings_ids <- valid_html_id(remaining_headings_vars)
 
     col_alignment <- col_alignment[-1][!(headings_vars %in% solo_headings)]
 
-    if (length(remaining_headings) > 0) {
+    if (length(remaining_headings_vars) > 0) {
 
       spanned_column_labels <- c()
 
-      for (j in seq(remaining_headings)) {
+      for (j in seq(remaining_headings_vars)) {
         styles_remaining <-
           dplyr::filter(
             styles_tbl,
             locname == "columns_columns",
-            colname == remaining_headings[j]
+            colname == remaining_headings_vars[j]
           )
 
         remaining_style <-
@@ -851,7 +850,7 @@ create_columns_component_h <- function(data) {
           }
 
         remaining_alignment <-
-          dt_boxhead_get_alignment_by_var(data = data, remaining_headings[j])
+          dt_boxhead_get_alignment_by_var(data = data, remaining_headings_vars[j])
 
         spanned_column_labels[[length(spanned_column_labels) + 1]] <-
           htmltools::tags$th(
@@ -866,7 +865,7 @@ create_columns_component_h <- function(data) {
             rowspan = 1, colspan = 1,
             style = remaining_style,
             scope = "col",
-            id = remaining_headings_labels[j],
+            id = remaining_headings_ids[j],
             htmltools::HTML(remaining_headings_labels[j])
           )
       }
@@ -927,19 +926,17 @@ create_columns_component_h <- function(data) {
 
         if (colspans[j] > 0) {
 
-          styles_spanners <-
-            dplyr::filter(
-              styles_tbl,
-              locname == "columns_groups",
-              grpname %in% spanners_vars
+          spanner_style <-
+            vctrs::vec_slice(
+              styles_tbl$html_style,
+              styles_tbl$locname == "columns_groups" &
+                styles_tbl$grpname %in% spanners_vars
             )
 
-          spanner_style <-
-            if (nrow(styles_spanners) > 0) {
-              styles_spanners$html_style
-            } else {
-              NULL
-            }
+
+          if (length(spanner_style) == 0) {
+            spanner_style <- NULL
+          }
 
           level_i_spanners[[length(level_i_spanners) + 1]] <-
             htmltools::tags$th(
@@ -955,9 +952,9 @@ create_columns_component_h <- function(data) {
               colspan = colspans[j],
               style = spanner_style,
               scope = ifelse(colspans[j] > 1, "colgroup", "col"),
-              id = spanners_row[j],
+              id = spanner_ids_row[j],
               if (spanner_ids_row[j] != "") {
-                htmltools::tags$span(
+                htmltools::tags$div(
                   class = "gt_column_spanner",
                   htmltools::HTML(spanners_row[j])
                 )
@@ -1189,7 +1186,7 @@ create_body_component_h <- function(data) {
           )
 
         summary[[1]] <-
-          htmltools::HTML(gsub("^<tr>", paste0("<tr>", group_col_td), as.character(summary[[1]])))
+          htmltools::HTML(sub("^<tr>", paste0("<tr>", group_col_td), as.character(summary[[1]])))
       }
 
       summary
@@ -1441,7 +1438,8 @@ create_body_component_h <- function(data) {
     # needs to be repeated to match the size of the other fields
     group_ids <- vctrs::vec_rep_each(group_ids, times = ns)
     body_rows_data_flat$current_group_id <- group_ids
-
+    ## here we have to make sur the lengths can be recycled to each others.
+    # vctrs::vec_recycle_common()
     body_rows_uncollapsed <- vctrs::vec_chop(
       do.call(render_row_data, body_rows_data_flat),
       sizes = ns
@@ -1624,11 +1622,15 @@ create_source_notes_component_h <- function(data) {
   # Get the style attrs for the source notes
   if ("source_notes" %in% styles_tbl$locname) {
 
-    source_notes_style <- dplyr::filter(styles_tbl, locname == "source_notes")
+    source_notes_style <-
+      vctrs::vec_slice(
+        styles_tbl$html_style,
+        !is.na(styles_tbl$locname) & styles_tbl$locname == "source_notes"
+        )
 
     source_notes_styles <-
-      if (nrow(source_notes_style) > 0) {
-        paste(source_notes_style$html_style, collapse = " ")
+      if (length(source_notes_style) > 0) {
+        paste(source_notes_style, collapse = " ")
       } else {
         NULL
       }
@@ -2067,7 +2069,7 @@ build_row_styles <- function(
   # colnum values. Check and throw early.
   if (
     !isTRUE(all(styles_resolved_row$colnum %in% c(0, seq_len(n_cols)))) ||
-    any(duplicated(styles_resolved_row$colnum))
+    anyDuplicated(styles_resolved_row$colnum) > 0L
   ) {
     cli::cli_abort(
       "`build_row_styles()` was called with invalid `colnum` values."
@@ -2110,4 +2112,11 @@ as_css_font_family_attr <- function(font_vec, value_only = FALSE) {
   }
 
   paste_between(value, x_2 = c("font-family: ", ";"))
+}
+
+valid_html_id <- function(x) {
+  # Make sure it starts with a letter.
+  valid_ids <- grepl("^[A-z]", x)
+  x[!valid_ids] <- paste0("a", x[!valid_ids])
+  gsub("\\s+", "-", x)
 }

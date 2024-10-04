@@ -31,8 +31,9 @@ This is the \strong{gt} table object that is commonly created through use of the
 The row groups to which targeting operations are constrained. Can either be
 a series of row group ID values provided in \code{c()} or a select helper
 function (e.g. \code{\link[=starts_with]{starts_with()}}, \code{\link[=ends_with]{ends_with()}}, \code{\link[=contains]{contains()}}, \code{\link[=matches]{matches()}},
-\code{\link[=num_range]{num_range()}}, and \code{\link[=everything]{everything()}}). By default this is set to \code{\link[=everything]{everything()}},
-which means that all available groups will obtain summary rows.}
+\code{\link[=num_range]{num_range()}}, and \code{\link[=everything]{everything()}}). By default this is set to
+\code{\link[=everything]{everything()}}, which means that all available groups will obtain summary
+rows.}
 
 \item{columns}{\emph{Columns to target}
 
@@ -118,7 +119,7 @@ bare column names or names in quotes) or we can use
 \strong{tidyselect}-style expressions. This can be as basic as supplying a select
 helper like \code{starts_with()}, or, providing a more complex incantation like
 
-\code{where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)}
+\code{where(~ is.numeric(.x) & max(.x, na.rm = TRUE) > 1E6)}
 
 which targets numeric columns that have a maximum value greater than
 1,000,000 (excluding any \code{NA}s from consideration).
@@ -335,7 +336,7 @@ summary rows with \code{\link[=tab_style]{tab_style()}}.
   gt(rowname_col = "country_name") |>
   tab_row_group(
     label = md("*BRIC*"),
-    rows = c("Brazil", "Russian Federation", "India", "China"),
+    rows = c("Brazil", "Russia", "India", "China"),
     id = "bric"
   ) |>
   tab_row_group(

@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------------------#
 
+
 # This creates a nanoplot
 generate_nanoplot <- function(
     y_vals,
@@ -1019,6 +1020,17 @@ generate_nanoplot <- function(
     bar_tags <- paste(bar_strings, collapse = "\n")
   }
 
+  # Speed up nanoplots number formatting rendering by avoid
+  # calling resolve_cols_i() too much.
+  # To be used with caution, but setting this envvar for all the vec_*() calls
+  # similar to withr::local_envvar()
+  Sys.setenv(GT_AVOID_RESOLVE = "true")
+  on.exit(
+    Sys.unsetenv("GT_AVOID_RESOLVE"),
+    add = TRUE,
+    after = TRUE
+  )
+  
   if (plot_type == "bar" && single_horizontal_bar) {
 
     # This type of display assumes there is only a single `y` value and there
@@ -2047,7 +2059,7 @@ get_extreme_value <- function(..., stat = c("max", "min")) {
 
   value_list <- list(...)
 
-  stat <- rlang::arg_match(stat)
+  stat <- rlang::arg_match0(stat, values = c("max", "min"))
 
   value_list_vec <- unlist(value_list)
 
@@ -2096,23 +2108,17 @@ generate_ref_line_from_keyword <- function(vals, keyword) {
 
   rlang::arg_match0(keyword, reference_line_keywords())
 
-  if (keyword == "mean") {
-    ref_line <- mean(vals, na.rm = TRUE)
-  } else if (keyword == "median") {
-    ref_line <- stats::median(vals, na.rm = TRUE)
-  } else if (keyword == "min") {
-    ref_line <- min(vals, na.rm = TRUE)
-  } else if (keyword == "max") {
-    ref_line <- max(vals, na.rm = TRUE)
-  } else if (keyword == "first") {
-    ref_line <- vals[!is.na(vals)][1]
-  } else if (keyword == "last") {
-    ref_line <- vals[!is.na(vals)][length(vals[!is.na(vals)])]
-  } else if (keyword == "q1") {
-    ref_line <- as.numeric(stats::quantile(vals, 0.25, na.rm = TRUE))
-  } else {
-    ref_line <- as.numeric(stats::quantile(vals, 0.75, na.rm = TRUE))
-  }
+  ref_line <- switch(keyword,
+    mean = mean(vals, na.rm = TRUE),
+    median = stats::median(vals, na.rm = TRUE),
+    min = min(vals, na.rm = TRUE),
+    max = max(vals, na.rm = TRUE),
+    first = vals[!is.na(vals)][1],
+    last = vals[!is.na(vals)][length(vals[!is.na(vals)])],
+    q1 = as.numeric(stats::quantile(vals, 0.25, na.rm = TRUE)),
+    # default:
+    as.numeric(stats::quantile(vals, 0.75, na.rm = TRUE))
+  )
 
   ref_line
 }
@@ -2209,7 +2215,7 @@ format_number_compactly <- function(
   }
 
   # Format value accordingly
-
+  
   if (!is.null(currency)) {
 
     if (abs(val) >= 1e15) {
@@ -2283,7 +2289,7 @@ process_number_stream <- function(number_stream) {
 
   number_stream <- gsub("[;,]", " ", number_stream)
   number_stream <- gsub("\\[|\\]", " ", number_stream)
-  number_stream <- gsub("^\\s+|\\s+$", "", number_stream)
+  number_stream <- sub("^\\s+|\\s+$", "", number_stream)
   number_stream <- unlist(strsplit(number_stream, split = "\\s+"))
   number_stream <- gsub("[\\(\\)a-dA-Df-zF-Z]", "", number_stream)
   number_stream <- as.numeric(number_stream)

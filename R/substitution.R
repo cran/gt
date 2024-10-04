@@ -22,6 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
+# sub_missing() ----------------------------------------------------------------
 #' Substitute missing values in the table body
 #'
 #' @description
@@ -35,7 +36,7 @@
 #'
 #' @param columns *Columns to target*
 #'
-#'   `<column-targeting expression>` // *default:* `everything()`
+#'   [`<column-targeting expression>`][rows-columns] // *default:* `everything()`
 #'
 #'   The columns to which substitution operations are constrained. Can either
 #'   be a series of column names provided in `c()`, a vector of column indices,
@@ -44,14 +45,14 @@
 #'
 #' @param rows *Rows to target*
 #'
-#'   `<row-targeting expression>` // *default:* `everything()`
+#'   [`<row-targeting expression>`][rows-columns] // *default:* `everything()`
 #'
 #'   In conjunction with `columns`, we can specify which of their rows should
 #'   form a constraint for targeting operations. The default [everything()]
 #'   results in all rows in `columns` being formatted. Alternatively, we can
 #'   supply a vector of row IDs within `c()`, a vector of row indices, or a
 #'   select helper function (e.g. [starts_with()], [ends_with()], [contains()],
-#'   [matches()], [num_range()], and [everything()]. We can also use
+#'   [matches()], [num_range()], and [everything()]). We can also use
 #'   expressions to filter down to the rows we need
 #'   (e.g., `[colname_1] > 100 & [colname_2] < 50`).
 #'
@@ -64,44 +65,6 @@
 #'   retain HTML elements in the text.
 #'
 #' @return An object of class `gt_tbl`.
-#'
-#' @section Targeting cells with `columns` and `rows`:
-#'
-#' Targeting of values is done through `columns` and additionally by `rows` (if
-#' nothing is provided for `rows` then entire columns are selected). The
-#' `columns` argument allows us to target a subset of cells contained in the
-#' resolved columns. We say resolved because aside from declaring column names
-#' in `c()` (with bare column names or names in quotes) we can use
-#' **tidyselect**-style expressions. This can be as basic as supplying a select
-#' helper like `starts_with()`, or, providing a more complex incantation like
-#'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
-#'
-#' which targets numeric columns that have a maximum value greater than
-#' 1,000,000 (excluding any `NA`s from consideration).
-#'
-#' By default all columns and rows are selected (with the `everything()`
-#' defaults). Cell values that are incompatible with a given substitution
-#' function will be skipped over. So it's safe to select all columns with a
-#' particular substitution function (only those values that can be substituted
-#' will be), but, you may not want that. One strategy is to work on the bulk of
-#' cell values with one substitution function and then constrain the columns for
-#' later passes with other types of substitution (the last operation done to a
-#' cell is what you get in the final output).
-#'
-#' Once the columns are targeted, we may also target the `rows` within those
-#' columns. This can be done in a variety of ways. If a stub is present, then we
-#' potentially have row identifiers. Those can be used much like column names in
-#' the `columns`-targeting scenario. We can use simpler **tidyselect**-style
-#' expressions (the select helpers should work well here) and we can use quoted
-#' row identifiers in `c()`. It's also possible to use row indices (e.g., `c(3,
-#' 5, 6)`) though these index values must correspond to the row numbers of the
-#' input data (the indices won't necessarily match those of rearranged rows if
-#' row groups are present). One more type of expression is possible, an
-#' expression that takes column values (can involve any of the available columns
-#' in the table) and returns a logical vector. This is nice if you want to base
-#' the substitution on values in the column or another column, or, you'd like to
-#' use a more complex predicate expression.
 #'
 #' @section Examples:
 #'
@@ -225,6 +188,7 @@ fmt_missing <- function(
   )
 }
 
+# sub_zero() -------------------------------------------------------------------
 #' Substitute zero values in the table body
 #'
 #' @description
@@ -244,44 +208,6 @@ fmt_missing <- function(
 #'   Markdown or to retain HTML elements in the text.
 #'
 #' @return An object of class `gt_tbl`.
-#'
-#' @section Targeting cells with `columns` and `rows`:
-#'
-#' Targeting of values is done through `columns` and additionally by `rows` (if
-#' nothing is provided for `rows` then entire columns are selected). The
-#' `columns` argument allows us to target a subset of cells contained in the
-#' resolved columns. We say resolved because aside from declaring column names
-#' in `c()` (with bare column names or names in quotes) we can use
-#' **tidyselect**-style expressions. This can be as basic as supplying a select
-#' helper like `starts_with()`, or, providing a more complex incantation like
-#'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
-#'
-#' which targets numeric columns that have a maximum value greater than
-#' 1,000,000 (excluding any `NA`s from consideration).
-#'
-#' By default all columns and rows are selected (with the `everything()`
-#' defaults). Cell values that are incompatible with a given substitution
-#' function will be skipped over. So it's safe to select all columns with a
-#' particular substitution function (only those values that can be substituted
-#' will be), but, you may not want that. One strategy is to work on the bulk of
-#' cell values with one substitution function and then constrain the columns for
-#' later passes with other types of substitution (the last operation done to a
-#' cell is what you get in the final output).
-#'
-#' Once the columns are targeted, we may also target the `rows` within those
-#' columns. This can be done in a variety of ways. If a stub is present, then we
-#' potentially have row identifiers. Those can be used much like column names in
-#' the `columns`-targeting scenario. We can use simpler **tidyselect**-style
-#' expressions (the select helpers should work well here) and we can use quoted
-#' row identifiers in `c()`. It's also possible to use row indices (e.g., `c(3,
-#' 5, 6)`) though these index values must correspond to the row numbers of the
-#' input data (the indices won't necessarily match those of rearranged rows if
-#' row groups are present). One more type of expression is possible, an
-#' expression that takes column values (can involve any of the available columns
-#' in the table) and returns a logical vector. This is nice if you want to base
-#' the substitution on values in the column or another column, or, you'd like to
-#' use a more complex predicate expression.
 #'
 #' @section Examples:
 #'
@@ -355,6 +281,7 @@ sub_zero <- function(
   )
 }
 
+# sub_small_vals() -------------------------------------------------------------
 #' Substitute small values in the table body
 #'
 #' @description
@@ -366,7 +293,8 @@ sub_zero <- function(
 #' those values found to be between `0` and the threshold value. This is
 #' possible for small positive and small negative values (this can be explicitly
 #' set by the `sign` option). Note that the interval does not include the `0` or
-#' the `threshold` value. Should you need to include zero values, use [sub_zero()].
+#' the `threshold` value. Should you need to include zero values, use
+#' [sub_zero()].
 #'
 #' @inheritParams sub_missing
 #'
@@ -393,44 +321,6 @@ sub_zero <- function(
 #'   to consider only negative values.
 #'
 #' @return An object of class `gt_tbl`.
-#'
-#' @section Targeting cells with `columns` and `rows`:
-#'
-#' Targeting of values is done through `columns` and additionally by `rows` (if
-#' nothing is provided for `rows` then entire columns are selected). The
-#' `columns` argument allows us to target a subset of cells contained in the
-#' resolved columns. We say resolved because aside from declaring column names
-#' in `c()` (with bare column names or names in quotes) we can use
-#' **tidyselect**-style expressions. This can be as basic as supplying a select
-#' helper like `starts_with()`, or, providing a more complex incantation like
-#'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
-#'
-#' which targets numeric columns that have a maximum value greater than
-#' 1,000,000 (excluding any `NA`s from consideration).
-#'
-#' By default all columns and rows are selected (with the `everything()`
-#' defaults). Cell values that are incompatible with a given substitution
-#' function will be skipped over. So it's safe to select all columns with a
-#' particular substitution function (only those values that can be substituted
-#' will be), but, you may not want that. One strategy is to work on the bulk of
-#' cell values with one substitution function and then constrain the columns for
-#' later passes with other types of substitution (the last operation done to a
-#' cell is what you get in the final output).
-#'
-#' Once the columns are targeted, we may also target the `rows` within those
-#' columns. This can be done in a variety of ways. If a stub is present, then we
-#' potentially have row identifiers. Those can be used much like column names in
-#' the `columns`-targeting scenario. We can use simpler **tidyselect**-style
-#' expressions (the select helpers should work well here) and we can use quoted
-#' row identifiers in `c()`. It's also possible to use row indices (e.g., `c(3,
-#' 5, 6)`) though these index values must correspond to the row numbers of the
-#' input data (the indices won't necessarily match those of rearranged rows if
-#' row groups are present). One more type of expression is possible, an
-#' expression that takes column values (can involve any of the available columns
-#' in the table) and returns a logical vector. This is nice if you want to base
-#' the substitution on values in the column or another column, or, you'd like to
-#' use a more complex predicate expression.
 #'
 #' @section Examples:
 #'
@@ -596,6 +486,16 @@ sub_small_vals <- function(
           context = "latex"
         )
       },
+      grid = function(x) {
+
+        sub_replace_small_vals(
+          x,
+          threshold = threshold,
+          sign = sign,
+          small_pattern = small_pattern,
+          context = "grid"
+        )
+      },
       default = function(x) {
 
         sub_replace_small_vals(
@@ -610,6 +510,7 @@ sub_small_vals <- function(
   )
 }
 
+# sub_large_vals() -------------------------------------------------------------
 #' Substitute large values in the table body
 #'
 #' @description
@@ -645,44 +546,6 @@ sub_small_vals <- function(
 #'
 #' @return An object of class `gt_tbl`.
 #'
-#' @section Targeting cells with `columns` and `rows`:
-#'
-#' Targeting of values is done through `columns` and additionally by `rows` (if
-#' nothing is provided for `rows` then entire columns are selected). The
-#' `columns` argument allows us to target a subset of cells contained in the
-#' resolved columns. We say resolved because aside from declaring column names
-#' in `c()` (with bare column names or names in quotes) we can use
-#' **tidyselect**-style expressions. This can be as basic as supplying a select
-#' helper like `starts_with()`, or, providing a more complex incantation like
-#'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
-#'
-#' which targets numeric columns that have a maximum value greater than
-#' 1,000,000 (excluding any `NA`s from consideration).
-#'
-#' By default all columns and rows are selected (with the `everything()`
-#' defaults). Cell values that are incompatible with a given substitution
-#' function will be skipped over. So it's safe to select all columns with a
-#' particular substitution function (only those values that can be substituted
-#' will be), but, you may not want that. One strategy is to work on the bulk of
-#' cell values with one substitution function and then constrain the columns for
-#' later passes with other types of substitution (the last operation done to a
-#' cell is what you get in the final output).
-#'
-#' Once the columns are targeted, we may also target the `rows` within those
-#' columns. This can be done in a variety of ways. If a stub is present, then we
-#' potentially have row identifiers. Those can be used much like column names in
-#' the `columns`-targeting scenario. We can use simpler **tidyselect**-style
-#' expressions (the select helpers should work well here) and we can use quoted
-#' row identifiers in `c()`. It's also possible to use row indices (e.g., `c(3,
-#' 5, 6)`) though these index values must correspond to the row numbers of the
-#' input data (the indices won't necessarily match those of rearranged rows if
-#' row groups are present). One more type of expression is possible, an
-#' expression that takes column values (can involve any of the available columns
-#' in the table) and returns a logical vector. This is nice if you want to base
-#' the substitution on values in the column or another column, or, you'd like to
-#' use a more complex predicate expression.
-#'
 #' @section Examples:
 #'
 #' Let's generate a simple, single-column tibble that contains an assortment of
@@ -709,10 +572,10 @@ sub_small_vals <- function(
 #' `r man_get_image_tag(file = "man_sub_large_vals_1.png")`
 #' }}
 #'
-#' Large negative values can also be handled but they are handled specially
-#' by the `sign` parameter. Setting that to `"-"` will format only the large
-#' values that are negative. Notice that with the default `large_pattern`
-#' value of `">={x}"` the `">="` is automatically changed to `"<="`.
+#' Large negative values can also be handled but they are handled specially by
+#' the `sign` parameter. Setting that to `"-"` will format only the large values
+#' that are negative. Notice that with the default `large_pattern` value of
+#' `">={x}"` the `">="` is automatically changed to `"<="`.
 #'
 #' ```r
 #' tbl |>
@@ -846,6 +709,16 @@ sub_large_vals <- function(
           context = "latex"
         )
       },
+      grid = function(x) {
+
+        sub_replace_large_vals(
+          x,
+          threshold = threshold,
+          sign = sign,
+          large_pattern = large_pattern,
+          context = "grid"
+        )
+      },
       default = function(x) {
 
         sub_replace_large_vals(
@@ -873,6 +746,7 @@ check_sub_fn_sign <- function(sign, call = rlang::caller_env()) {
   }
 }
 
+# sub_values() -----------------------------------------------------------------
 #' Substitute targeted values in the table body
 #'
 #' @description
@@ -925,44 +799,6 @@ check_sub_fn_sign <- function(sign, call = rlang::caller_env()) {
 #'   mind.
 #'
 #' @return An object of class `gt_tbl`.
-#'
-#' @section Targeting cells with `columns` and `rows`:
-#'
-#' Targeting of values is done through `columns` and additionally by `rows` (if
-#' nothing is provided for `rows` then entire columns are selected). The
-#' `columns` argument allows us to target a subset of cells contained in the
-#' resolved columns. We say resolved because aside from declaring column names
-#' in `c()` (with bare column names or names in quotes) we can use
-#' **tidyselect**-style expressions. This can be as basic as supplying a select
-#' helper like `starts_with()`, or, providing a more complex incantation like
-#'
-#' `where(~ is.numeric(.x) && max(.x, na.rm = TRUE) > 1E6)`
-#'
-#' which targets numeric columns that have a maximum value greater than
-#' 1,000,000 (excluding any `NA`s from consideration).
-#'
-#' By default all columns and rows are selected (with the `everything()`
-#' defaults). Cell values that are incompatible with a given substitution
-#' function will be skipped over. So it's safe to select all columns with a
-#' particular substitution function (only those values that can be substituted
-#' will be), but, you may not want that. One strategy is to work on the bulk of
-#' cell values with one substitution function and then constrain the columns for
-#' later passes with other types of substitution (the last operation done to a
-#' cell is what you get in the final output).
-#'
-#' Once the columns are targeted, we may also target the `rows` within those
-#' columns. This can be done in a variety of ways. If a stub is present, then we
-#' potentially have row identifiers. Those can be used much like column names in
-#' the `columns`-targeting scenario. We can use simpler **tidyselect**-style
-#' expressions (the select helpers should work well here) and we can use quoted
-#' row identifiers in `c()`. It's also possible to use row indices (e.g., `c(3,
-#' 5, 6)`) though these index values must correspond to the row numbers of the
-#' input data (the indices won't necessarily match those of rearranged rows if
-#' row groups are present). One more type of expression is possible, an
-#' expression that takes column values (can involve any of the available columns
-#' in the table) and returns a logical vector. This is nice if you want to base
-#' the substitution on values in the column or another column, or, you'd like to
-#' use a more complex predicate expression.
 #'
 #' @section Examples:
 #'

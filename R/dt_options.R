@@ -49,6 +49,24 @@ dt_options_get_value <- function(data, option) {
   dt_options$value[[which(dt_options$parameter == option)]]
 }
 
+# Get a list of option values
+dt_options_get_values <- function(data) {
+  dt_options <- dt_options_get(data = data)[c("parameter", "value")]
+  # Similar to tibble::deframe
+  res <- vctrs::vec_set_names(dt_options$value, dt_options$parameter)
+  class(res) <- c("gt_option", class(res))
+  res
+}
+
+#' @export
+`$.gt_option` <- function(x, name) {
+  out <- .subset2(x, name)
+  if (is.null(out)) {
+    cli::cli_abort("Can't find option {.val {name}}.")
+  }
+  out
+}
+
 default_fonts_vec <-
   c(
     "system-ui", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif",
@@ -252,4 +270,6 @@ dt_options_tbl <-
     "page_footer_height",                FALSE,  "page",             "value",   "0.5in",
     "quarto_disable_processing",         FALSE,  "quarto",           "logical", FALSE,
     "quarto_use_bootstrap",              FALSE,  "quarto",           "logical", FALSE,
+    "latex_use_longtable",               FALSE,  "latex",            "logical", FALSE,
+    "latex_tbl_pos",                     FALSE,  "latex",            "value",   "!t",
   )[-1, ]

@@ -153,7 +153,39 @@ resolve_cells_column_spanners <- function(
 
   spanners <- dt_spanners_get(data = data)
 
-  #
+  levels <- attr(object,"spanner_levels")
+
+  if(!is.null(levels)){
+    # check if there are wrong level expectations in the argument
+
+    # must be numeric
+    if(!all(suppressWarnings(!is.na(as.numeric(levels))))){
+      cli::cli_warn(c(
+        "All values of vector `levels` must be numeric.",
+        "!" = "Please check wrong element{?/s}: [{levels[suppressWarnings(is.na(as.numeric(levels)))]}]."
+      ))
+
+      levels <- levels[suppressWarnings(!is.na(as.numeric(levels)))]
+    }
+    # must actually exist
+
+    wrong_levels <- setdiff(levels, unique(spanners$spanner_level))
+    if(length(wrong_levels) > 0){
+      cli::cli_warn(c(
+        "All values of vector `levels` must exist in spanner definition.",
+        "i" = "currently only the following level{?s} {?is/are} available: [{as.character(unique(spanners$spanner_level))}].",
+        "!" = "Please check wrong element{?s} of vector `levels`: [{wrong_levels}]."
+      ))
+
+      levels <- setdiff(levels, wrong_levels)
+    }
+
+    # filter for levels
+    spanners <- vctrs::vec_slice(
+      spanners,
+      spanners$spanner_level %in% levels
+    )
+  }  #
   # Resolution of spanners as column spanner names
   #
   spanner_labels <- unlist(spanners$spanner_label)
@@ -225,8 +257,13 @@ resolve_cols_c <- function(
     call = rlang::caller_env()
 ) {
 
-  null_means <- rlang::arg_match(null_means)
-
+  if (identical(Sys.getenv("GT_AVOID_RESOLVE"), "true")) {
+    ret <- names(dt_data_get(data))
+    return(ret)
+  }
+  
+  null_means <- rlang::arg_match0(null_means, c("everything", "nothing"))
+  
   names(
     resolve_cols_i(
       expr = {{ expr }},
@@ -267,7 +304,7 @@ resolve_cols_i <- function(
     # If we use the gt-specific select helper `stub()` then we
     # will retrieve the stub var name and return the output in the
     # same format as the return value for `tidyselect::eval_select()`
-    if (rlang::as_label(quo) == "stub()") {
+    if (rlang::as_label(quo) %in% c("stub()", "gt::stub()")) {
 
       stub_var <- dt_boxhead_get_var_stub(data = data)
 
@@ -283,7 +320,7 @@ resolve_cols_i <- function(
     # If we use the gt-specific select helper `row_group()` then we
     # will retrieve the row_group var name and return the output in the
     # same format as the return value for `tidyselect::eval_select()`
-    if (rlang::as_label(quo) == "row_group()") {
+    if (rlang::as_label(quo) %in% c("row_group()", "gt::row_group()")) {
 
       row_group_var <- dt_boxhead_get_vars_groups(data = data)
 
@@ -469,8 +506,11 @@ resolve_rows_i <- function(
     null_means = c("everything", "nothing"),
     call = rlang::caller_env()
 ) {
-
-  null_means <- rlang::arg_match(null_means)
+  if (identical(Sys.getenv("GT_AVOID_RESOLVE"), "true")) {
+    ret <- seq_len(nrow(dt_data_get(data)))
+    return(ret)
+  }
+  null_means <- rlang::arg_match0(null_means, c("everything", "nothing"))
 
   resolved_rows <-
     resolve_rows_l(
@@ -644,7 +684,23 @@ normalize_resolved <- function(
 
     unknown_resolved <- setdiff(resolved, item_names)
     if (length(unknown_resolved) != 0) {
-      resolver_stop_on_character(item_label = item_label, unknown_resolved = unknown_resolved, call = call)
+      if (all(is.na(item_names)) && item_label == "row")  {
+        # Send a more informative message when the gt table has no rows
+        # rows need to be initialized with `rownames_to_stub = TRUE` or with `rowname_col = <column>`
+        # Issue #1535 (Override the resolver default error message.)
+
+        cli::cli_abort(c(
+          "Can't find named rows in the table",
+          "i" = "In {.help [gt()](gt::gt)}, use {.code rownames_to_stub = TRUE} or specify {.arg rowname_col} to initialize row names in the table."
+        ), call = call)
+      }
+
+      # Potentially use arg_match() when rlang issue is solved?
+      resolver_stop_on_character(
+        item_label = item_label,
+        unknown_resolved = unknown_resolved,
+        call = call
+      )
     }
     resolved <- item_names %in% resolved
 
@@ -693,7 +749,7 @@ resolver_stop_on_character <- function(
   # Specify cli pluralization
   l <- length(unknown_resolved)
   cli::cli_abort(
-    "{item_label}{cli::qty(l)}{?s} {.code {unknown_resolved}}
+    "{item_label}{cli::qty(l)}{?s} {.str {unknown_resolved}}
     do{?es/} not exist in the data.",
     call = call
   )
