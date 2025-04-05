@@ -1,3 +1,25 @@
+# gt 1.0.0
+
+## Minor improvements and bug fixes
+
+* Tables embedded in Shiny apps with `gt_output()` and `render_gt()` with `ihtml.selection_mode` enabled also act as inputs, reporting the row numbers that are selected (#354, #1368). (@jonthegeek, #1909)
+
+* Significantly faster rendering of certain large tables, by optimizing the internal `rownum_translation()` utility (#1924). (@magnusdv, #1925)
+
+* Fixed an issue in `fmt_number()` where `drop_trailing_dec_mark` would be ignored if `use_seps = FALSE` (#1961). (@olivroy, #1962).
+
+* Fixed an issue where `fmt_markdown()` could create strange output in Quarto (html and Typst formats) (#1957). (@olivroy, #1958, [quarto-dev/quarto-cli#11932](https://github.com/quarto-dev/quarto-cli/issues/11932), [quarto-dev/quarto-cli#11610](https://github.com/quarto-dev/quarto-cli/issues/11610)).
+ 
+* The default table position in LaTeX is now "t" instead of "!t" (@AaronGullickson, #1935).
+
+* Fixed an issue where cross-references would fail in bookdown::html_document2 (@olivroy, #1948)
+
+* Improved width calculations in `as_gtable()` (@teunbrand, #1923)
+
+* `gt(row_group_as_column = TRUE)` now works if multiple groups are supplied (#1552). (@olivroy, #1801).
+
+* Fixed many typos in the documentation. (#1910, thanks @MichaelChirico!)
+
 # gt 0.11.1
 
 ## Breaking changes
@@ -37,8 +59,6 @@
 * The `locale` argument of `gt()` now defaults to `getOption("gt.locale")` if set. (#1894)
 
 * The optional argument `levels` was added to `cells_column_spanners()` to constrain targeting of column spanners by their level. (@obsaditelnost, #1858)
-
-
 
 * Fixed a bug in using `pct()` column widths with `as_gtable()` (#1771). (@teunbrand, #1776)
 
@@ -575,7 +595,7 @@
 
 * Added the `opt_horizontal_padding()` and `opt_vertical_padding()` functions to easily expand or contract an HTML table in the horizontal and vertical directions (#868). (#882) 
 
-* There is now a `locale` argument in the `gt()` function. If set, formatter functions like `fmt_number()` will automatically use this global locale while formatting. There also remains the the option to override the global locale with any non-`NULL` value set for `locale` within a `fmt_*()` call (#682). (#866)
+* There is now a `locale` argument in the `gt()` function. If set, formatter functions like `fmt_number()` will automatically use this global locale while formatting. There also remains the option to override the global locale with any non-`NULL` value set for `locale` within a `fmt_*()` call (#682). (#866)
 
 ## Minor improvements and bug fixes
 
