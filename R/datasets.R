@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------------#
 
 
-#' Yearly populations of countries from 1960 to 2023
+#' Yearly populations of countries from 1960 to 2024
 #'
 #' @description
 #'
@@ -30,11 +30,11 @@
 #' population is based on counts of all residents regardless of legal status or
 #' citizenship. Country identifiers include the English-language country names,
 #' and the 2- and 3-letter ISO 3166-1 country codes. Each row contains a
-#' `population` value for a given `year` (from 1960 to 2023). Any `NA` values
+#' `population` value for a given `year` (from 1960 to 2024). Any `NA` values
 #' within `population` indicate the non-existence of the entity during that
 #' year.
 #'
-#' @format A tibble with 13,760 rows and 5 variables:
+#' @format A tibble with 13,975 rows and 5 variables:
 #' \describe{
 #' \item{country_name}{The name of the country.}
 #' \item{country_code_2, country_code_3}{The 2- and 3-letter ISO 3166-1 country
@@ -92,10 +92,6 @@
 #' \item{sza}{The solar zenith angle in degrees, where `NA`s indicate that
 #' sunrise hadn't yet occurred by the `tst` value.}
 #' }
-#'
-#' @source Calculated Actinic Fluxes (290 - 700 nm) for Air Pollution
-#' Photochemistry Applications (Peterson, 1976), available at:
-#' <https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=9100JA26.txt>.
 #'
 #' @family datasets
 #' @section Dataset ID and Badge:

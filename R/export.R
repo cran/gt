@@ -185,6 +185,13 @@ as_latex <- function(data) {
   # Perform input object validation
   stop_if_not_gt_tbl(data = data)
 
+  # Set option to apply latex conversion in escape_latex()
+  unicode_conversion <- dt_options_get_value(data = data, option = "latex_unicode_conversion")
+  if(unicode_conversion){
+    rlang::check_installed("withr","withr is needed to set the option that turns on the unicode conversion")
+    withr::local_options(.new = list(gt.latex.unicode_convert = unicode_conversion))
+  }
+
   # Build all table data objects through a common pipeline
   data <- build_data(data = data, context = "latex")
 
@@ -236,37 +243,41 @@ as_latex <- function(data) {
   # Compose the LaTeX table
   if (dt_options_get_value(data = data, option = "latex_use_longtable")) {
     knitr::asis_output(
-      paste0(
-        wrap_start_statement,
-        table_width_statement,
-        fontsize_statement,
-        table_start,
-        caption_component,
-        heading_component,
-        columns_component,
-        body_component,
-        table_end,
-        footer_component,
-        wrap_end_statement,
-        collapse = ""
+      latex_cleanup_multicolumn(
+        paste0(
+          wrap_start_statement,
+          table_width_statement,
+          fontsize_statement,
+          table_start,
+          caption_component,
+          heading_component,
+          columns_component,
+          body_component,
+          table_end,
+          footer_component,
+          wrap_end_statement,
+          collapse = ""
+        )
       ),
       meta = latex_packages
     )
   } else {
     knitr::asis_output(
-      paste0(
-        wrap_start_statement,
-        caption_component,
-        heading_component,
-        table_width_statement,
-        fontsize_statement,
-        table_start,
-        columns_component,
-        body_component,
-        table_end,
-        footer_component,
-        wrap_end_statement,
-        collapse = ""
+      latex_cleanup_multicolumn(
+        paste0(
+          wrap_start_statement,
+          caption_component,
+          heading_component,
+          table_width_statement,
+          fontsize_statement,
+          table_start,
+          columns_component,
+          body_component,
+          table_end,
+          footer_component,
+          wrap_end_statement,
+          collapse = ""
+        )
       ),
       meta = latex_packages
     )
