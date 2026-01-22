@@ -1,6 +1,30 @@
+# gt 1.3.0
+
+## New features
+
+* The new `row_order()` function makes it possible to order rows within groups by one or more columns. This complements the existing `row_group_order()` function, which reorders the groups themselves (#1112). (#2099)
+
+* Added the `info_tf_style()` function, which provides a quick reference table showing all available styles for formatting `TRUE`/`FALSE` values with `fmt_tf()` (#2107). (#2108)
+
+## Minor improvements and bug fixes
+
+* Numeric formatting functions (e.g., `fmt_number()`, `fmt_integer()`, `fmt_currency()`, etc.) now work with `bit64::integer64` columns (#1932). (#2106)
+
+* Several improvements were made to LaTeX output tables: text in cells is now wrapped correctly when the cell has a specified width, and footnotes placed in such cells are now correctly rendered. (@thebioengineer, #2097)
+
+* The new `stub.separate` option in `tab_options()` controls whether vertical lines are displayed at the stub boundary; this works with both HTML and LaTeX output (#2096). (@thebioengineer, #2101)
+
+* The `cells_stub()` location helper now correctly targets all stub columns when using a multi-column stub (#2100). (#2102)
+
+* Improved multi-column stub styling in LaTeX output tables; the `cells_stub()` helper now works properly for adding footnotes and applying styles to stub cells in LaTeX (#2103). (#2104)
+
+* When using `row_group_as_column = TRUE` for LaTeX output tables, column widths are now correctly computed (#2110). (@thebioengineer, #2112)
+
+* Fixed an issue where applying styling to `columns = everything()` could miss columns when a multi-column stub is present (#2094). (#2113)
+
 # gt 1.2.0
 
-* The new `fmt_number_si()` function format numeric values with SI prefixes and an optional unit (could be obtained from a separate column), automatically selecting the appropriate prefix to keep the mantissa in a readable range (#1999). (#2060)
+* The new `fmt_number_si()` function format numeric values with SI prefixes and an optional unit (which could be also be obtained from a separate column), automatically selecting the appropriate prefix to keep the mantissa in a readable range (#1999). (#2060)
 
 * Added the `summary_columns()` function to enable horizontal, row-wise aggregation (#382). (#2067)
 
@@ -8,7 +32,7 @@
 
 * Added the `omit_na_group` argument to the `gt()` function; when `TRUE`, rows with `NA` values in the `groupname_col` be excluded from row group assignment (the default of `FALSE` preserves the old behavior) (#1215). (#2062)
 
-* Ensure that the `stub()` helper works with tables having a multi-column stub (#2066). (#2069)
+* The `stub()` helper now works with tables having a multi-column stub (#2066). (#2069)
 
 * Fixed issue where loading in the Unicode conversion file (for LaTeX output tables) fails (#2048). (#2049)
 

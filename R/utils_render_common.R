@@ -14,7 +14,7 @@
 #
 #  This file is part of the 'rstudio/gt' project.
 #
-#  Copyright (c) 2018-2025 gt authors
+#  Copyright (c) 2018-2026 gt authors
 #
 #  For full copyright and license information, please look at
 #  https://gt.rstudio.com/LICENSE.html
@@ -132,7 +132,19 @@ is_compatible_formatter <- function(table, column, rows, compat) {
     return(TRUE)
   }
 
-  inherits(table[[column]][rows], compat)
+  column_data <- table[[column]][rows]
+  
+  # Check for standard class inheritance
+  if (inherits(column_data, compat)) {
+    return(TRUE)
+  }
+  
+  # If compat includes numeric or integer types, also check for bit64::integer64
+  if (any(c("numeric", "integer") %in% compat) && inherits(column_data, "integer64")) {
+    return(TRUE)
+  }
+  
+  FALSE
 }
 
 #' Render any formatting directives available in the `substitutions` list
@@ -842,13 +854,13 @@ summary_row_side <- function(data, group_id) {
 
 # Get the number of columns in the stub for layout purposes
 get_stub_column_count <- function(data) {
-  
+
   stub_layout <- get_stub_layout(data = data)
-  
+
   if (is.null(stub_layout)) {
     return(0)
   }
-  
+
   # Check if we have "rowname" in the layout
   if ("rowname" %in% stub_layout) {
     # Check if there are multiple stub columns
@@ -859,7 +871,7 @@ get_stub_column_count <- function(data) {
       return(length(stub_vars) + group_count)
     }
   }
-  
+
   # Default: return the length of the layout (original behavior)
   return(length(stub_layout))
 }
