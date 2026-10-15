@@ -884,7 +884,7 @@ create_columns_component_h <- function(data) {
               colspan = colspans[i],
               style = spanner_style,
               scope = ifelse(colspans[i] > 1, "colgroup", "col"),
-              id = spanner_ids[level_1_index, ][i],
+              id = valid_html_id(spanner_ids[level_1_index, ][i]),
               htmltools::tags$div(
                 class = "gt_column_spanner",
                 htmltools::HTML(spanners[level_1_index, ][i])
@@ -1030,7 +1030,7 @@ create_columns_component_h <- function(data) {
               colspan = colspans[j],
               style = spanner_style,
               scope = ifelse(colspans[j] > 1, "colgroup", "col"),
-              id = spanner_ids_row[j],
+              id = valid_html_id(spanner_ids_row[j]),
               if (spanner_ids_row[j] != "") {
                 htmltools::tags$div(
                   class = "gt_column_spanner",
@@ -1043,12 +1043,14 @@ create_columns_component_h <- function(data) {
 
       if (length(stub_layout) > 0 && i == 1) {
 
+        n_stub_cols <- get_stub_column_count(data)
+
         level_i_spanners <-
           htmltools::tagList(
             htmltools::tags$th(
               rowspan = max(higher_spanner_rows_idx),
-              colspan = length(stub_layout),
-              scope = ifelse(length(stub_layout) > 1, "colgroup", "col")
+              colspan = n_stub_cols,
+              scope = ifelse(n_stub_cols > 1, "colgroup", "col")
             ),
             level_i_spanners
           )
@@ -1110,13 +1112,17 @@ create_body_component_h <- function(data) {
   }
 
   # Create ID components for every column that will be rendered
+  # Apply valid_html_id() so that headers attributes on <td> elements match
+  # the id attributes on <th> elements (e.g., spaces become hyphens)
   col_names_id <-
-    c(
-      if ((n_cols_total - n_data_cols) > 0) {
-        # For all stub columns, use generic stub IDs for backward compatibility
-        paste0("stub_", seq_len(n_cols_total - n_data_cols))
-      },
-      dt_boxhead_get_vars_default(data = data)
+    valid_html_id(
+      c(
+        if ((n_cols_total - n_data_cols) > 0) {
+          # For all stub columns, use generic stub IDs for backward compatibility
+          paste0("stub_", seq_len(n_cols_total - n_data_cols))
+        },
+        dt_boxhead_get_vars_default(data = data)
+      )
     )
 
   # Get a matrix of all cells in the body (not including summary cells)
@@ -1224,7 +1230,7 @@ create_body_component_h <- function(data) {
           class = group_class,
           style = row_style_group_heading_row,
           scope = if (n_cols_total > 1) "colgroup" else "col",
-          id = group_label,
+          id = valid_html_id(group_label),
           htmltools::HTML(group_label)
         )
       )
@@ -1256,7 +1262,8 @@ create_body_component_h <- function(data) {
         group_id = group_id
       )
 
-      if (has_two_col_stub && identical(group_summary_row_side, "top")) {
+      if (has_two_col_stub && identical(group_summary_row_side, "top") &&
+          "rowname" %in% stub_layout) {
         summary_rows_group_df <-
           list_of_summaries[["summary_df_display_list"]][[group_id]]
 
@@ -1278,13 +1285,48 @@ create_body_component_h <- function(data) {
 
         row_style_group_heading_row <- row_style_row_groups_tbl[["html_style"]]
 
+        # Inherit vertical-align from body cell styles when no explicit
+        # row_groups vertical-align is set
+        has_explicit_valign <-
+          !is_empty(row_style_group_heading_row) &&
+          any(grepl("vertical-align", row_style_group_heading_row))
+
+        if (!has_explicit_valign) {
+          first_row <- groups_rows_df$row_start[[i]]
+          body_styles_tbl <- dt_styles_pluck(
+            styles_tbl = styles_tbl,
+            locname = "data",
+            rownum = first_row
+          )
+          body_valigns <- grep(
+            "vertical-align",
+            body_styles_tbl[["html_style"]],
+            value = TRUE
+          )
+          if (length(body_valigns) > 0) {
+            valign_match <- regmatches(
+              body_valigns[[1]],
+              regexpr("vertical-align:\\s*[^;]+", body_valigns[[1]])
+            )
+            if (length(valign_match) > 0) {
+              valign_css <- paste0(valign_match, ";")
+              if (is_empty(row_style_group_heading_row)) {
+                row_style_group_heading_row <- valign_css
+              } else {
+                row_style_group_heading_row <-
+                  paste(row_style_group_heading_row, valign_css, sep = " ")
+              }
+            }
+          }
+        }
+
         group_col_td <-
           htmltools::tags$td(
-            headers = group_id,
+            headers = valid_html_id(group_id),
             rowspan = rowspan_val,
             class = "gt_row gt_left gt_stub_row_group",
             style = row_style_group_heading_row,
-            id = group_id,
+            id = valid_html_id(group_id),
             htmltools::HTML(group_label)
           )
 
@@ -1473,7 +1515,8 @@ create_body_component_h <- function(data) {
       # contains the number of rows to span
       # TODO: replace with condition for summary rows at bottom
 
-      if (!(i %in% summary_locations && group_summary_row_side == "top")) {
+      if (!(i %in% summary_locations && group_summary_row_side == "top" &&
+            "rowname" %in% stub_layout)) {
         row_span_vals_i[[1]] <-
           group_row_end - group_row_start + 1 + summary_row_count
       }
@@ -1490,6 +1533,34 @@ create_body_component_h <- function(data) {
       row_style_group_heading_row <- row_style_row_groups_tbl[["html_style"]]
       if (is_empty(row_style_group_heading_row)) {
         row_style_group_heading_row <- NA_character_
+      }
+
+      # Inherit vertical-align from body cell styles when no explicit
+      # row_groups vertical-align is set
+      has_explicit_valign <-
+        !is.na(row_style_group_heading_row) &&
+        grepl("vertical-align", row_style_group_heading_row)
+
+      if (!has_explicit_valign) {
+        body_valigns <- vapply(
+          row_styles[!is.na(row_styles)],
+          function(s) {
+            m <- regmatches(s, regexpr("vertical-align:\\s*[^;]+", s))
+            if (length(m) > 0) m else NA_character_
+          },
+          character(1),
+          USE.NAMES = FALSE
+        )
+        body_valigns <- body_valigns[!is.na(body_valigns)]
+        if (length(body_valigns) > 0) {
+          valign_css <- paste0(body_valigns[[1]], ";")
+          if (is.na(row_style_group_heading_row)) {
+            row_style_group_heading_row <- valign_css
+          } else {
+            row_style_group_heading_row <-
+              paste(row_style_group_heading_row, valign_css, sep = " ")
+          }
+        }
       }
 
       # Add style of row group cell to vector
@@ -1616,7 +1687,8 @@ create_body_component_h <- function(data) {
       group_start &&
       !is.null(group_summary_row_side) &&
       !is.na(group_summary_row_side) &&
-      group_summary_row_side == "top"
+      group_summary_row_side == "top" &&
+      "rowname" %in% stub_layout
     ) {
 
       row_df <- row_df[-1]
@@ -1685,7 +1757,25 @@ create_body_component_h <- function(data) {
   }
 
   if (n_rows == 0) {
-    body_rows <- list()
+    no_data_msg <- get_no_data_message(data = data)
+    if (!is.null(no_data_msg)) {
+      body_rows <- list(
+        htmltools::tags$tr(
+          htmltools::tags$td(
+            class = "gt_row gt_no_data",
+            colspan = n_cols_total,
+            style = htmltools::css(
+              `text-align` = "center",
+              `font-style` = "italic",
+              color = "inherit"
+            ),
+            no_data_msg
+          )
+        )
+      )
+    } else {
+      body_rows <- list()
+    }
   } else {
     ns <- lengths(body_rows_data$row_df)
     body_rows_data_flat <- lapply(body_rows_data, function(x) unlist(x, recursive = FALSE))
@@ -1795,7 +1885,7 @@ render_row_data <- function(
 
   has_group <- !is.na(current_group_id)
   header <- paste0(
-    ifelse(has_group, current_group_id, ""), ifelse(has_group, " ", ""),
+    ifelse(has_group, valid_html_id(current_group_id), ""), ifelse(has_group, " ", ""),
     row_id_i, ifelse(has_group | nzchar(row_id_i), " ", ""),
     col_id_i
   )
@@ -2082,8 +2172,7 @@ summary_rows_for_group_h <- function(
   default_vars <- dt_boxhead_get_vars_default(data = data)
 
   stub_layout <- get_stub_layout(data = data)
-
-  stub_is_2 <- length(stub_layout) > 1
+  n_stub_cols <- get_stub_column_count(data = data)
 
   summary_row_lines <- list()
 
@@ -2120,8 +2209,8 @@ summary_rows_for_group_h <- function(
   # Get the number of columns for the body cells only
   n_data_cols <- get_number_of_visible_data_columns(data = data)
 
-  if (stub_is_2) {
-    n_cols_total <- n_cols_total - 1
+  if (n_stub_cols > 1L) {
+    n_cols_total <- n_cols_total - (n_stub_cols - 1L)
   }
 
   extra_classes <- rep_len(list(NULL), n_cols_total)
@@ -2130,8 +2219,8 @@ summary_rows_for_group_h <- function(
   # Create a default list of colspan values for the summary row
   col_span_vals <- rep_len(list(NULL), n_cols_total)
 
-  if (stub_is_2 && summary_row_type == "grand") {
-    col_span_vals[[1]] <- 2L
+  if (n_stub_cols > 1L && summary_row_type == "grand") {
+    col_span_vals[[1]] <- n_stub_cols
   }
 
   # Default to a left alignment for the summary row labels and obtain the
@@ -2183,8 +2272,8 @@ summary_rows_for_group_h <- function(
         }
     }
 
-    # For summary rows, use 1 stub column (the summary label column)
-    # unless we have a two-column stub which is handled separately
+    # Summary rows have one rendered stub cell; with multicolumn stubs,
+    # that cell spans the applicable stub columns
     row_styles <-
       build_row_styles(
         styles_resolved_row = styles_resolved_row,
@@ -2204,7 +2293,7 @@ summary_rows_for_group_h <- function(
               alignment_classes,
               extra_classes,
               row_styles,
-              names(summary_df),
+              valid_html_id(names(summary_df)),
               FUN = function(x, col_span, alignment_class, extra_class, cell_style, col_name) {
                 extra_class <- c(extra_class, summary_row_class)
 
@@ -2248,8 +2337,8 @@ summary_rows_for_group_h <- function(
                         )
                       } else {
                         paste0(
-                          group_id, " summary_stub_",
-                          group_id, "_", j, " ", col_name, "\""
+                          valid_html_id(group_id), " summary_stub_",
+                          valid_html_id(group_id), "_", j, " ", col_name, "\""
                         )
                       }
                     )
@@ -2336,10 +2425,13 @@ build_row_styles <- function(
 
   # If stub columns exist, apply stub styles
   if (n_stub_cols > 0) {
+
     # Handle colnum == 0 (applies to all stub columns for backward compatibility)
     idx_0 <- styles_resolved_row$colnum == 0
     stub_style <- styles_resolved_row$html_style[idx_0]
+
     if (!is_empty(stub_style)) {
+
       # Apply to all stub columns
       for (i in seq_len(n_stub_cols)) {
         result[i] <- stub_style
@@ -2378,19 +2470,27 @@ build_row_styles_with_stub_columns <- function(
 
       # Apply per-column stub styles
       for (j in seq_len(nrow(stub_column_styles))) {
+
         col_name <- stub_column_styles$colname[j]
+
         if (col_name %in% names(stub_positions)) {
+
           stub_pos <- stub_positions[col_name]
+
           # Apply style to the correct stub position
           # Each stub column has its own position in the row_styles array
           if (stub_pos <= length(row_styles)) {
-            # MERGE styles instead of overwriting
+
+            # Merge styles instead of overwriting
             existing_style <- row_styles[stub_pos]
             new_style <- stub_column_styles$html_style[j]
 
             if (is.na(existing_style) || existing_style == "") {
+
               row_styles[stub_pos] <- new_style
+
             } else if (!is.na(new_style) && new_style != "") {
+
               # Merge CSS styles by combining them
               row_styles[stub_pos] <- paste(existing_style, new_style, sep = "; ")
             }
@@ -2450,10 +2550,12 @@ as_css_font_family_attr <- function(font_vec, value_only = FALSE) {
 }
 
 valid_html_id <- function(x) {
+  needs_fix <- !is.na(x) & nzchar(x)
   # Make sure it starts with a letter.
   valid_ids <- grepl("^[A-z]", x)
-  x[!valid_ids] <- paste0("a", x[!valid_ids])
-  gsub("\\s+", "-", x)
+  x[needs_fix & !valid_ids] <- paste0("a", x[needs_fix & !valid_ids])
+  x[needs_fix] <- gsub("\\s+", "-", x[needs_fix])
+  x
 }
 
 # Function to calculate rowspan values for hierarchical stub columns
@@ -2485,8 +2587,26 @@ calculate_hierarchical_stub_rowspans <- function(data) {
     return(NULL)
   }
 
-  # Create a matrix of stub values (excluding the rightmost column which is the row identifier)
-  hierarchy_vars <- stub_vars[-length(stub_vars)]  # Remove rightmost stub column
+  # Build a per-row group-id vector so that spans never cross group boundaries.
+  # Two consecutive rows with the same stub value but in different row groups
+  # must not be merged.
+  groups_rows_df <- dt_groups_rows_get(data = data)
+  row_group_ids <- rep(NA_character_, n_rows)
+
+  for (gi in seq_len(nrow(groups_rows_df))) {
+
+    g_start <- groups_rows_df$row_start[[gi]]
+    g_end <- groups_rows_df$row_end[[gi]]
+
+    if (!is.na(g_start) && !is.na(g_end) && g_start <= n_rows) {
+      row_group_ids[seq(g_start, min(g_end, n_rows))] <-
+        groups_rows_df$group_id[[gi]]
+    }
+  }
+
+  # Create a matrix of stub values (excluding the rightmost column which is the
+  # row identifier)
+  hierarchy_vars <- stub_vars[-length(stub_vars)]  # Remove rightmost stub col
   stub_matrix <- as.matrix(original_body[, hierarchy_vars, drop = FALSE])
 
   # Initialize rowspan information
@@ -2507,6 +2627,11 @@ calculate_hierarchical_stub_rowspans <- function(data) {
     for (row_idx in 2:n_rows) {
       # Check if current row should continue the span from previous row
       should_continue_span <- TRUE
+
+      # Never merge cells across row-group boundaries
+      if (!identical(row_group_ids[row_idx], row_group_ids[row_idx - 1])) {
+        should_continue_span <- FALSE
+      }
 
       # Must match current column value (handle NAs properly)
       curr_val <- col_values[row_idx]
@@ -2530,14 +2655,19 @@ calculate_hierarchical_stub_rowspans <- function(data) {
       }
 
       if (should_continue_span) {
+
         # Continue the current span
         display_mask[row_idx] <- FALSE
+
       } else {
+
         # End current span and start a new one
         span_length <- row_idx - current_span_start
+
         if (span_length > 1) {
           rowspans[current_span_start] <- span_length
         }
+
         current_span_start <- row_idx
       }
     }

@@ -57,6 +57,18 @@ is_gt_tbl_empty_w_cols <- function(data) {
   ncol(data_tbl) > 0 && nrow(data_tbl) == 0
 }
 
+# Returns the no-data message for a table with columns but zero rows.
+# Uses the `table_no_data_message` option when set, otherwise falls back to
+# the locale-appropriate string.  Returns NULL when the message is "".
+get_no_data_message <- function(data) {
+  msg <- dt_options_get_value(data = data, option = "table_no_data_message")
+  if (is.na(msg)) {
+    tbl_locale <- dt_locale_get_value(data = data)
+    msg <- get_locale_no_table_data_text(locale = tbl_locale)
+  }
+  if (identical(msg, "")) NULL else msg
+}
+
 # Adjustments for a completely empty table (no columns and no rows)
 adjust_gt_tbl_empty <- function(data) {
 
@@ -947,7 +959,7 @@ process_text <- function(text, context = "html") {
 
     } else {
 
-      text <- escape_latex(text = text)
+      text <- escape_latex(text = as.character(text))
 
       return(text)
     }
@@ -967,7 +979,7 @@ process_text <- function(text, context = "html") {
 
     } else {
 
-      text <- escape_rtf(text)
+      text <- escape_rtf(as.character(text))
 
       return(text)
     }
@@ -989,6 +1001,8 @@ process_text <- function(text, context = "html") {
 
     return(text)
 
+  } else if (grepl("^ooxml/", context)) {
+    return(process_text_ooxml(text, ooxml_type = sub("^ooxml/", "", context)))
   } else if (context == "grid") {
     # Skip any formatting (unless wrapped in from_md)
     if (inherits(text, "from_markdown")) {
@@ -1038,6 +1052,32 @@ unescape_html <- function(text) {
   text <- gsub("&mdash;", "---", text, fixed = TRUE)
   # universal linebreak
   text <- gsub("<br>", "\n", text, fixed = TRUE)
+  text
+}
+
+# Decode only the five standard HTML character entities that htmlEscape() inserts.
+# Unlike unescape_html(), this does NOT touch <br> tags, so it is safe to use
+# on values that may already contain HTML markup (e.g. from fmt_* functions).
+decode_html_entities <- function(text) {
+  text <- gsub("&amp;",  "&",  text, fixed = TRUE)
+  text <- gsub("&lt;",   "<",  text, fixed = TRUE)
+  text <- gsub("&gt;",   ">",  text, fixed = TRUE)
+  text <- gsub("&quot;", '"',  text, fixed = TRUE)
+  text <- gsub("&#39;",  "'",  text, fixed = TRUE)
+  text
+}
+
+decode_latex_special_chars <- function(text) {
+  text <- gsub("\\_",               "_",  text, fixed = TRUE)
+  text <- gsub("\\&",               "&",  text, fixed = TRUE)
+  text <- gsub("\\%",               "%",  text, fixed = TRUE)
+  text <- gsub("\\$",               "$",  text, fixed = TRUE)
+  text <- gsub("\\#",               "#",  text, fixed = TRUE)
+  text <- gsub("\\{",               "{",  text, fixed = TRUE)
+  text <- gsub("\\}",               "}",  text, fixed = TRUE)
+  text <- gsub("\\textasciitilde{}", "~",  text, fixed = TRUE)
+  text <- gsub("\\textasciicircum{}", "^", text, fixed = TRUE)
+  text <- gsub("\\textbackslash{}", "\\", text, fixed = TRUE)
   text
 }
 
@@ -1153,9 +1193,15 @@ markdown_to_latex <- function(text, md_engine) {
 
           if(grepl("..gt\\_linebreak\\_indicator..", x, fixed = TRUE)){
             ## if there is a linebreak, wrap the text in a shortstack, and put it into a parbox that has the width set to linewidth
+            ## struts at the start and end of the parbox ensure that its first and last lines
+            ## have full line height/depth so that text in adjacent rows doesn't overlap
             x <- paste0("\\shortstack[l]{" ,
                         parbox_wrapper(
-                          gsub("..gt\\_linebreak\\_indicator..", " \\\\", x, fixed = TRUE),
+                          paste0(
+                            "\\strut ",
+                            gsub("..gt\\_linebreak\\_indicator..", " \\\\", x, fixed = TRUE),
+                            "\\strut"
+                          ),
                           "\\linewidth"),
                         "}")
           }
@@ -1177,6 +1223,7 @@ markdown_to_xml <- function(text) {
     USE.NAMES = FALSE,
     FUN = function(x, ...) commonmark::markdown_xml(linebreak_br(x), ...)
   )
+
   vapply(
     res,
     FUN.VALUE = character(1L),
@@ -1225,9 +1272,21 @@ markdown_to_xml <- function(text) {
         }
       }
 
-      res <- lapply(children, apply_rules)
-      res <- vapply(res, FUN = as.character, FUN.VALUE = character(1L))
-      res <-  paste0(res, collapse = "")
+      if(length(children)){
+        res <- lapply(children, apply_rules)
+        res <- vapply(res, FUN = as.character, FUN.VALUE = character(1L))
+        res <-  paste0(res, collapse = "")
+      }else{
+        res <- xml_p(
+          xml_pPr(
+            xml_spacing(before = 0, after = 60)
+          ),
+          xml_r(
+            xml_rPr(),
+            xml_t()
+          )
+        )
+      }
       paste0("<md_container>", res, "</md_container>")
     }
   )

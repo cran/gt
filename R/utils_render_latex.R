@@ -469,7 +469,7 @@ create_columns_component_l <- function(data, colwidth_df) {
     if ("group_label" %in% stub_layout && "rowname" %in% stub_layout) {
       n_stub_cols <- length(stub_vars) + 1  # group_label + all rowname columns
       # Get stub_df for width calculations
-      stub_df <- dplyr::filter(colwidth_df, type %in% c("row_group","stub")) %>%
+      stub_df <- dplyr::filter(colwidth_df, type %in% c("row_group","stub")) |>
         dplyr::arrange(type)
     } else if ("rowname" %in% stub_layout) {
       stub_df <- dplyr::filter(colwidth_df, type == "stub")
@@ -513,6 +513,9 @@ create_columns_component_l <- function(data, colwidth_df) {
 
     if(sum(colwidth_heading_i$unspec > 0)){
       width <- ""
+      # Strip \parbox{\linewidth} that markdown_to_latex() inserts for <br> in md() labels;
+      # without a column width, \linewidth expands to the full text width (same strip done for body cells)
+      headings_labels[i] <- gsub("\\\\parbox\\{\\\\linewidth\\}\\{(.+?)\\}", "\\1", headings_labels[i])
     }else{
       width <- create_singlecolumn_width_text_l(pt = colwidth_heading_i$pt, lw = colwidth_heading_i$lw)
     }
@@ -1131,6 +1134,15 @@ create_body_component_l <- function(data, colwidth_df) {
 
   body_rows <- unlist(body_rows)
 
+  if (n_rows == 0) {
+    no_data_msg <- get_no_data_message(data = data)
+    if (!is.null(no_data_msg)) {
+      body_rows <- paste0(
+        "\\multicolumn{", n_cols, "}{c}{\\textit{", no_data_msg, "}} \\\\ \n"
+      )
+    }
+  }
+
   #
   # Add grand summary rows
   #
@@ -1227,7 +1239,7 @@ summary_rows_for_group_l <- function(
         # The value of colnum in styles_summary differs for
         # group and grand summaries
         if (summary_row_type == "group") {
-          row_pos <- (row_num - floor(row_num)) * 100L
+          row_pos <- round((row_num - floor(row_num)) * 100L,0)
         } else {
           row_pos <- row_num
         }
@@ -1539,12 +1551,34 @@ create_body_rows_l <- function(
 
               if (
                 !is.na(colname_i) &&
-                colname_i == "::group::" &&
-                "row_groups" %in% styles_tbl_i[["locname"]]
+                colname_i == "::group::"
               ) {
 
-                styles_tbl_i_col <- vctrs::vec_slice(styles_tbl_i, styles_tbl_i$locname == "row_groups")
-                #styles_i_col <- styles_tbl_i_col[["styles"]]
+                if ("row_groups" %in% styles_tbl_i[["locname"]]) {
+                  styles_tbl_i_col <- vctrs::vec_slice(
+                    styles_tbl_i, styles_tbl_i$locname == "row_groups"
+                  )
+                } else if ("data" %in% styles_tbl_i[["locname"]]) {
+                  # Inherit v_align from body cell styles when no explicit
+                  # row_groups styles are set
+                  data_styles <- vctrs::vec_slice(
+                    styles_tbl_i, styles_tbl_i$locname == "data"
+                  )
+                  has_valign <- vapply(
+                    data_styles[["styles"]],
+                    function(s) !is.null(s[["cell_text"]][["v_align"]]),
+                    logical(1)
+                  )
+                  if (any(has_valign)) {
+                    styles_tbl_i_col <- vctrs::vec_slice(
+                      data_styles, which(has_valign)[1]
+                    )
+                  } else {
+                    styles_tbl_i_col <- NULL
+                  }
+                } else {
+                  styles_tbl_i_col <- NULL
+                }
 
               } else if (
                 !is.na(colname_i) &&
@@ -2115,7 +2149,7 @@ apply_cell_styles_l <- function(content, style_obj, type = "cell", width = "\\li
 
 .apply_style_alignment_shortstack <- function(x, style_obj) {
 
-  if(!grepl("\\shortstack[l]", x, fixed = TRUE)){return(x)}
+  if(!isTRUE(grepl("\\shortstack[l]", x, fixed = TRUE))){return(x)}
 
   alignment <- style_obj[["cell_text"]][["align"]]
 
@@ -2483,8 +2517,8 @@ calculate_multicolumn_width_text_l <- function(begins, ends, col_order, colwidth
 
   # order by column order to ensure correct columns are used
   # this is important if data order has changed, or there are hidden columns etc
-  colwidth_df <- col_order %>%
-    dplyr::left_join(colwidth_df, by = "var") %>%
+  colwidth_df <- col_order |>
+    dplyr::left_join(colwidth_df, by = "var") |>
     dplyr::filter(type != "hidden" )
 
 

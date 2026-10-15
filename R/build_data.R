@@ -47,6 +47,7 @@ build_data <- function(data, context) {
   data <- render_formats(data = data, skip_compat_check = FALSE, context = context)
   data <- render_substitutions(data = data, context = context)
   data <- migrate_unformatted_to_output(data = data, context = context)
+
   data <- perform_col_merge(data = data, context = context)
 
   # Reorder stub_df first (handles group ordering and row_order() directives),
@@ -70,6 +71,10 @@ build_data <- function(data, context) {
   data <- dt_groups_rows_build(data = data, context = context)
 
   # Resolution of footnotes and styles --------------------------------------
+
+  # Resolve any styles that were deferred (e.g., tab_style called
+  # before tab_spanner) as all structural components exist by this point
+  data <- resolve_deferred_styles(data = data)
 
   # Resolve footnotes and styles
   data <- resolve_footnotes_styles(data = data, tbl_type = "footnotes")

@@ -61,11 +61,11 @@ tidyselect::where
 #' @export
 htmltools::css
 
+# TODO: Stop reexporting these once reverse dependencies have migrated -----
 #' @importFrom magrittr %>%
 #' @export
 magrittr::`%>%`
 
-# TODO Avoid reexporting those helpers eventually -----
 #' @importFrom dplyr vars
 #' @export
 dplyr::vars
